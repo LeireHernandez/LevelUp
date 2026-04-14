@@ -212,15 +212,6 @@
             font-size: 0.65rem;
             color: #aa927a;
         }
-        .streak-badge {
-            background: #e6c8a0;
-            border-radius: 20px;
-            padding: 2px 8px;
-            font-size: 0.65rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
         .reset-btn {
             background: #c4b49c;
             color: #2f3e25;
@@ -244,8 +235,16 @@
             font-size: 0.7rem;
             display: inline-block;
         }
+        .offline-warning {
+            background: #f0e0c8;
+            border-left: 4px solid #c46a3a;
+            padding: 8px 12px;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+            margin-bottom: 12px;
+            color: #8b5a3a;
+        }
         
-        /* Sección de móvil - gráfico centrado y más grande */
         .phone-section {
             margin-top: 16px;
             border-top: 1px solid #ece0d2;
@@ -316,6 +315,10 @@
 </head>
 <body>
 <div class="container">
+    <div class="header">
+        <h1>Virtual•Life</h1>
+        <div class="sub">Equilibrio · Hábitos · Evolución</div>
+    </div>
 
     <div class="card">
         <div class="avatar-row">
@@ -328,6 +331,7 @@
             </div>
             <div class="level-badge" id="levelDisplay">Nivel 1 · 0/100 exp</div>
         </div>
+        <div id="offlineMessage" class="offline-warning" style="display: none;"></div>
         <div class="needs-grid" id="needsContainer"></div>
     </div>
 
@@ -346,7 +350,6 @@
             <div id="streaksContainer" style="display: flex; flex-wrap: wrap; gap: 12px;"></div>
         </div>
 
-        <!-- Sección de móvil con gráfico centrado y más grande -->
         <div class="phone-section">
             <div class="phone-title">
                 <span>📱</span> Tiempo de pantalla (móvil) · Perjudicial
@@ -362,7 +365,6 @@
                 </div>
             </div>
             
-            <!-- Gráfico centrado y más grande -->
             <div class="chart-wrapper">
                 <div class="chart-container">
                     <canvas id="phoneChart" width="500" height="220" style="max-width:100%; height:auto;"></canvas>
@@ -386,7 +388,7 @@
     <div style="display: flex; justify-content: center; margin: 10px 0;">
         <button class="reset-btn" id="resetGameBtn">🔄 Reiniciar sendero (Avatar nuevo + Todo a cero)</button>
     </div>
-    <footer>Las necesidades decaen · El tiempo de móvil daña al avatar · Si pasas 7 días sin ningún hábito, el avatar muere · Las rachas mejoran la salud</footer>
+    <footer>🌙 El avatar envejece incluso con la web cerrada · Cuídalo a diario · Las rachas mejoran la salud</footer>
 </div>
 
 <script>
@@ -424,6 +426,7 @@
     let phoneUsage = [];
     let phoneChart = null;
     let lastHabitDate = new Date().toDateString();
+    let lastSaveTimestamp = Date.now(); // Para calcular tiempo offline
 
     const HABITS = [
         { id: "german_study", name: "Estudiar alemán 1h", icon: "📖", xp: 14, needEffects: { mind: 8, spirit: 2 }, goalEffect: { german: 1 } },
@@ -442,6 +445,65 @@
     let penaltyInterval = null;
 
     function initNeeds() { let obj = {}; NEEDS.forEach(n => { obj[n.id] = n.initial; }); return obj; }
+
+    // ⭐ FUNCIÓN CLAVE: Aplicar decaimiento por tiempo offline
+    function applyOfflineDecay() {
+        const now = Date.now();
+        const lastTimestamp = lastSaveTimestamp;
+        if (!lastTimestamp) return 0;
+        
+        const millisPassed = now - lastTimestamp;
+        const secondsPassed = Math.floor(millisPassed / 1000);
+        
+        // Solo aplicar si han pasado más de 30 segundos (para evitar falsos positivos)
+        if (secondsPassed < 30) return 0;
+        
+        // Cada ciclo de decaimiento es cada 10 segundos (como el intervalo online)
+        const decayCycles = Math.floor(secondsPassed / 10);
+        if (decayCycles <= 0) return 0;
+        
+        let totalDecay = 0;
+        let decayApplied = false;
+        
+        for (let i = 0; i < Math.min(decayCycles, 500); i++) { // Máximo 500 ciclos (~1.4 horas) para no matar instantáneamente
+            let anyLow = false;
+            NEEDS.forEach(need => {
+                let newVal = avatar.needs[need.id] - need.decay;
+                if (newVal < 0) newVal = 0;
+                avatar.needs[need.id] = newVal;
+                if (newVal <= 5) anyLow = true;
+                totalDecay += need.decay;
+            });
+            decayApplied = true;
+        }
+        
+        // También aplicar penalización diaria por cada día completo sin actividad
+        const daysPassed = Math.floor(secondsPassed / 86400);
+        if (daysPassed > 0 && lastHabitDate) {
+            const lastHabitDateObj = new Date(lastHabitDate);
+            const today = new Date();
+            const daysDiff = Math.floor((today - lastHabitDateObj) / (1000 * 60 * 60 * 24));
+            if (daysDiff > 0 && daysDiff <= daysPassed) {
+                for (let d = 0; d < Math.min(daysDiff, 7); d++) {
+                    NEEDS.forEach(need => {
+                        avatar.needs[need.id] = Math.max(0, avatar.needs[need.id] - 8);
+                    });
+                }
+                addToast(`⚠️ Han pasado ${daysDiff} día(s) sin actividad · El avatar ha sufrido`);
+            }
+        }
+        
+        if (decayApplied && secondsPassed > 60) {
+            const hoursOffline = (secondsPassed / 3600).toFixed(1);
+            addToast(`⏰ Has estado fuera ${hoursOffline}h · El avatar ha envejecido`);
+            const msgDiv = document.getElementById("offlineMessage");
+            msgDiv.style.display = "block";
+            msgDiv.innerHTML = `⏰ Durante tu ausencia de ${hoursOffline}h, el avatar ha perdido vitalidad. ¡Cuídalo de nuevo!`;
+            setTimeout(() => { msgDiv.style.display = "none"; }, 8000);
+        }
+        
+        return totalDecay;
+    }
 
     function updateStreak(habitId) {
         const today = new Date().toDateString();
@@ -479,7 +541,6 @@
     }
 
     function checkNoHabitDeath() {
-        const today = new Date().toDateString();
         const lastHabit = new Date(lastHabitDate);
         const nowDate = new Date();
         const diffDays = Math.floor((nowDate - lastHabit) / (1000*60*60*24));
@@ -497,7 +558,6 @@
         const today = new Date().toDateString();
         if (lastHabitDate !== today) {
             NEEDS.forEach(need => { avatar.needs[need.id] = Math.max(0, avatar.needs[need.id] - 4); });
-            addToast("🌙 No hiciste hábitos ayer · avatar decaído");
         }
         checkNoHabitDeath();
         applyWeeklyPenalties();
@@ -588,11 +648,17 @@
         HABITS.forEach(h => { streaks[h.id] = { lastDate: null, currentStreak: 0, requiredWeekly: (h.id === "running_session") ? 3 : null, weeklyCount: 0, weekStart: null }; });
         cooldowns = {}; HABITS.forEach(h => { cooldowns[h.id] = { available: true, remaining: 0 }; });
         lastHabitDate = new Date().toDateString();
+        lastSaveTimestamp = Date.now();
         saveGame(); updateUI(); startDecay(); startPenaltyCheck(); updatePhoneChart();
         addToast("✨ Sendero reiniciado · Todas las metas a cero");
     }
 
-    function saveGame() { localStorage.setItem("LevelUpFull", JSON.stringify({ avatar, goalsState, cooldowns, habitStatsData, streaks, phoneUsage, lastHabitDate })); }
+    function saveGame() {
+        lastSaveTimestamp = Date.now();
+        const data = { avatar, goalsState, cooldowns, habitStatsData, streaks, phoneUsage, lastHabitDate, lastSaveTimestamp };
+        localStorage.setItem("LevelUpFull", JSON.stringify(data));
+    }
+    
     function loadGame() {
         const raw = localStorage.getItem("LevelUpFull");
         if (raw) {
@@ -600,16 +666,26 @@
                 const p = JSON.parse(raw);
                 avatar = p.avatar; goalsState = p.goalsState; cooldowns = p.cooldowns || {}; habitStatsData = p.habitStatsData || habitStatsData;
                 streaks = p.streaks || {}; phoneUsage = p.phoneUsage || []; lastHabitDate = p.lastHabitDate || new Date().toDateString();
+                lastSaveTimestamp = p.lastSaveTimestamp || Date.now();
                 if (!avatar.needs) avatar.needs = initNeeds();
                 HABITS.forEach(h => { if (!streaks[h.id]) streaks[h.id] = { lastDate: null, currentStreak: 0, requiredWeekly: h.id==="running_session"?3:null, weeklyCount:0, weekStart:null }; });
                 HABITS.forEach(h => { if (!cooldowns[h.id]) cooldowns[h.id] = { available: true, remaining: 0 }; });
+                
+                // ⭐ Aplicar decaimiento por tiempo offline después de cargar
+                const hadDecay = applyOfflineDecay();
+                if (hadDecay) checkDeath();
+                
             } catch(e) { fullResetGame(); }
         } else fullResetGame();
         if (!avatar.alive) avatar.alive = true;
         updateUI(); startDecay(); startPenaltyCheck(); updatePhoneChart();
     }
 
-    function recordHabitAction(habitId) { lastHabitDate = new Date().toDateString(); updateStreak(habitId); saveGame(); }
+    function recordHabitAction(habitId) { 
+        lastHabitDate = new Date().toDateString(); 
+        updateStreak(habitId); 
+        saveGame(); 
+    }
 
     function addReadingTime(m) { if(!avatar.alive)return; if(m<=0)return; habitStatsData.reading.entries.push({date:new Date().toDateString(),minutes:m}); if(habitStatsData.reading.entries.length>7) habitStatsData.reading.entries.shift(); avatar.needs.mind=Math.min(100,avatar.needs.mind+Math.floor(m/10)+3); avatar.needs.spirit=Math.min(100,avatar.needs.spirit+2); avatar.xp+=Math.floor(m/15)+5; checkLevelUp(); addToast(`📚 +${m}min lectura`); saveGame(); updateUI(); recordHabitAction("reading"); }
     function addSteps(s) { if(!avatar.alive)return; if(s<=0)return; habitStatsData.steps.entries.push({date:new Date().toDateString(),steps:s}); if(habitStatsData.steps.entries.length>7) habitStatsData.steps.entries.shift(); let efecto=Math.floor(s/1000)+2; avatar.needs.body=Math.min(100,avatar.needs.body+efecto); avatar.needs.energy=Math.min(100,avatar.needs.energy+efecto); avatar.xp+=Math.floor(s/2000)+4; checkLevelUp(); addToast(`👣 +${s} pasos`); saveGame(); updateUI(); recordHabitAction("steps"); }
@@ -628,7 +704,7 @@
         addToast(`📋 Test orden: ${note}/10 · Media: ${goalsState.order.currentAvg.toFixed(1)}`); saveGame(); updateUI(); avatar.xp+=12; avatar.needs.mind=Math.min(100,avatar.needs.mind+6); avatar.needs.spirit=Math.min(100,avatar.needs.spirit+5); checkLevelUp(); recordHabitAction("tidy_morning");
     }
     function checkLevelUp() { while(avatar.xp>=avatar.xpToNext){ avatar.xp-=avatar.xpToNext; avatar.level++; avatar.xpToNext=Math.floor(avatar.xpToNext*1.18); NEEDS.forEach(n=>{avatar.needs[n.id]=Math.min(100,avatar.needs[n.id]+8);}); addToast(`🎋 Nivel ${avatar.level}`); } }
-    function addToast(msg) { let t=document.createElement("div"); t.innerText=msg; t.style.position="fixed"; t.style.bottom="70px"; t.style.left="20px"; t.style.backgroundColor="#e6ddcf"; t.style.padding="6px 16px"; t.style.borderRadius="40px"; t.style.fontSize="0.7rem"; t.style.zIndex="999"; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+    function addToast(msg) { let t=document.createElement("div"); t.innerText=msg; t.style.position="fixed"; t.style.bottom="70px"; t.style.left="20px"; t.style.backgroundColor="#e6ddcf"; t.style.padding="6px 16px"; t.style.borderRadius="40px"; t.style.fontSize="0.7rem"; t.style.zIndex="999"; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
     
     function completeHabit(habit, customVal=null) {
         if(!avatar.alive){addToast("❌ Avatar muerto");return false;}
@@ -656,8 +732,9 @@
         NEEDS.forEach(need=>{ let val=avatar.needs[need.id]; let percent=(val/need.max)*100; needsDiv.innerHTML+=`<div class="need"><div class="need-label"><span>${need.icon} ${need.name}</span><span>${Math.floor(val)}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${percent}%"></div></div></div>`; });
         document.getElementById("avatarNameDisplay").innerText=avatar.name; document.getElementById("levelDisplay").innerHTML=`Nivel ${avatar.level} · ${avatar.xp}/${avatar.xpToNext} exp`; document.getElementById("avatarEmoji").innerHTML=avatar.level>=4?"🌳":"🌱";
         document.getElementById("habitStats").innerHTML=`<div class="stat-badge">📚 Lectura: media ${getReadingAverage().toFixed(0)} min/día</div><div class="stat-badge">👣 Pasos: media ${getStepsAverage().toFixed(0)} · Hoy: ${getTodaySteps()}/10000</div><div class="stat-badge">💪 Calistenia: media ${getCalisthenicsAverage().toFixed(0)} min/día</div>`;
-        let streakHtml=""; for(let hid in streaks){ let s=streaks[hid]; let habit=HABITS.find(h=>h.id===hid); if(habit) streakHtml+=`<div class="stat-badge">🔥 ${habit.icon} ${habit.name}: racha ${s.currentStreak} día(s)</div>`; }
-        document.getElementById("streaksContainer").innerHTML=streakHtml;
+        let streakHtml=""; for(let hid in streaks){ let s=streaks[hid]; let habit=HABITS.find(h=>h.id===hid); if(habit && s.currentStreak>0) streakHtml+=`<div class="stat-badge">🔥 ${habit.icon} ${habit.name}: racha ${s.currentStreak} día(s)</div>`; }
+        document.getElementById("streaksContainer").innerHTML=streakHtml || "<div class='stat-badge'>🌱 Completa hábitos para crear rachas</div>";
+        
         const grid=document.getElementById("goalsGrid");
         let germanPercent=(goalsState.german.currentHours/660)*100; let levelEst="A1"; if(goalsState.german.currentHours>=200) levelEst="A2"; if(goalsState.german.currentHours>=400) levelEst="B1"; if(goalsState.german.currentHours>=600) levelEst="B2";
         let cmFaltan=goalsState.spagatt.currentCmToGround; let avgOrder=goalsState.order.currentAvg.toFixed(1); let currentKm=goalsState.running.currentMaxKm; let pace=goalsState.running.paceMinPerKm;
@@ -673,6 +750,7 @@
         document.getElementById("waterStat").innerText=`${goalsState.hydration.todayLiters.toFixed(1)} / 1.5 L`;
         renderDailyHabits();
     }
+    
     function renderDailyHabits() {
         const container=document.getElementById("dailyHabitsList"); if(!avatar.alive){ container.innerHTML="🌱 Reinicia"; return; }
         container.innerHTML="";
@@ -692,10 +770,12 @@
         document.querySelectorAll(".habit-steps").forEach(btn=>btn.addEventListener("click",()=>{ let s=parseInt(document.getElementById("stepsCount")?.value); if(!isNaN(s)&&s>0) completeHabit(HABITS.find(h=>h.id==="steps"), s); }));
         document.querySelectorAll(".habit-cali").forEach(btn=>btn.addEventListener("click",()=>{ let m=parseInt(document.getElementById("caliMins")?.value); if(!isNaN(m)&&m>0) completeHabit(HABITS.find(h=>h.id==="calisthenics"), m); }));
     }
+    
     document.getElementById("addWaterBtn").addEventListener("click",()=>{ let l=parseFloat(document.getElementById("waterAmount").value); if(!isNaN(l)&&l>0) addWater(l); });
     document.getElementById("addPhoneBtn").addEventListener("click",()=>{ let h=parseFloat(document.getElementById("phoneHours").value); if(!isNaN(h)&&h>=0) addPhoneHours(h); });
     document.getElementById("editNameBtn").addEventListener("click",()=>{ let n=prompt("Nombre",avatar.name); if(n) avatar.name=n.slice(0,20); saveGame(); updateUI(); });
     document.getElementById("resetGameBtn").addEventListener("click",()=>fullResetGame());
+    
     loadGame();
 </script>
 </body>
