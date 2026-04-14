@@ -127,6 +127,7 @@
             height: 6px;
             border-radius: 20px;
             width: 0%;
+            transition: width 0.3s ease;
         }
 
         .goals-grid {
@@ -383,17 +384,21 @@
     </div>
 
     <div style="display: flex; justify-content: center; margin: 10px 0;">
-        <button class="reset-btn" id="resetGameBtn">🔄 Reiniciar sendero (Avatar nuevo + Todo a cero)</button>
+        <button class="reset-btn" id="resetGameBtn">🔄 Reiniciar (Avatar nuevo + Todo a cero)</button>
     </div>
-    <footer>🌙 El avatar envejece incluso con la web cerrada · Cuídalo a diario · Las rachas mejoran la salud</footer>
+    <footer>El avatar envejece poco a poco · Con 2-3 hábitos a la semana se mantiene sano · Muere tras 7 días sin NINGUNA actividad</footer>
 </div>
 
 <script>
+    // ⚡ BALANCE AJUSTADO - Decaimiento mucho más lento y realista
+    // Cada necesidad pierde entre 0.08 y 0.12 por ciclo (10 segundos)
+    // En 1 hora: ~30-40 puntos de pérdida → puede vivir ~2-3 días sin cuidados
+    // En 1 día completo sin abrir la app: ~70-90 puntos de pérdida → sobrevive pero muy debilitado
     const NEEDS = [
-        { id: "energy", name: "Energía", icon: "⚡", initial: 72, max: 100, decay: 0.65 },
-        { id: "body", name: "Cuerpo", icon: "💪", initial: 68, max: 100, decay: 0.7 },
-        { id: "mind", name: "Mente", icon: "📘", initial: 65, max: 100, decay: 0.55 },
-        { id: "spirit", name: "Tranquilidad", icon: "🍃", initial: 70, max: 100, decay: 0.5 }
+        { id: "energy", name: "Energía", icon: "⚡", initial: 85, max: 100, decay: 0.09 },
+        { id: "body", name: "Cuerpo", icon: "💪", initial: 85, max: 100, decay: 0.10 },
+        { id: "mind", name: "Mente", icon: "📘", initial: 85, max: 100, decay: 0.08 },
+        { id: "spirit", name: "Tranquilidad", icon: "🍃", initial: 85, max: 100, decay: 0.07 }
     ];
 
     const INITIAL_GOALS = {
@@ -423,16 +428,16 @@
     let phoneUsage = [];
     let phoneChart = null;
     let lastHabitDate = new Date().toDateString();
-    let lastSaveTimestamp = Date.now(); // Para calcular tiempo offline
+    let lastSaveTimestamp = Date.now();
 
     const HABITS = [
-        { id: "german_study", name: "Estudiar alemán 1h", icon: "📖", xp: 14, needEffects: { mind: 8, spirit: 2 }, goalEffect: { german: 1 } },
-        { id: "stretch_spagatt", name: "Estiramientos", icon: "🧘", xp: 10, needEffects: { body: 7, energy: 4 }, goalEffect: { spagatt: -1.2 } },
-        { id: "running_session", name: "Salir a correr", icon: "🏃", xp: 16, needEffects: { body: 9, energy: 5, mind: 3 }, goalEffect: { runningKm: null }, customRun: true, weeklyHabit: true },
-        { id: "tidy_morning", name: "Rutina de orden", icon: "🧹", xp: 8, needEffects: { mind: 6, spirit: 4 }, goalEffect: { orderBoost: true }, customOrder: true },
-        { id: "reading", name: "Leer", icon: "📚", xp: 12, needEffects: { mind: 10, spirit: 5 }, customReading: true },
-        { id: "steps", name: "Registrar pasos", icon: "👣", xp: 10, needEffects: { body: 6, energy: 5 }, customSteps: true },
-        { id: "calisthenics", name: "Calistenia", icon: "💪", xp: 15, needEffects: { body: 10, energy: 7, mind: 3 }, customCalisthenics: true }
+        { id: "german_study", name: "Estudiar alemán 1h", icon: "📖", xp: 14, needEffects: { mind: 8, spirit: 4 }, goalEffect: { german: 1 } },
+        { id: "stretch_spagatt", name: "Estiramientos", icon: "🧘", xp: 10, needEffects: { body: 8, energy: 5 }, goalEffect: { spagatt: -1.2 } },
+        { id: "running_session", name: "Salir a correr", icon: "🏃", xp: 16, needEffects: { body: 12, energy: 8, mind: 4 }, goalEffect: { runningKm: null }, customRun: true, weeklyHabit: true },
+        { id: "tidy_morning", name: "Rutina de orden", icon: "🧹", xp: 8, needEffects: { mind: 7, spirit: 5 }, goalEffect: { orderBoost: true }, customOrder: true },
+        { id: "reading", name: "Leer", icon: "📚", xp: 12, needEffects: { mind: 12, spirit: 6 }, customReading: true },
+        { id: "steps", name: "Registrar pasos", icon: "👣", xp: 10, needEffects: { body: 7, energy: 6 }, customSteps: true },
+        { id: "calisthenics", name: "Calistenia", icon: "💪", xp: 15, needEffects: { body: 10, energy: 8, mind: 4 }, customCalisthenics: true }
     ];
 
     let avatar = { name: "Leire", level: 1, xp: 0, xpToNext: 100, needs: {}, alive: true };
@@ -441,9 +446,13 @@
     let decayInterval = null;
     let penaltyInterval = null;
 
-    function initNeeds() { let obj = {}; NEEDS.forEach(n => { obj[n.id] = n.initial; }); return obj; }
+    function initNeeds() { 
+        let obj = {}; 
+        NEEDS.forEach(n => { obj[n.id] = n.initial; }); 
+        return obj; 
+    }
 
-    // ⭐ FUNCIÓN CLAVE: Aplicar decaimiento por tiempo offline
+    // Aplicar decaimiento por tiempo offline (ahora mucho más lento)
     function applyOfflineDecay() {
         const now = Date.now();
         const lastTimestamp = lastSaveTimestamp;
@@ -452,51 +461,32 @@
         const millisPassed = now - lastTimestamp;
         const secondsPassed = Math.floor(millisPassed / 1000);
         
-        // Solo aplicar si han pasado más de 30 segundos (para evitar falsos positivos)
-        if (secondsPassed < 30) return 0;
+        if (secondsPassed < 60) return 0;
         
-        // Cada ciclo de decaimiento es cada 10 segundos (como el intervalo online)
+        // Cada ciclo de decaimiento es cada 10 segundos
         const decayCycles = Math.floor(secondsPassed / 10);
         if (decayCycles <= 0) return 0;
         
         let totalDecay = 0;
-        let decayApplied = false;
         
-        for (let i = 0; i < Math.min(decayCycles, 500); i++) { // Máximo 500 ciclos (~1.4 horas) para no matar instantáneamente
-            let anyLow = false;
+        // Máximo 5000 ciclos (~13.9 horas) para no matar instantáneamente con ausencias largas
+        const cyclesToApply = Math.min(decayCycles, 5000);
+        
+        for (let i = 0; i < cyclesToApply; i++) {
             NEEDS.forEach(need => {
                 let newVal = avatar.needs[need.id] - need.decay;
                 if (newVal < 0) newVal = 0;
                 avatar.needs[need.id] = newVal;
-                if (newVal <= 5) anyLow = true;
                 totalDecay += need.decay;
             });
-            decayApplied = true;
         }
         
-        // También aplicar penalización diaria por cada día completo sin actividad
-        const daysPassed = Math.floor(secondsPassed / 86400);
-        if (daysPassed > 0 && lastHabitDate) {
-            const lastHabitDateObj = new Date(lastHabitDate);
-            const today = new Date();
-            const daysDiff = Math.floor((today - lastHabitDateObj) / (1000 * 60 * 60 * 24));
-            if (daysDiff > 0 && daysDiff <= daysPassed) {
-                for (let d = 0; d < Math.min(daysDiff, 7); d++) {
-                    NEEDS.forEach(need => {
-                        avatar.needs[need.id] = Math.max(0, avatar.needs[need.id] - 8);
-                    });
-                }
-                addToast(`⚠️ Han pasado ${daysDiff} día(s) sin actividad · El avatar ha sufrido`);
-            }
-        }
-        
-        if (decayApplied && secondsPassed > 60) {
+        if (secondsPassed > 3600) {
             const hoursOffline = (secondsPassed / 3600).toFixed(1);
-            addToast(`⏰ Has estado fuera ${hoursOffline}h · El avatar ha envejecido`);
             const msgDiv = document.getElementById("offlineMessage");
             msgDiv.style.display = "block";
-            msgDiv.innerHTML = `⏰ Durante tu ausencia de ${hoursOffline}h, el avatar ha perdido vitalidad. ¡Cuídalo de nuevo!`;
-            setTimeout(() => { msgDiv.style.display = "none"; }, 8000);
+            msgDiv.innerHTML = `⏰ Ausencia de ${hoursOffline}h · El avatar ha perdido energía. ¡Cuídalo de nuevo!`;
+            setTimeout(() => { msgDiv.style.display = "none"; }, 6000);
         }
         
         return totalDecay;
@@ -524,19 +514,27 @@
         saveGame();
     }
 
-    Date.prototype.getWeek = function() { const d = new Date(this); d.setHours(0,0,0,0); d.setDate(d.getDate() + 3 - (d.getDay()+6)%7); const year = d.getFullYear(); const week = Math.floor(( (d - new Date(year,0,1)) / 86400000 + 1)/7); return week; };
+    Date.prototype.getWeek = function() { 
+        const d = new Date(this); 
+        d.setHours(0,0,0,0); 
+        d.setDate(d.getDate() + 3 - (d.getDay()+6)%7); 
+        const year = d.getFullYear(); 
+        const week = Math.floor(((d - new Date(year,0,1)) / 86400000 + 1)/7); 
+        return week; 
+    };
 
     function applyWeeklyPenalties() {
         const runStreak = streaks.running_session;
         if (runStreak.requiredWeekly && runStreak.weekStart === `${new Date().getFullYear()}-${new Date().getWeek()}`) {
             if (runStreak.weeklyCount < 3) {
-                avatar.needs.body = Math.max(0, avatar.needs.body - 12);
-                avatar.needs.energy = Math.max(0, avatar.needs.energy - 10);
-                addToast("⚠️ No has corrido suficiente esta semana");
+                avatar.needs.body = Math.max(0, avatar.needs.body - 8);
+                avatar.needs.energy = Math.max(0, avatar.needs.energy - 6);
+                addToast("⚠️ No has corrido suficiente esta semana · -8 cuerpo, -6 energía");
             }
         }
     }
 
+    // Muerte solo después de 7 días completos sin NINGÚN hábito
     function checkNoHabitDeath() {
         const lastHabit = new Date(lastHabitDate);
         const nowDate = new Date();
@@ -546,15 +544,18 @@
             if (decayInterval) clearInterval(decayInterval);
             if (penaltyInterval) clearInterval(penaltyInterval);
             updateUI();
-            addToast("💀 El avatar ha muerto por 7 días sin hábitos");
+            addToast("💀 El avatar ha muerto por 7 días sin ninguna actividad");
         }
     }
 
+    // Penalización diaria suave (solo si no hay hábitos)
     function applyDailyPenalty() {
         if (!avatar.alive) return;
         const today = new Date().toDateString();
         if (lastHabitDate !== today) {
-            NEEDS.forEach(need => { avatar.needs[need.id] = Math.max(0, avatar.needs[need.id] - 4); });
+            NEEDS.forEach(need => { 
+                avatar.needs[need.id] = Math.max(0, avatar.needs[need.id] - 3); 
+            });
         }
         checkNoHabitDeath();
         applyWeeklyPenalties();
@@ -571,11 +572,11 @@
         else phoneUsage.push({ date: today, hours: hours });
         if (phoneUsage.length > 14) phoneUsage.shift();
         
-        let damage = hours * 2.5;
+        let damage = hours * 1.5;
         avatar.needs.mind = Math.max(0, avatar.needs.mind - damage);
-        avatar.needs.spirit = Math.max(0, avatar.needs.spirit - damage * 0.8);
+        avatar.needs.spirit = Math.max(0, avatar.needs.spirit - damage * 0.7);
         avatar.needs.energy = Math.max(0, avatar.needs.energy - damage * 0.5);
-        addToast(`📱 +${hours}h de móvil · Mente y espíritu se resienten`);
+        addToast(`📱 +${hours}h de móvil · Mente -${damage.toFixed(0)}`);
         updateUI();
         saveGame();
         updatePhoneChart();
@@ -629,8 +630,8 @@
         document.getElementById('todayPhone').innerText = last7[6].toFixed(1);
         document.getElementById('avgPhone').innerText = avg.toFixed(1);
         const warningDiv = document.getElementById('phoneWarning');
-        if (last7[6] > 4) warningDiv.innerHTML = "⚠️ Alto uso de móvil hoy · tu salud mental se deteriora ⚠️";
-        else if (last7[6] > 2.5) warningDiv.innerHTML = "📱 Uso moderado · intenta reducir para mejorar necesidades";
+        if (last7[6] > 5) warningDiv.innerHTML = "⚠️ Alto uso de móvil · tu mente se resiente";
+        else if (last7[6] > 3) warningDiv.innerHTML = "📱 Intenta reducir el móvil para sentirte mejor";
         else warningDiv.innerHTML = "🌿 Buen control del móvil · tu mente lo agradece";
     }
 
@@ -647,17 +648,17 @@
         lastHabitDate = new Date().toDateString();
         lastSaveTimestamp = Date.now();
         saveGame(); updateUI(); startDecay(); startPenaltyCheck(); updatePhoneChart();
-        addToast("✨ Sendero reiniciado · Todas las metas a cero");
+        addToast("✨ Sendero reiniciado · Avatar con energía renovada");
     }
 
     function saveGame() {
         lastSaveTimestamp = Date.now();
         const data = { avatar, goalsState, cooldowns, habitStatsData, streaks, phoneUsage, lastHabitDate, lastSaveTimestamp };
-        localStorage.setItem("LevelUpFull", JSON.stringify(data));
+        localStorage.setItem("LevelUpBalanced", JSON.stringify(data));
     }
     
     function loadGame() {
-        const raw = localStorage.getItem("LevelUpFull");
+        const raw = localStorage.getItem("LevelUpBalanced");
         if (raw) {
             try {
                 const p = JSON.parse(raw);
@@ -668,9 +669,8 @@
                 HABITS.forEach(h => { if (!streaks[h.id]) streaks[h.id] = { lastDate: null, currentStreak: 0, requiredWeekly: h.id==="running_session"?3:null, weeklyCount:0, weekStart:null }; });
                 HABITS.forEach(h => { if (!cooldowns[h.id]) cooldowns[h.id] = { available: true, remaining: 0 }; });
                 
-                // ⭐ Aplicar decaimiento por tiempo offline después de cargar
-                const hadDecay = applyOfflineDecay();
-                if (hadDecay) checkDeath();
+                applyOfflineDecay();
+                checkDeath();
                 
             } catch(e) { fullResetGame(); }
         } else fullResetGame();
@@ -684,23 +684,23 @@
         saveGame(); 
     }
 
-    function addReadingTime(m) { if(!avatar.alive)return; if(m<=0)return; habitStatsData.reading.entries.push({date:new Date().toDateString(),minutes:m}); if(habitStatsData.reading.entries.length>7) habitStatsData.reading.entries.shift(); avatar.needs.mind=Math.min(100,avatar.needs.mind+Math.floor(m/10)+3); avatar.needs.spirit=Math.min(100,avatar.needs.spirit+2); avatar.xp+=Math.floor(m/15)+5; checkLevelUp(); addToast(`📚 +${m}min lectura`); saveGame(); updateUI(); recordHabitAction("reading"); }
-    function addSteps(s) { if(!avatar.alive)return; if(s<=0)return; habitStatsData.steps.entries.push({date:new Date().toDateString(),steps:s}); if(habitStatsData.steps.entries.length>7) habitStatsData.steps.entries.shift(); let efecto=Math.floor(s/1000)+2; avatar.needs.body=Math.min(100,avatar.needs.body+efecto); avatar.needs.energy=Math.min(100,avatar.needs.energy+efecto); avatar.xp+=Math.floor(s/2000)+4; checkLevelUp(); addToast(`👣 +${s} pasos`); saveGame(); updateUI(); recordHabitAction("steps"); }
-    function addCalisthenicsTime(m) { if(!avatar.alive)return; if(m<=0)return; habitStatsData.calisthenics.entries.push({date:new Date().toDateString(),minutes:m}); if(habitStatsData.calisthenics.entries.length>7) habitStatsData.calisthenics.entries.shift(); avatar.needs.body=Math.min(100,avatar.needs.body+Math.floor(m/5)+4); avatar.needs.energy=Math.min(100,avatar.needs.energy+Math.floor(m/8)+3); avatar.xp+=Math.floor(m/10)+6; checkLevelUp(); addToast(`💪 +${m}min calistenia`); saveGame(); updateUI(); recordHabitAction("calisthenics"); }
+    function addReadingTime(m) { if(!avatar.alive)return; if(m<=0)return; habitStatsData.reading.entries.push({date:new Date().toDateString(),minutes:m}); if(habitStatsData.reading.entries.length>7) habitStatsData.reading.entries.shift(); avatar.needs.mind=Math.min(100,avatar.needs.mind+Math.floor(m/12)+4); avatar.needs.spirit=Math.min(100,avatar.needs.spirit+3); avatar.xp+=Math.floor(m/12)+4; checkLevelUp(); addToast(`📚 +${m}min lectura`); saveGame(); updateUI(); recordHabitAction("reading"); }
+    function addSteps(s) { if(!avatar.alive)return; if(s<=0)return; habitStatsData.steps.entries.push({date:new Date().toDateString(),steps:s}); if(habitStatsData.steps.entries.length>7) habitStatsData.steps.entries.shift(); let efecto=Math.floor(s/1500)+2; avatar.needs.body=Math.min(100,avatar.needs.body+efecto); avatar.needs.energy=Math.min(100,avatar.needs.energy+efecto); avatar.xp+=Math.floor(s/2000)+3; checkLevelUp(); addToast(`👣 +${s} pasos`); saveGame(); updateUI(); recordHabitAction("steps"); }
+    function addCalisthenicsTime(m) { if(!avatar.alive)return; if(m<=0)return; habitStatsData.calisthenics.entries.push({date:new Date().toDateString(),minutes:m}); if(habitStatsData.calisthenics.entries.length>7) habitStatsData.calisthenics.entries.shift(); avatar.needs.body=Math.min(100,avatar.needs.body+Math.floor(m/4)+5); avatar.needs.energy=Math.min(100,avatar.needs.energy+Math.floor(m/6)+4); avatar.xp+=Math.floor(m/8)+5; checkLevelUp(); addToast(`💪 +${m}min calistenia`); saveGame(); updateUI(); recordHabitAction("calisthenics"); }
     function getTodaySteps() { let today=new Date().toDateString(); let e=habitStatsData.steps.entries.find(e=>e.date===today); return e?e.steps:0; }
     function getStepsAverage() { if(habitStatsData.steps.entries.length===0)return 0; return habitStatsData.steps.entries.reduce((s,e)=>s+e.steps,0)/habitStatsData.steps.entries.length; }
     function getReadingAverage() { if(habitStatsData.reading.entries.length===0)return 0; return habitStatsData.reading.entries.reduce((s,e)=>s+e.minutes,0)/habitStatsData.reading.entries.length; }
     function getCalisthenicsAverage() { if(habitStatsData.calisthenics.entries.length===0)return 0; return habitStatsData.calisthenics.entries.reduce((s,e)=>s+e.minutes,0)/habitStatsData.calisthenics.entries.length; }
 
     function runOrderTest() {
-        let qs = ["¿Suelo libre de objetos?","¿Mesa despejada?","¿Ropa preparada para mañana?","¿Cama hecha?","¿Ventilaste?","¿Pasaste escoba?"];
+        let qs = ["¿Suelo libre de objetos?","¿Mesa despejada?","¿Ropa preparada?","¿Cama hecha?","¿Ventilaste?","¿Pasaste escoba?"];
         let score=0; for(let q of qs) if(confirm(q+"\n\nAceptar=SÍ / Cancelar=NO")) score++;
         let note=(score/qs.length)*10; note=Math.round(note*10)/10;
         goalsState.order.dailyScores.push({date:new Date().toDateString(),score:note}); if(goalsState.order.dailyScores.length>7) goalsState.order.dailyScores.shift();
         let sum=goalsState.order.dailyScores.reduce((a,b)=>a+b.score,0); goalsState.order.currentAvg=goalsState.order.dailyScores.length?sum/goalsState.order.dailyScores.length:0;
-        addToast(`📋 Test orden: ${note}/10 · Media: ${goalsState.order.currentAvg.toFixed(1)}`); saveGame(); updateUI(); avatar.xp+=12; avatar.needs.mind=Math.min(100,avatar.needs.mind+6); avatar.needs.spirit=Math.min(100,avatar.needs.spirit+5); checkLevelUp(); recordHabitAction("tidy_morning");
+        addToast(`📋 Test orden: ${note}/10`); saveGame(); updateUI(); avatar.xp+=10; avatar.needs.mind=Math.min(100,avatar.needs.mind+5); avatar.needs.spirit=Math.min(100,avatar.needs.spirit+4); checkLevelUp(); recordHabitAction("tidy_morning");
     }
-    function checkLevelUp() { while(avatar.xp>=avatar.xpToNext){ avatar.xp-=avatar.xpToNext; avatar.level++; avatar.xpToNext=Math.floor(avatar.xpToNext*1.18); NEEDS.forEach(n=>{avatar.needs[n.id]=Math.min(100,avatar.needs[n.id]+8);}); addToast(`🎋 Nivel ${avatar.level}`); } }
+    function checkLevelUp() { while(avatar.xp>=avatar.xpToNext){ avatar.xp-=avatar.xpToNext; avatar.level++; avatar.xpToNext=Math.floor(avatar.xpToNext*1.2); NEEDS.forEach(n=>{avatar.needs[n.id]=Math.min(100,avatar.needs[n.id]+10);}); addToast(`🎋 Nivel ${avatar.level}`); } }
     function addToast(msg) { let t=document.createElement("div"); t.innerText=msg; t.style.position="fixed"; t.style.bottom="70px"; t.style.left="20px"; t.style.backgroundColor="#e6ddcf"; t.style.padding="6px 16px"; t.style.borderRadius="40px"; t.style.fontSize="0.7rem"; t.style.zIndex="999"; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
     
     function completeHabit(habit, customVal=null) {
@@ -715,10 +715,10 @@
         if(habit.customSteps && customVal!==null) addSteps(customVal);
         if(habit.customCalisthenics && customVal!==null) addCalisthenicsTime(customVal);
         avatar.xp+=habit.xp; checkLevelUp();
-        cd.available=false; cd.remaining=25; let itv=setInterval(()=>{ if(cd.remaining<=1){ cd.available=true; clearInterval(itv); renderDailyHabits(); } else{ cd.remaining--; renderDailyHabits(); } },1000);
+        cd.available=false; cd.remaining=20; let itv=setInterval(()=>{ if(cd.remaining<=1){ cd.available=true; clearInterval(itv); renderDailyHabits(); } else{ cd.remaining--; renderDailyHabits(); } },1000);
         saveGame(); updateUI(); checkDeath(); recordHabitAction(habit.id); return true;
     }
-    function addWater(liters){ if(!avatar.alive)return; let newTotal=goalsState.hydration.todayLiters+liters; if(newTotal>1.5)newTotal=1.5; goalsState.hydration.todayLiters=newTotal; avatar.needs.body=Math.min(100,avatar.needs.body+Math.floor(liters*8)); avatar.xp+=3; checkLevelUp(); saveGame(); updateUI(); addToast(`💧 +${liters}L agua`); if(newTotal>=1.5) addToast("✨ Meta hidratación cumplida"); }
+    function addWater(liters){ if(!avatar.alive)return; let newTotal=goalsState.hydration.todayLiters+liters; if(newTotal>1.5)newTotal=1.5; goalsState.hydration.todayLiters=newTotal; avatar.needs.body=Math.min(100,avatar.needs.body+Math.floor(liters*6)); avatar.xp+=3; checkLevelUp(); saveGame(); updateUI(); addToast(`💧 +${liters}L agua`); if(newTotal>=1.5) addToast("✨ Meta hidratación cumplida"); }
     function checkDeath(){ for(let n of NEEDS) if(avatar.needs[n.id]<=0){ avatar.alive=false; if(decayInterval)clearInterval(decayInterval); if(penaltyInterval)clearInterval(penaltyInterval); updateUI(); addToast("🌿 Avatar fallecido · Reinicia"); return true; } return false; }
     function startDecay(){ if(decayInterval)clearInterval(decayInterval); decayInterval=setInterval(()=>{ if(!avatar.alive)return; NEEDS.forEach(need=>{ let newVal=avatar.needs[need.id]-need.decay; if(newVal<0)newVal=0; avatar.needs[need.id]=newVal; }); updateUI(); checkDeath(); saveGame(); },10000); }
     function startPenaltyCheck(){ if(penaltyInterval)clearInterval(penaltyInterval); penaltyInterval=setInterval(()=>{ applyDailyPenalty(); }, 60000); }
@@ -736,9 +736,9 @@
         let germanPercent=(goalsState.german.currentHours/660)*100; let levelEst="A1"; if(goalsState.german.currentHours>=200) levelEst="A2"; if(goalsState.german.currentHours>=400) levelEst="B1"; if(goalsState.german.currentHours>=600) levelEst="B2";
         let cmFaltan=goalsState.spagatt.currentCmToGround; let avgOrder=goalsState.order.currentAvg.toFixed(1); let currentKm=goalsState.running.currentMaxKm; let pace=goalsState.running.paceMinPerKm;
         grid.innerHTML=`<div class="goal-card"><div class="goal-title">📖 Alemán ${levelEst}→B2</div><div class="progress-stat">${goalsState.german.currentHours}/660h (${Math.min(100,germanPercent).toFixed(0)}%)</div><div class="prediction-text">⏱️ ${Math.max(0,660-goalsState.german.currentHours)}h restantes</div><div class="input-group"><input type="number" id="germanHoursAdd" step="0.5" placeholder="+horas"><button id="addGermanBtn">+</button></div></div>
-        <div class="goal-card"><div class="goal-title">🧘 Spagatt</div><div class="progress-stat">${cmFaltan<=0?"Completado":cmFaltan.toFixed(1)+" cm al suelo"}</div><div class="prediction-text">✨ ${cmFaltan<=0?"Meta alcanzada":`${Math.ceil(cmFaltan/1.8)} semanas aprox`}</div><div class="input-group"><input type="number" id="spagattCm" step="0.5" placeholder="cm"><button id="updateSpagattBtn">Act</button></div></div>
+        <div class="goal-card"><div class="goal-title">🧘 Spagatt</div><div class="progress-stat">${cmFaltan<=0?"Completado":cmFaltan.toFixed(1)+" cm al suelo"}</div><div class="prediction-text">✨ ${cmFaltan<=0?"Meta alcanzada":`${Math.ceil(cmFaltan/1.5)} semanas aprox`}</div><div class="input-group"><input type="number" id="spagattCm" step="0.5" placeholder="cm"><button id="updateSpagattBtn">Act</button></div></div>
         <div class="goal-card"><div class="goal-title">🧹 Orden</div><div class="progress-stat">Media ${avgOrder}/10 · ${goalsState.order.dailyScores.length} tests</div><button id="orderTestBtn" class="test-btn">Test orden</button></div>
-        <div class="goal-card"><div class="goal-title">🏃 Correr 20km</div><div class="progress-stat">Máx: ${currentKm}km · Ritmo ${pace}min/km</div><div class="prediction-text">📈 ${currentKm>=20?"Logrado":`${Math.ceil((20-currentKm)/1.8)} semanas estimadas`}</div><div class="input-group"><input type="number" id="runKmAdd" step="0.5" placeholder="km"><button id="addRunBtn">+</button><input type="number" id="paceInput" step="0.1" value="${pace}" style="width:70px"><button id="updatePaceBtn">Ritmo</button></div></div>`;
+        <div class="goal-card"><div class="goal-title">🏃 Correr 20km</div><div class="progress-stat">Máx: ${currentKm}km · Ritmo ${pace}min/km</div><div class="prediction-text">📈 ${currentKm>=20?"Logrado":`${Math.ceil((20-currentKm)/1.5)} semanas estimadas`}</div><div class="input-group"><input type="number" id="runKmAdd" step="0.5" placeholder="km"><button id="addRunBtn">+</button><input type="number" id="paceInput" step="0.1" value="${pace}" style="width:70px"><button id="updatePaceBtn">Ritmo</button></div></div>`;
         document.getElementById("addGermanBtn")?.addEventListener("click",()=>{ let h=parseFloat(document.getElementById("germanHoursAdd").value); if(!isNaN(h)&&h>0){ goalsState.german.currentHours=Math.min(660,goalsState.german.currentHours+h); saveGame(); updateUI(); addToast(`alemán +${h}h`); } });
         document.getElementById("updateSpagattBtn")?.addEventListener("click",()=>{ let cm=parseFloat(document.getElementById("spagattCm").value); if(!isNaN(cm)&&cm>=0){ goalsState.spagatt.currentCmToGround=Math.min(50,cm); saveGame(); updateUI(); } });
         document.getElementById("orderTestBtn")?.addEventListener("click",()=>{ runOrderTest(); updateUI(); });
