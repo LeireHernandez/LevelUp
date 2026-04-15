@@ -3,16 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>LevelUp</title>
+    <title>LevelUp · Evolución total</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&family=Instrument+Serif&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #ece4d7;
             background-image: radial-gradient(circle at 10% 20%, rgba(185,150,108,0.08) 2%, transparent 2.5%);
@@ -21,16 +16,8 @@
             padding: 1.8rem 1.5rem;
             color: #2c2a24;
         }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 2rem; }
         .header h1 {
             font-family: 'Instrument Serif', serif;
             font-weight: 400;
@@ -40,12 +27,7 @@
             display: inline-block;
             padding-bottom: 6px;
         }
-        .sub {
-            color: #6f6a5c;
-            font-size: 0.85rem;
-            margin-top: 8px;
-        }
-
+        .sub { color: #6f6a5c; font-size: 0.85rem; margin-top: 8px; }
         .card {
             background: #fefaf3;
             border-radius: 2rem;
@@ -53,7 +35,6 @@
             margin-bottom: 1.6rem;
             box-shadow: 0 6px 14px rgba(0,0,0,0.03), 0 0 0 1px #e2d8cb;
         }
-
         .avatar-row {
             display: flex;
             flex-wrap: wrap;
@@ -61,11 +42,7 @@
             align-items: center;
             gap: 1rem;
         }
-        .avatar-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+        .avatar-info { display: flex; align-items: center; gap: 1rem; }
         .avatar-icon {
             font-size: 3.2rem;
             background: #e7ddcf;
@@ -76,11 +53,7 @@
             justify-content: center;
             border-radius: 3rem;
         }
-        .name-area h2 {
-            font-weight: 500;
-            font-size: 1.5rem;
-            color: #4a6741;
-        }
+        .name-area h2 { font-weight: 500; font-size: 1.5rem; color: #4a6741; }
         .edit-name {
             background: none;
             border: 1px solid #d0c1ad;
@@ -98,38 +71,12 @@
             font-weight: 500;
             color: #4d5a3b;
         }
-
-        .needs-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 1rem 0 0.5rem;
-        }
-        .need {
-            flex: 1;
-            min-width: 110px;
-        }
-        .need-label {
-            font-size: 0.7rem;
-            font-weight: 500;
-            color: #8f7a64;
-            display: flex;
-            justify-content: space-between;
-        }
-        .bar-bg {
-            background: #e5d9ce;
-            border-radius: 20px;
-            height: 6px;
-            margin-top: 4px;
-        }
-        .bar-fill {
-            background: #7c9a6e;
-            height: 6px;
-            border-radius: 20px;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
+        .needs-grid { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0 0.5rem; }
+        .need { flex: 1; min-width: 130px; }
+        .need-label { font-size: 0.7rem; font-weight: 500; color: #8f7a64; display: flex; justify-content: space-between; }
+        .bar-bg { background: #e5d9ce; border-radius: 20px; height: 8px; margin-top: 4px; }
+        .bar-fill { background: #7c9a6e; height: 8px; border-radius: 20px; width: 0%; transition: width 0.3s ease; }
+        .critical .bar-fill { background: #c46a3a; }
         .goals-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
@@ -142,43 +89,11 @@
             padding: 1rem;
             border: 1px solid #e5d8ca;
         }
-        .goal-title {
-            font-weight: 600;
-            font-size: 1rem;
-            color: #5c6e4a;
-            margin-bottom: 12px;
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-        .progress-stat {
-            font-size: 0.75rem;
-            color: #6e5b48;
-            margin-top: 8px;
-        }
-        .prediction-text {
-            background: #f2ede4;
-            padding: 6px 10px;
-            border-radius: 1rem;
-            font-size: 0.7rem;
-            color: #5f6a46;
-            margin: 10px 0;
-        }
-        .input-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .input-group input {
-            flex: 1;
-            background: #fff7ef;
-            border: 1px solid #e2cfbb;
-            padding: 8px 10px;
-            border-radius: 2rem;
-            font-size: 0.75rem;
-        }
+        .goal-title { font-weight: 600; font-size: 1rem; color: #5c6e4a; margin-bottom: 12px; display: flex; gap: 6px; align-items: center; }
+        .progress-stat { font-size: 0.75rem; color: #6e5b48; margin-top: 8px; }
+        .prediction-text { background: #f2ede4; padding: 6px 10px; border-radius: 1rem; font-size: 0.7rem; color: #5f6a46; margin: 10px 0; }
+        .input-group { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+        .input-group input { flex: 1; background: #fff7ef; border: 1px solid #e2cfbb; padding: 8px 10px; border-radius: 2rem; font-size: 0.75rem; }
         button {
             background: #cbdbb6;
             border: none;
@@ -190,15 +105,8 @@
             cursor: pointer;
             transition: 0.1s;
         }
-        button:active {
-            transform: scale(0.96);
-        }
-        .daily-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 12px;
-        }
+        button:active { transform: scale(0.96); }
+        .daily-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
         .habit-pill {
             background: #f2ede2;
             border-radius: 3rem;
@@ -209,114 +117,28 @@
             font-size: 0.75rem;
             flex-wrap: wrap;
         }
-        .cooldown {
-            font-size: 0.65rem;
-            color: #aa927a;
-        }
-        .reset-btn {
-            background: #c4b49c;
-            color: #2f3e25;
-            padding: 8px 22px;
-            margin-top: 6px;
-        }
-        footer {
-            text-align: center;
-            font-size: 0.7rem;
-            color: #998f7a;
-            margin-top: 2rem;
-        }
-        .test-btn {
-            background: #cfbc9f;
-            color: #2f3a21;
-        }
-        .stat-badge {
-            background: #e9e0d4;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            display: inline-block;
-        }
-        .offline-warning {
-            background: #f0e0c8;
-            border-left: 4px solid #c46a3a;
-            padding: 8px 12px;
-            border-radius: 1rem;
-            font-size: 0.7rem;
-            margin-bottom: 12px;
-            color: #8b5a3a;
-        }
-        
-        .phone-section {
-            margin-top: 16px;
-            border-top: 1px solid #ece0d2;
-            padding-top: 16px;
-        }
-        .phone-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #5c6e4a;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .phone-stats-row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .phone-input-area {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .phone-stats-badges {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .chart-wrapper {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0 10px 0;
-        }
-        .chart-container {
-            background: linear-gradient(145deg, #fffbf5, #fef7ef);
-            border-radius: 2rem;
-            padding: 20px 20px 15px 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-            border: 1px solid #e5d8ca;
-            max-width: 550px;
-            width: 100%;
-        }
-        canvas {
-            max-height: 220px;
-            width: 100%;
-        }
-        .warning {
-            color: #c46a3a;
-            font-weight: 500;
-            font-size: 0.75rem;
-            text-align: center;
-            margin-top: 12px;
-            padding: 6px;
-            background: #fff0e6;
-            border-radius: 2rem;
-        }
-        
-        @media (max-width: 700px) {
-            .chart-container { padding: 12px; }
-            canvas { max-height: 180px; }
-        }
+        .cooldown { font-size: 0.65rem; color: #aa927a; }
+        .reset-btn { background: #c4b49c; color: #2f3e25; padding: 8px 22px; margin-top: 6px; }
+        footer { text-align: center; font-size: 0.7rem; color: #998f7a; margin-top: 2rem; }
+        .test-btn { background: #cfbc9f; color: #2f3a21; }
+        .stat-badge { background: #e9e0d4; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; display: inline-block; }
+        .offline-warning { background: #f0e0c8; border-left: 4px solid #c46a3a; padding: 8px 12px; border-radius: 1rem; font-size: 0.7rem; margin-bottom: 12px; color: #8b5a3a; }
+        .phone-section { margin-top: 16px; border-top: 1px solid #ece0d2; padding-top: 16px; }
+        .phone-title { font-size: 0.85rem; font-weight: 600; color: #5c6e4a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .phone-stats-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .phone-input-area { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .phone-stats-badges { display: flex; gap: 12px; flex-wrap: wrap; }
+        .chart-wrapper { display: flex; justify-content: center; margin: 20px 0 10px 0; }
+        .chart-container { background: linear-gradient(145deg, #fffbf5, #fef7ef); border-radius: 2rem; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border: 1px solid #e5d8ca; max-width: 550px; width: 100%; }
+        canvas { max-height: 220px; width: 100%; }
+        .warning { color: #c46a3a; font-weight: 500; font-size: 0.75rem; text-align: center; margin-top: 12px; padding: 6px; background: #fff0e6; border-radius: 2rem; }
+        @media (max-width: 700px) { .chart-container { padding: 12px; } canvas { max-height: 180px; } }
+        .water-progress { margin-top: 8px; padding: 6px; background: #eef3e8; border-radius: 1rem; font-size: 0.7rem; text-align: center; }
+        .hydrate-btn { background: #7c9a6e; color: white; }
     </style>
 </head>
 <body>
 <div class="container">
-
 
     <div class="card">
         <div class="avatar-row">
@@ -343,15 +165,12 @@
         <div class="daily-actions" id="dailyHabitsList"></div>
         
         <div style="margin-top: 20px; border-top: 1px solid #ece0d2; padding-top: 12px;">
-            <div style="font-size:0.75rem; font-weight:500; margin-bottom: 8px;">📊 Estadísticas y rachas</div>
-            <div id="habitStats" style="display: flex; flex-wrap: wrap; gap: 12px; font-size:0.7rem; margin-bottom: 12px;"></div>
+            <div style="font-size:0.75rem; font-weight:500; margin-bottom: 8px;">📊 Tiempos restantes por necesidad</div>
             <div id="streaksContainer" style="display: flex; flex-wrap: wrap; gap: 12px;"></div>
         </div>
 
         <div class="phone-section">
-            <div class="phone-title">
-                <span>📱</span> Tiempo de pantalla (móvil) · Perjudicial
-            </div>
+            <div class="phone-title"><span>📱</span> Tiempo de pantalla (móvil) · Perjudicial</div>
             <div class="phone-stats-row">
                 <div class="phone-input-area">
                     <input type="number" id="phoneHours" step="0.5" placeholder="Horas hoy" value="0" style="width: 110px;">
@@ -362,205 +181,429 @@
                     <div class="stat-badge">📊 Media semanal: <span id="avgPhone">0</span> h</div>
                 </div>
             </div>
-            
-            <div class="chart-wrapper">
-                <div class="chart-container">
-                    <canvas id="phoneChart" width="500" height="220" style="max-width:100%; height:auto;"></canvas>
-                </div>
-            </div>
-            
+            <div class="chart-wrapper"><div class="chart-container"><canvas id="phoneChart" width="500" height="220"></canvas></div></div>
             <div id="phoneWarning" class="warning"></div>
-            <div style="font-size:0.65rem; text-align:center; margin-top:8px; color:#8f7a64;">⚠️ Cada hora de móvil daña mente y espíritu</div>
         </div>
-
+        
         <div style="margin-top: 16px; border-top: 1px solid #ece0d2; padding-top: 12px;">
-            <div style="font-size:0.75rem; font-weight:500;">💧 Hidratación (1.5 L/día)</div>
+            <div style="font-size:0.75rem; font-weight:500;">💧 Hidratación (bebe agua para recargar)</div>
             <div class="input-group" style="margin-top: 6px;">
                 <input type="number" id="waterAmount" step="0.3" placeholder="litros (0.3L = 1 vaso)" value="0.3">
-                <button id="addWaterBtn">+ Añadir agua</button>
-                <span id="waterStat" style="font-size:0.75rem; background:#e9e0d4; padding:4px 12px; border-radius:30px;">0 / 1.5 L hoy</span>
+                <button id="addWaterBtn" class="hydrate-btn">💧 Beber agua</button>
             </div>
+            <div id="waterStats" class="water-progress"></div>
+            <div style="font-size:0.65rem; text-align:center; margin-top:6px; color:#8f7a64;">🌊 El nivel baja durante el día · Bebe 1.5L para recuperar el 100%</div>
         </div>
     </div>
 
     <div style="display: flex; justify-content: center; margin: 10px 0;">
         <button class="reset-btn" id="resetGameBtn">🔄 Reiniciar (Avatar nuevo + Todo a cero)</button>
     </div>
-    <footer>El avatar envejece poco a poco · Con 2-3 hábitos a la semana se mantiene sano · Muere tras 7 días sin NINGUNA actividad</footer>
+    <footer>💧 La hidratación empieza al 100% a las 00:00 y baja hasta 0% a las 24:00 · Bebe 1.5L para recargarla</footer>
 </div>
 
 <script>
-    // ⚡ BALANCE AJUSTADO - Decaimiento mucho más lento y realista
-    // Cada necesidad pierde entre 0.08 y 0.12 por ciclo (10 segundos)
-    // En 1 hora: ~30-40 puntos de pérdida → puede vivir ~2-3 días sin cuidados
-    // En 1 día completo sin abrir la app: ~70-90 puntos de pérdida → sobrevive pero muy debilitado
-    const NEEDS = [
-        { id: "energy", name: "Energía", icon: "⚡", initial: 85, max: 100, decay: 0.09 },
-        { id: "body", name: "Cuerpo", icon: "💪", initial: 85, max: 100, decay: 0.10 },
-        { id: "mind", name: "Mente", icon: "📘", initial: 85, max: 100, decay: 0.08 },
-        { id: "spirit", name: "Tranquilidad", icon: "🍃", initial: 85, max: 100, decay: 0.07 }
+    // ==================== SISTEMA DE HIDRATACIÓN (basado en hora real del día) ====================
+    // El nivel de hidratación comienza en 100% a las 00:00
+    // Va disminuyendo linealmente a lo largo de 24 horas hasta llegar a 0% a las 24:00
+    // Cada 0.3L de agua bebida aumenta el nivel en un 20% (1.5L = 100% de recarga)
+    
+    let hydrationData = {
+        lastDate: null,              // última fecha registrada (para reset diario)
+        currentLevel: 100,          // nivel actual de hidratación (0-100)
+        lastUpdateTimestamp: Date.now(),
+        targetLiters: 1.5,
+        // Agua registrada hoy (para mostrar progreso)
+        waterLoggedToday: 0
+    };
+    
+    // Función que calcula el nivel de hidratación según la hora del día
+    // Devuelve el porcentaje que debería tener según la hora actual (0-100)
+    function getHydrationByTimeOfDay() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const totalMinutes = hours * 60 + minutes;
+        const totalMinutesInDay = 24 * 60;
+        
+        // El porcentaje baja linealmente: 100% a las 00:00, 0% a las 24:00
+        let percent = 100 - (totalMinutes / totalMinutesInDay) * 100;
+        percent = Math.max(0, Math.min(100, percent));
+        return percent;
+    }
+    
+    // Actualizar nivel de hidratación (aplica el decaimiento natural + reseteo diario)
+    function updateHydrationLevel() {
+        const now = new Date();
+        const todayStr = now.toDateString();
+        
+        // Si es un nuevo día, resetear el nivel al 100% y limpiar agua registrada
+        if (hydrationData.lastDate !== todayStr) {
+            // Verificar si el día anterior murió por deshidratación (solo si no es la primera vez)
+            if (hydrationData.lastDate !== null && hydrationData.currentLevel <= 0) {
+                if (avatar.alive) {
+                    avatar.alive = false;
+                    addToast(`💀 HIDRATACIÓN: El nivel de agua llegó a 0% al final del día. ¡Tu avatar ha muerto de sed!`);
+                    if (decayInterval) clearInterval(decayInterval);
+                    updateUI();
+                    return false;
+                }
+            }
+            // Nuevo día: resetear
+            hydrationData.lastDate = todayStr;
+            hydrationData.currentLevel = getHydrationByTimeOfDay();
+            hydrationData.waterLoggedToday = 0;
+            hydrationData.lastUpdateTimestamp = now;
+            addToast(`🌅 Nuevo día · Hidratación reiniciada al ${Math.floor(hydrationData.currentLevel)}%`);
+            saveGame();
+            updateUI();
+            return true;
+        }
+        
+        // Mismo día: actualizar nivel según la hora actual
+        const expectedLevel = getHydrationByTimeOfDay();
+        
+        // Si el nivel actual es mayor que el esperado (porque bebió agua), mantener el beneficio
+        // pero aplicar decaimiento natural gradual
+        if (hydrationData.currentLevel > expectedLevel) {
+            // El nivel baja lentamente hacia el nivel esperado
+            const timeSinceLastUpdate = (now - hydrationData.lastUpdateTimestamp) / (1000 * 60); // minutos
+            const decayPerMinute = 0.5; // 0.5% por minuto de decaimiento hacia el nivel natural
+            let newLevel = hydrationData.currentLevel - (decayPerMinute * timeSinceLastUpdate);
+            newLevel = Math.max(expectedLevel, newLevel);
+            hydrationData.currentLevel = newLevel;
+        } else {
+            // Si está por debajo del esperado, sube al nivel esperado (por tiempo)
+            hydrationData.currentLevel = expectedLevel;
+        }
+        
+        hydrationData.currentLevel = Math.max(0, Math.min(100, hydrationData.currentLevel));
+        hydrationData.lastUpdateTimestamp = now;
+        
+        // Verificar si el nivel llegó a 0
+        if (hydrationData.currentLevel <= 0 && avatar.alive) {
+            avatar.alive = false;
+            addToast(`💀 HIDRATACIÓN: ¡Te has quedado sin agua! El avatar ha muerto.`);
+            if (decayInterval) clearInterval(decayInterval);
+            updateUI();
+            return false;
+        }
+        
+        // Aviso si el nivel está bajo
+        if (hydrationData.currentLevel < 20 && hydrationData.currentLevel > 0) {
+            if (!window.lowHydrationWarned) {
+                window.lowHydrationWarned = true;
+                addToast(`⚠️ ¡Cuidado! Nivel de hidratación bajo (${Math.floor(hydrationData.currentLevel)}%). Bebe agua pronto.`);
+                setTimeout(() => { window.lowHydrationWarned = false; }, 60000);
+            }
+        }
+        
+        return true;
+    }
+    
+    // Beber agua: aumenta el nivel de hidratación
+    function addWater(liters) {
+        if (!avatar.alive) return;
+        if (isNaN(liters) || liters <= 0) { addToast("Ingresa una cantidad válida (mínimo 0.1L)"); return; }
+        
+        // Actualizar nivel antes de modificarlo
+        updateHydrationLevel();
+        
+        // Cada 0.3L restaura un 20% del nivel (1.5L = 100% completo)
+        const percentPerLiter = (100 / hydrationData.targetLiters);
+        const percentGain = liters * percentPerLiter;
+        
+        let newLevel = hydrationData.currentLevel + percentGain;
+        newLevel = Math.min(100, newLevel);
+        hydrationData.currentLevel = newLevel;
+        hydrationData.lastUpdateTimestamp = Date.now();
+        
+        // Registrar agua bebida hoy
+        hydrationData.waterLoggedToday += liters;
+        if (hydrationData.waterLoggedToday > hydrationData.targetLiters) {
+            hydrationData.waterLoggedToday = hydrationData.targetLiters;
+        }
+        
+        addToast(`💧 +${liters}L de agua · Nivel de hidratación: ${Math.floor(hydrationData.currentLevel)}%`);
+        
+        // Ganar XP por beber agua
+        avatar.xp += 3;
+        checkLevelUp();
+        
+        // Si se alcanza el 100%, mensaje especial
+        if (hydrationData.currentLevel >= 99) {
+            addToast(`✨ ¡Hidratación completa al 100%! +5 XP extra`);
+            avatar.xp += 5;
+            checkLevelUp();
+        }
+        
+        saveGame();
+        updateUI();
+    }
+    
+    // Obtener el nivel actual de hidratación para mostrar en UI
+    function getHydrationLevel() {
+        return hydrationData.currentLevel;
+    }
+    
+    // Obtener el agua bebida hoy
+    function getWaterLoggedToday() {
+        return hydrationData.waterLoggedToday;
+    }
+
+    // ==================== RESTO DE NECESIDADES ====================
+    const NEEDS_CONFIG = [
+        { id: "hydration", name: "Hidratación", icon: "💧", habitId: "water_habit", habitName: "Beber agua", maxHoursWithout: 24, initial: 100 },
+        { id: "strength", name: "Fuerza", icon: "💪", habitId: "sport_habit", habitName: "Hacer deporte", maxHoursWithout: 168, initial: 100 },
+        { id: "intelligence", name: "Inteligencia", icon: "🧠", habitId: "german_study", habitName: "Estudiar alemán", maxHoursWithout: 72, initial: 100 },
+        { id: "energy", name: "Energía", icon: "⚡", habitId: "steps_habit", habitName: "Caminar 10k pasos", maxHoursWithout: 72, initial: 100, requiresWeekly: true, requiredDaysPerWeek: 3 },
+        { id: "calmness", name: "Tranquilidad", icon: "🍃", habitId: "order_habit", habitName: "Test de orden (nota 10)", maxHoursWithout: 48, initial: 100, requiresPerfectScore: true },
+        { id: "flexibility", name: "Elasticidad", icon: "🧘", habitId: "stretch_habit", habitName: "Estiramientos", maxHoursWithout: 24, initial: 100 },
+        { id: "entertainment", name: "Entretenimiento", icon: "📖", habitId: "reading_habit", habitName: "Leer", maxHoursWithout: 48, initial: 100 }
     ];
 
-    const INITIAL_GOALS = {
+    let needsState = {};
+    let weeklyHabitLog = { steps: [] };
+    let lastOrderTestScore = 0;
+    let lastOrderTestDate = null;
+    let lastReadingDate = null;
+
+    let avatar = { name: "Leire", level: 1, xp: 0, xpToNext: 100, alive: true };
+    let goalsState = {
         german: { currentHours: 0, targetHours: 660 },
         spagatt: { currentCmToGround: 32 },
         order: { dailyScores: [], currentAvg: 0 },
         running: { currentMaxKm: 0, targetKm: 20, paceMinPerKm: 7.5 },
-        hydration: { todayLiters: 0, targetLiters: 1.5, history: [] }
+        reading: { totalMinutes: 0, entries: [] }
     };
-
-    let habitStatsData = {
-        reading: { totalMinutes: 0, entries: [] },
-        steps: { totalSteps: 0, entries: [] },
-        calisthenics: { totalMinutes: 0, entries: [] }
-    };
-
-    let streaks = {
-        german_study: { lastDate: null, currentStreak: 0, requiredWeekly: null },
-        stretch_spagatt: { lastDate: null, currentStreak: 0, requiredWeekly: null },
-        running_session: { lastDate: null, currentStreak: 0, requiredWeekly: 3, weeklyCount: 0, weekStart: null },
-        tidy_morning: { lastDate: null, currentStreak: 0, requiredWeekly: null },
-        reading: { lastDate: null, currentStreak: 0, requiredWeekly: null },
-        steps: { lastDate: null, currentStreak: 0, requiredWeekly: null },
-        calisthenics: { lastDate: null, currentStreak: 0, requiredWeekly: null }
-    };
-
+    
     let phoneUsage = [];
     let phoneChart = null;
-    let lastHabitDate = new Date().toDateString();
-    let lastSaveTimestamp = Date.now();
-
-    const HABITS = [
-        { id: "german_study", name: "Estudiar alemán 1h", icon: "📖", xp: 14, needEffects: { mind: 8, spirit: 4 }, goalEffect: { german: 1 } },
-        { id: "stretch_spagatt", name: "Estiramientos", icon: "🧘", xp: 10, needEffects: { body: 8, energy: 5 }, goalEffect: { spagatt: -1.2 } },
-        { id: "running_session", name: "Salir a correr", icon: "🏃", xp: 16, needEffects: { body: 12, energy: 8, mind: 4 }, goalEffect: { runningKm: null }, customRun: true, weeklyHabit: true },
-        { id: "tidy_morning", name: "Rutina de orden", icon: "🧹", xp: 8, needEffects: { mind: 7, spirit: 5 }, goalEffect: { orderBoost: true }, customOrder: true },
-        { id: "reading", name: "Leer", icon: "📚", xp: 12, needEffects: { mind: 12, spirit: 6 }, customReading: true },
-        { id: "steps", name: "Registrar pasos", icon: "👣", xp: 10, needEffects: { body: 7, energy: 6 }, customSteps: true },
-        { id: "calisthenics", name: "Calistenia", icon: "💪", xp: 15, needEffects: { body: 10, energy: 8, mind: 4 }, customCalisthenics: true }
-    ];
-
-    let avatar = { name: "Leire", level: 1, xp: 0, xpToNext: 100, needs: {}, alive: true };
-    let goalsState = JSON.parse(JSON.stringify(INITIAL_GOALS));
-    let cooldowns = {};
     let decayInterval = null;
-    let penaltyInterval = null;
+    let cooldowns = {};
 
-    function initNeeds() { 
-        let obj = {}; 
-        NEEDS.forEach(n => { obj[n.id] = n.initial; }); 
-        return obj; 
+    function initNeedsState() {
+        let state = {};
+        NEEDS_CONFIG.forEach(need => {
+            if (need.id === "hydration") return;
+            state[need.id] = { value: need.initial, lastFulfilled: Date.now() };
+        });
+        return state;
     }
 
-    // Aplicar decaimiento por tiempo offline (ahora mucho más lento)
-    function applyOfflineDecay() {
+    function checkDeathByNeeds() {
+        if (!avatar.alive) return true;
+        
+        if (!updateHydrationLevel()) return true;
+        
         const now = Date.now();
-        const lastTimestamp = lastSaveTimestamp;
-        if (!lastTimestamp) return 0;
         
-        const millisPassed = now - lastTimestamp;
-        const secondsPassed = Math.floor(millisPassed / 1000);
-        
-        if (secondsPassed < 60) return 0;
-        
-        // Cada ciclo de decaimiento es cada 10 segundos
-        const decayCycles = Math.floor(secondsPassed / 10);
-        if (decayCycles <= 0) return 0;
-        
-        let totalDecay = 0;
-        
-        // Máximo 5000 ciclos (~13.9 horas) para no matar instantáneamente con ausencias largas
-        const cyclesToApply = Math.min(decayCycles, 5000);
-        
-        for (let i = 0; i < cyclesToApply; i++) {
-            NEEDS.forEach(need => {
-                let newVal = avatar.needs[need.id] - need.decay;
-                if (newVal < 0) newVal = 0;
-                avatar.needs[need.id] = newVal;
-                totalDecay += need.decay;
-            });
-        }
-        
-        if (secondsPassed > 3600) {
-            const hoursOffline = (secondsPassed / 3600).toFixed(1);
-            const msgDiv = document.getElementById("offlineMessage");
-            msgDiv.style.display = "block";
-            msgDiv.innerHTML = `⏰ Ausencia de ${hoursOffline}h · El avatar ha perdido energía. ¡Cuídalo de nuevo!`;
-            setTimeout(() => { msgDiv.style.display = "none"; }, 6000);
-        }
-        
-        return totalDecay;
-    }
-
-    function updateStreak(habitId) {
-        const today = new Date().toDateString();
-        const streak = streaks[habitId];
-        if (!streak) return;
-        if (streak.lastDate === today) return;
-        if (streak.lastDate === null) { streak.currentStreak = 1; }
-        else {
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            if (streak.lastDate === yesterday.toDateString()) streak.currentStreak++;
-            else streak.currentStreak = 1;
-        }
-        streak.lastDate = today;
-        if (habitId === "running_session") {
-            const now = new Date();
-            const weekKey = `${now.getFullYear()}-${now.getWeek()}`;
-            if (streak.weekStart !== weekKey) { streak.weeklyCount = 0; streak.weekStart = weekKey; }
-            streak.weeklyCount++;
-        }
-        saveGame();
-    }
-
-    Date.prototype.getWeek = function() { 
-        const d = new Date(this); 
-        d.setHours(0,0,0,0); 
-        d.setDate(d.getDate() + 3 - (d.getDay()+6)%7); 
-        const year = d.getFullYear(); 
-        const week = Math.floor(((d - new Date(year,0,1)) / 86400000 + 1)/7); 
-        return week; 
-    };
-
-    function applyWeeklyPenalties() {
-        const runStreak = streaks.running_session;
-        if (runStreak.requiredWeekly && runStreak.weekStart === `${new Date().getFullYear()}-${new Date().getWeek()}`) {
-            if (runStreak.weeklyCount < 3) {
-                avatar.needs.body = Math.max(0, avatar.needs.body - 8);
-                avatar.needs.energy = Math.max(0, avatar.needs.energy - 6);
-                addToast("⚠️ No has corrido suficiente esta semana · -8 cuerpo, -6 energía");
+        for (let need of NEEDS_CONFIG) {
+            if (need.id === "hydration") continue;
+            
+            const state = needsState[need.id];
+            if (!state) continue;
+            
+            const hoursSinceLast = (now - state.lastFulfilled) / (1000 * 60 * 60);
+            
+            if (need.id === "energy") {
+                const lastWeek = now - 7 * 24 * 60 * 60 * 1000;
+                const daysWithSteps = weeklyHabitLog.steps.filter(date => date > lastWeek).length;
+                if (daysWithSteps < need.requiredDaysPerWeek) {
+                    avatar.alive = false;
+                    addToast(`💀 ${need.name}: No caminaste 10.000 pasos al menos 3 días esta semana`);
+                    return true;
+                }
             }
+            else if (need.id === "calmness") {
+                if (lastOrderTestDate) {
+                    const daysSinceTest = (now - lastOrderTestDate) / (1000 * 60 * 60 * 24);
+                    if (daysSinceTest <= 2 && lastOrderTestScore === 10) continue;
+                    else { avatar.alive = false; addToast(`💀 ${need.name}: Necesitas sacar un 10 en el test de orden cada 2 días`); return true; }
+                } else { avatar.alive = false; addToast(`💀 ${need.name}: No has realizado ningún test de orden`); return true; }
+            }
+            else if (need.id === "entertainment") {
+                if (lastReadingDate) {
+                    const daysSinceReading = (now - lastReadingDate) / (1000 * 60 * 60 * 24);
+                    if (daysSinceReading >= 2) { avatar.alive = false; addToast(`💀 ${need.name}: Llevas más de 2 días sin leer`); return true; }
+                } else { avatar.alive = false; addToast(`💀 ${need.name}: Nunca has leído`); return true; }
+            }
+            else if (hoursSinceLast >= need.maxHoursWithout) {
+                avatar.alive = false;
+                addToast(`💀 ${need.name}: Has pasado más de ${need.maxHoursWithout}h sin ${need.habitName}`);
+                return true;
+            }
+            
+            let newValue = Math.max(0, 100 - (hoursSinceLast / need.maxHoursWithout) * 100);
+            state.value = Math.min(100, newValue);
         }
-    }
-
-    // Muerte solo después de 7 días completos sin NINGÚN hábito
-    function checkNoHabitDeath() {
-        const lastHabit = new Date(lastHabitDate);
-        const nowDate = new Date();
-        const diffDays = Math.floor((nowDate - lastHabit) / (1000*60*60*24));
-        if (diffDays >= 7 && avatar.alive) {
-            avatar.alive = false;
+        
+        if (!avatar.alive) {
             if (decayInterval) clearInterval(decayInterval);
-            if (penaltyInterval) clearInterval(penaltyInterval);
             updateUI();
-            addToast("💀 El avatar ha muerto por 7 días sin ninguna actividad");
         }
+        return !avatar.alive;
     }
 
-    // Penalización diaria suave (solo si no hay hábitos)
-    function applyDailyPenalty() {
-        if (!avatar.alive) return;
-        const today = new Date().toDateString();
-        if (lastHabitDate !== today) {
-            NEEDS.forEach(need => { 
-                avatar.needs[need.id] = Math.max(0, avatar.needs[need.id] - 3); 
-            });
+    function fulfillNeed(needId, habitId, customValue = null) {
+        const need = NEEDS_CONFIG.find(n => n.id === needId);
+        if (!need) return false;
+        
+        const now = Date.now();
+        needsState[need.id].lastFulfilled = now;
+        needsState[need.id].value = 100;
+        
+        if (needId === "energy" && habitId === "steps_habit" && customValue !== null && customValue >= 10000) {
+            weeklyHabitLog.steps.push(now);
+            const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
+            weeklyHabitLog.steps = weeklyHabitLog.steps.filter(t => t > oneWeekAgo);
         }
-        checkNoHabitDeath();
-        applyWeeklyPenalties();
+        if (needId === "calmness" && habitId === "order_habit" && customValue !== null) {
+            lastOrderTestScore = customValue;
+            lastOrderTestDate = now;
+        }
+        if (needId === "entertainment" && habitId === "reading_habit") lastReadingDate = now;
+        
+        avatar.xp += 8;
+        checkLevelUp();
+        addToast(`✨ +${need.name}: ¡${need.habitName} completado! +8 XP`);
         saveGame();
         updateUI();
+        return true;
+    }
+
+    function addReadingTime(minutes) {
+        if (!avatar.alive) return;
+        if (isNaN(minutes) || minutes <= 0) { addToast("Ingresa minutos válidos"); return; }
+        
+        goalsState.reading.entries.push({ date: new Date().toDateString(), minutes: minutes });
+        if (goalsState.reading.entries.length > 7) goalsState.reading.entries.shift();
+        goalsState.reading.totalMinutes = goalsState.reading.entries.reduce((sum, e) => sum + e.minutes, 0);
+        fulfillNeed("entertainment", "reading_habit");
+        avatar.xp += Math.floor(minutes / 15) + 3;
+        checkLevelUp();
+        addToast(`📚 +${minutes} min de lectura`);
+        saveGame();
+        updateUI();
+    }
+
+    function getReadingAverage() {
+        if (goalsState.reading.entries.length === 0) return 0;
+        return goalsState.reading.entries.reduce((sum, e) => sum + e.minutes, 0) / goalsState.reading.entries.length;
+    }
+
+    function updateNeedsUI() {
+        const container = document.getElementById("needsContainer");
+        container.innerHTML = "";
+        
+        for (let need of NEEDS_CONFIG) {
+            let percent = 0;
+            let extraText = "";
+            
+            if (need.id === "hydration") {
+                percent = getHydrationLevel();
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                const remainingMinutes = (24 * 60) - (hours * 60 + minutes);
+                const remainingHours = (remainingMinutes / 60).toFixed(1);
+                extraText = `<div style="font-size:0.6rem; color:#5c6e4a; margin-top:4px;">⏳ ${remainingHours}h restantes · Bebido: ${getWaterLoggedToday().toFixed(1)}/1.5L</div>`;
+            } else {
+                const state = needsState[need.id];
+                percent = state ? state.value : 100;
+                const now = Date.now();
+                const hoursSince = (now - state.lastFulfilled) / (1000 * 60 * 60);
+                const remaining = Math.max(0, need.maxHoursWithout - hoursSince);
+                const remainingText = need.maxHoursWithout >= 168 ? `${(remaining/24).toFixed(1)}d` : `${remaining.toFixed(1)}h`;
+                extraText = `<div style="font-size:0.6rem; color:#8f7a64; margin-top:4px;">⏰ ${remainingText}</div>`;
+            }
+            
+            const isCritical = percent < 25;
+            container.innerHTML += `<div class="need ${isCritical ? 'critical' : ''}"><div class="need-label"><span>${need.icon} ${need.name}</span><span>${Math.floor(percent)}%</span></div><div class="bar-bg"><div class="bar-fill" style="width: ${percent}%;"></div></div>${extraText}</div>`;
+        }
+    }
+
+    function checkLevelUp() {
+        while (avatar.xp >= avatar.xpToNext) {
+            avatar.xp -= avatar.xpToNext;
+            avatar.level++;
+            avatar.xpToNext = Math.floor(avatar.xpToNext * 1.2);
+            addToast(`🎋 ¡Subiste al nivel ${avatar.level}!`);
+        }
+    }
+
+    function addToast(msg) {
+        let t = document.createElement("div");
+        t.innerText = msg;
+        t.style.position = "fixed"; t.style.bottom = "70px"; t.style.left = "20px";
+        t.style.backgroundColor = "#e6ddcf"; t.style.padding = "6px 16px"; t.style.borderRadius = "40px";
+        t.style.fontSize = "0.7rem"; t.style.zIndex = "999";
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+
+    const HABITS = [
+        { id: "sport_habit", name: "Hacer deporte", icon: "🏋️", xp: 15, needId: "strength", customSport: true },
+        { id: "german_study", name: "Estudiar alemán 1h", icon: "📖", xp: 14, needId: "intelligence", goalEffect: { german: 1 } },
+        { id: "steps_habit", name: "Caminar 10.000 pasos", icon: "👣", xp: 12, needId: "energy", customSteps: true },
+        { id: "order_habit", name: "Test de orden", icon: "🧹", xp: 10, needId: "calmness", customOrder: true },
+        { id: "stretch_habit", name: "Estiramientos", icon: "🧘", xp: 10, needId: "flexibility", goalEffect: { spagatt: -1.2 } },
+        { id: "reading_habit", name: "Leer", icon: "📚", xp: 12, needId: "entertainment", customReading: true }
+    ];
+
+    function completeHabit(habit, customVal = null) {
+        if (!avatar.alive) { addToast("❌ Avatar muerto"); return false; }
+        let cd = cooldowns[habit.id];
+        if (cd && !cd.available) { addToast(`⏳ ${habit.name} en ${Math.ceil(cd.remaining)}s`); return false; }
+        
+        if (habit.needId) fulfillNeed(habit.needId, habit.id, customVal);
+        
+        if (habit.customSteps && customVal !== null) {
+            const steps = parseInt(customVal);
+            if (!isNaN(steps) && steps > 0) {
+                if (steps >= 10000) fulfillNeed("energy", habit.id, steps);
+                addToast(`👣 +${steps} pasos`);
+            }
+        }
+        if (habit.customSport && customVal !== null) {
+            const km = parseFloat(customVal);
+            if (!isNaN(km) && km > 0 && km > goalsState.running.currentMaxKm) {
+                goalsState.running.currentMaxKm = Math.min(20, km);
+                addToast(`🏃 +${km}km · Mejor marca: ${goalsState.running.currentMaxKm}km`);
+            }
+            fulfillNeed("strength", habit.id);
+        }
+        if (habit.customOrder) runOrderTestAndFulfill();
+        if (habit.customReading && customVal !== null) addReadingTime(customVal);
+        
+        if (habit.goalEffect) {
+            if (habit.goalEffect.german) goalsState.german.currentHours = Math.min(660, goalsState.german.currentHours + 1);
+            if (habit.goalEffect.spagatt) goalsState.spagatt.currentCmToGround = Math.max(0, goalsState.spagatt.currentCmToGround + habit.goalEffect.spagatt);
+        }
+        
+        avatar.xp += habit.xp;
+        checkLevelUp();
+        
+        cooldowns[habit.id] = { available: false, remaining: 20 };
+        let itv = setInterval(() => {
+            if (cooldowns[habit.id].remaining <= 1) { cooldowns[habit.id].available = true; clearInterval(itv); renderDailyHabits(); }
+            else { cooldowns[habit.id].remaining--; renderDailyHabits(); }
+        }, 1000);
+        
+        saveGame(); updateUI();
+        return true;
+    }
+
+    function runOrderTestAndFulfill() {
+        let questions = ["¿Suelo libre de objetos?", "¿Mesa despejada?", "¿Ropa preparada?", "¿Cama hecha?", "¿Ventilaste?", "¿Pasaste escoba?"];
+        let score = 0; for (let q of questions) if (confirm(q + "\n\nAceptar=SÍ / Cancelar=NO")) score++;
+        let note = Math.round((score / questions.length) * 10 * 10) / 10;
+        goalsState.order.dailyScores.push({ date: new Date().toDateString(), score: note });
+        if (goalsState.order.dailyScores.length > 7) goalsState.order.dailyScores.shift();
+        let sum = goalsState.order.dailyScores.reduce((a, b) => a + b.score, 0);
+        goalsState.order.currentAvg = goalsState.order.dailyScores.length ? sum / goalsState.order.dailyScores.length : 0;
+        addToast(`📋 Test orden: ${note}/10`);
+        if (note === 10) fulfillNeed("calmness", "order_habit", note);
     }
 
     function addPhoneHours(hours) {
@@ -571,207 +614,143 @@
         if (existing) existing.hours += hours;
         else phoneUsage.push({ date: today, hours: hours });
         if (phoneUsage.length > 14) phoneUsage.shift();
-        
-        let damage = hours * 1.5;
-        avatar.needs.mind = Math.max(0, avatar.needs.mind - damage);
-        avatar.needs.spirit = Math.max(0, avatar.needs.spirit - damage * 0.7);
-        avatar.needs.energy = Math.max(0, avatar.needs.energy - damage * 0.5);
-        addToast(`📱 +${hours}h de móvil · Mente -${damage.toFixed(0)}`);
-        updateUI();
-        saveGame();
-        updatePhoneChart();
-        checkDeath();
+        let damage = hours * 1.2;
+        if (needsState["calmness"]) needsState["calmness"].value = Math.max(0, needsState["calmness"].value - damage);
+        if (needsState["intelligence"]) needsState["intelligence"].value = Math.max(0, needsState["intelligence"].value - damage * 0.8);
+        addToast(`📱 +${hours}h de móvil`);
+        saveGame(); updateUI(); updatePhoneChart();
     }
 
     function updatePhoneChart() {
         const ctx = document.getElementById('phoneChart').getContext('2d');
-        const last7 = [];
-        const labels = [];
+        const last7 = [], labels = [];
         for (let i = 6; i >= 0; i--) {
             const d = new Date(); d.setDate(d.getDate() - i);
-            const dateStr = d.toDateString();
-            labels.push(d.toLocaleDateString('es-ES', { weekday: 'short', day:'numeric' }));
-            const entry = phoneUsage.find(p => p.date === dateStr);
+            labels.push(d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' }));
+            const entry = phoneUsage.find(p => p.date === d.toDateString());
             last7.push(entry ? entry.hours : 0);
         }
         if (phoneChart) phoneChart.destroy();
-        phoneChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Horas de móvil',
-                    data: last7,
-                    borderColor: '#c46a3a',
-                    backgroundColor: 'rgba(196, 106, 58, 0.1)',
-                    borderWidth: 2.5,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#c46a3a',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 1.5,
-                    tension: 0.2,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { position: 'top', labels: { font: { size: 11, family: 'Inter' }, boxWidth: 10 } },
-                    tooltip: { backgroundColor: '#2c2a24', titleColor: '#fefaf3', bodyColor: '#e2d8cb' }
-                },
-                scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Horas', font: { size: 10 } }, grid: { color: '#e5d9ce' } },
-                    x: { ticks: { font: { size: 10 } }, grid: { display: false } }
-                }
-            }
-        });
-        const avg = last7.reduce((a,b)=>a+b,0)/7;
+        phoneChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Horas de móvil', data: last7, borderColor: '#c46a3a', backgroundColor: 'rgba(196,106,58,0.1)', borderWidth: 2.5, pointRadius: 4, fill: true }] }, options: { responsive: true, maintainAspectRatio: true } });
+        const avg = last7.reduce((a, b) => a + b, 0) / 7;
         document.getElementById('todayPhone').innerText = last7[6].toFixed(1);
         document.getElementById('avgPhone').innerText = avg.toFixed(1);
-        const warningDiv = document.getElementById('phoneWarning');
-        if (last7[6] > 5) warningDiv.innerHTML = "⚠️ Alto uso de móvil · tu mente se resiente";
-        else if (last7[6] > 3) warningDiv.innerHTML = "📱 Intenta reducir el móvil para sentirte mejor";
-        else warningDiv.innerHTML = "🌿 Buen control del móvil · tu mente lo agradece";
+        document.getElementById('phoneWarning').innerHTML = last7[6] > 5 ? "⚠️ Alto uso de móvil" : (last7[6] > 3 ? "📱 Reduce el móvil" : "🌿 Buen control");
     }
 
     function fullResetGame() {
-        if (decayInterval) clearInterval(decayInterval);
-        if (penaltyInterval) clearInterval(penaltyInterval);
-        avatar = { name: "Leire", level: 1, xp: 0, xpToNext: 100, needs: initNeeds(), alive: true };
-        goalsState = JSON.parse(JSON.stringify(INITIAL_GOALS));
-        habitStatsData = { reading: { totalMinutes: 0, entries: [] }, steps: { totalSteps: 0, entries: [] }, calisthenics: { totalMinutes: 0, entries: [] } };
-        phoneUsage = [];
-        streaks = {};
-        HABITS.forEach(h => { streaks[h.id] = { lastDate: null, currentStreak: 0, requiredWeekly: (h.id === "running_session") ? 3 : null, weeklyCount: 0, weekStart: null }; });
-        cooldowns = {}; HABITS.forEach(h => { cooldowns[h.id] = { available: true, remaining: 0 }; });
-        lastHabitDate = new Date().toDateString();
-        lastSaveTimestamp = Date.now();
-        saveGame(); updateUI(); startDecay(); startPenaltyCheck(); updatePhoneChart();
-        addToast("✨ Sendero reiniciado · Avatar con energía renovada");
+        avatar = { name: "Leire", level: 1, xp: 0, xpToNext: 100, alive: true };
+        goalsState = { german: { currentHours: 0, targetHours: 660 }, spagatt: { currentCmToGround: 32 }, order: { dailyScores: [], currentAvg: 0 }, running: { currentMaxKm: 0, targetKm: 20, paceMinPerKm: 7.5 }, reading: { totalMinutes: 0, entries: [] } };
+        needsState = initNeedsState();
+        weeklyHabitLog = { steps: [] };
+        lastOrderTestScore = 0; lastOrderTestDate = null; lastReadingDate = null;
+        phoneUsage = []; cooldowns = {};
+        hydrationData = { lastDate: new Date().toDateString(), currentLevel: getHydrationByTimeOfDay(), lastUpdateTimestamp: Date.now(), targetLiters: 1.5, waterLoggedToday: 0 };
+        saveGame(); updateUI(); updatePhoneChart();
+        addToast("✨ Todo reiniciado");
     }
 
-    function saveGame() {
-        lastSaveTimestamp = Date.now();
-        const data = { avatar, goalsState, cooldowns, habitStatsData, streaks, phoneUsage, lastHabitDate, lastSaveTimestamp };
-        localStorage.setItem("LevelUpBalanced", JSON.stringify(data));
-    }
-    
+    function saveGame() { localStorage.setItem("LevelUpV6", JSON.stringify({ avatar, goalsState, needsState, weeklyHabitLog, lastOrderTestScore, lastOrderTestDate, lastReadingDate, phoneUsage, cooldowns, hydrationData })); }
     function loadGame() {
-        const raw = localStorage.getItem("LevelUpBalanced");
+        const raw = localStorage.getItem("LevelUpV6");
         if (raw) {
             try {
                 const p = JSON.parse(raw);
-                avatar = p.avatar; goalsState = p.goalsState; cooldowns = p.cooldowns || {}; habitStatsData = p.habitStatsData || habitStatsData;
-                streaks = p.streaks || {}; phoneUsage = p.phoneUsage || []; lastHabitDate = p.lastHabitDate || new Date().toDateString();
-                lastSaveTimestamp = p.lastSaveTimestamp || Date.now();
-                if (!avatar.needs) avatar.needs = initNeeds();
-                HABITS.forEach(h => { if (!streaks[h.id]) streaks[h.id] = { lastDate: null, currentStreak: 0, requiredWeekly: h.id==="running_session"?3:null, weeklyCount:0, weekStart:null }; });
-                HABITS.forEach(h => { if (!cooldowns[h.id]) cooldowns[h.id] = { available: true, remaining: 0 }; });
-                
-                applyOfflineDecay();
-                checkDeath();
-                
+                avatar = p.avatar; goalsState = p.goalsState; needsState = p.needsState; weeklyHabitLog = p.weeklyHabitLog || { steps: [] };
+                lastOrderTestScore = p.lastOrderTestScore || 0; lastOrderTestDate = p.lastOrderTestDate || null; lastReadingDate = p.lastReadingDate || null;
+                phoneUsage = p.phoneUsage || []; cooldowns = p.cooldowns || {};
+                hydrationData = p.hydrationData || { lastDate: new Date().toDateString(), currentLevel: getHydrationByTimeOfDay(), lastUpdateTimestamp: Date.now(), targetLiters: 1.5, waterLoggedToday: 0 };
+                if (!goalsState.reading) goalsState.reading = { totalMinutes: 0, entries: [] };
+                if (!avatar.name) avatar.name = "Leire";
+                if (!needsState || Object.keys(needsState).length === 0) needsState = initNeedsState();
             } catch(e) { fullResetGame(); }
         } else fullResetGame();
         if (!avatar.alive) avatar.alive = true;
-        updateUI(); startDecay(); startPenaltyCheck(); updatePhoneChart();
+        updateHydrationLevel();
+        updateUI(); updatePhoneChart();
+        startDecayLoop();
     }
 
-    function recordHabitAction(habitId) { 
-        lastHabitDate = new Date().toDateString(); 
-        updateStreak(habitId); 
-        saveGame(); 
+    function startDecayLoop() {
+        if (decayInterval) clearInterval(decayInterval);
+        decayInterval = setInterval(() => { if (avatar.alive) { checkDeathByNeeds(); updateNeedsUI(); saveGame(); } }, 5000);
     }
-
-    function addReadingTime(m) { if(!avatar.alive)return; if(m<=0)return; habitStatsData.reading.entries.push({date:new Date().toDateString(),minutes:m}); if(habitStatsData.reading.entries.length>7) habitStatsData.reading.entries.shift(); avatar.needs.mind=Math.min(100,avatar.needs.mind+Math.floor(m/12)+4); avatar.needs.spirit=Math.min(100,avatar.needs.spirit+3); avatar.xp+=Math.floor(m/12)+4; checkLevelUp(); addToast(`📚 +${m}min lectura`); saveGame(); updateUI(); recordHabitAction("reading"); }
-    function addSteps(s) { if(!avatar.alive)return; if(s<=0)return; habitStatsData.steps.entries.push({date:new Date().toDateString(),steps:s}); if(habitStatsData.steps.entries.length>7) habitStatsData.steps.entries.shift(); let efecto=Math.floor(s/1500)+2; avatar.needs.body=Math.min(100,avatar.needs.body+efecto); avatar.needs.energy=Math.min(100,avatar.needs.energy+efecto); avatar.xp+=Math.floor(s/2000)+3; checkLevelUp(); addToast(`👣 +${s} pasos`); saveGame(); updateUI(); recordHabitAction("steps"); }
-    function addCalisthenicsTime(m) { if(!avatar.alive)return; if(m<=0)return; habitStatsData.calisthenics.entries.push({date:new Date().toDateString(),minutes:m}); if(habitStatsData.calisthenics.entries.length>7) habitStatsData.calisthenics.entries.shift(); avatar.needs.body=Math.min(100,avatar.needs.body+Math.floor(m/4)+5); avatar.needs.energy=Math.min(100,avatar.needs.energy+Math.floor(m/6)+4); avatar.xp+=Math.floor(m/8)+5; checkLevelUp(); addToast(`💪 +${m}min calistenia`); saveGame(); updateUI(); recordHabitAction("calisthenics"); }
-    function getTodaySteps() { let today=new Date().toDateString(); let e=habitStatsData.steps.entries.find(e=>e.date===today); return e?e.steps:0; }
-    function getStepsAverage() { if(habitStatsData.steps.entries.length===0)return 0; return habitStatsData.steps.entries.reduce((s,e)=>s+e.steps,0)/habitStatsData.steps.entries.length; }
-    function getReadingAverage() { if(habitStatsData.reading.entries.length===0)return 0; return habitStatsData.reading.entries.reduce((s,e)=>s+e.minutes,0)/habitStatsData.reading.entries.length; }
-    function getCalisthenicsAverage() { if(habitStatsData.calisthenics.entries.length===0)return 0; return habitStatsData.calisthenics.entries.reduce((s,e)=>s+e.minutes,0)/habitStatsData.calisthenics.entries.length; }
-
-    function runOrderTest() {
-        let qs = ["¿Suelo libre de objetos?","¿Mesa despejada?","¿Ropa preparada?","¿Cama hecha?","¿Ventilaste?","¿Pasaste escoba?"];
-        let score=0; for(let q of qs) if(confirm(q+"\n\nAceptar=SÍ / Cancelar=NO")) score++;
-        let note=(score/qs.length)*10; note=Math.round(note*10)/10;
-        goalsState.order.dailyScores.push({date:new Date().toDateString(),score:note}); if(goalsState.order.dailyScores.length>7) goalsState.order.dailyScores.shift();
-        let sum=goalsState.order.dailyScores.reduce((a,b)=>a+b.score,0); goalsState.order.currentAvg=goalsState.order.dailyScores.length?sum/goalsState.order.dailyScores.length:0;
-        addToast(`📋 Test orden: ${note}/10`); saveGame(); updateUI(); avatar.xp+=10; avatar.needs.mind=Math.min(100,avatar.needs.mind+5); avatar.needs.spirit=Math.min(100,avatar.needs.spirit+4); checkLevelUp(); recordHabitAction("tidy_morning");
-    }
-    function checkLevelUp() { while(avatar.xp>=avatar.xpToNext){ avatar.xp-=avatar.xpToNext; avatar.level++; avatar.xpToNext=Math.floor(avatar.xpToNext*1.2); NEEDS.forEach(n=>{avatar.needs[n.id]=Math.min(100,avatar.needs[n.id]+10);}); addToast(`🎋 Nivel ${avatar.level}`); } }
-    function addToast(msg) { let t=document.createElement("div"); t.innerText=msg; t.style.position="fixed"; t.style.bottom="70px"; t.style.left="20px"; t.style.backgroundColor="#e6ddcf"; t.style.padding="6px 16px"; t.style.borderRadius="40px"; t.style.fontSize="0.7rem"; t.style.zIndex="999"; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
-    
-    function completeHabit(habit, customVal=null) {
-        if(!avatar.alive){addToast("❌ Avatar muerto");return false;}
-        let cd=cooldowns[habit.id]; if(!cd.available){addToast(`⏳ ${habit.name} en ${Math.ceil(cd.remaining)}s`);return false;}
-        if(habit.needEffects) for(let [nid,val] of Object.entries(habit.needEffects)) if(avatar.needs[nid]!==undefined) avatar.needs[nid]=Math.min(NEEDS.find(n=>n.id===nid).max, avatar.needs[nid]+val);
-        if(habit.goalEffect){ if(habit.goalEffect.german) goalsState.german.currentHours=Math.min(goalsState.german.targetHours, goalsState.german.currentHours+1);
-        if(habit.goalEffect.spagatt){ let newCm=goalsState.spagatt.currentCmToGround+habit.goalEffect.spagatt; goalsState.spagatt.currentCmToGround=Math.max(0,newCm); }
-        if(habit.customRun && customVal!==null){ let km=parseFloat(customVal); if(!isNaN(km)&&km>0 && km>goalsState.running.currentMaxKm) goalsState.running.currentMaxKm=Math.min(20,km); addToast(`🏃 +${km}km`); }
-        if(habit.customOrder) runOrderTest(); }
-        if(habit.customReading && customVal!==null) addReadingTime(customVal);
-        if(habit.customSteps && customVal!==null) addSteps(customVal);
-        if(habit.customCalisthenics && customVal!==null) addCalisthenicsTime(customVal);
-        avatar.xp+=habit.xp; checkLevelUp();
-        cd.available=false; cd.remaining=20; let itv=setInterval(()=>{ if(cd.remaining<=1){ cd.available=true; clearInterval(itv); renderDailyHabits(); } else{ cd.remaining--; renderDailyHabits(); } },1000);
-        saveGame(); updateUI(); checkDeath(); recordHabitAction(habit.id); return true;
-    }
-    function addWater(liters){ if(!avatar.alive)return; let newTotal=goalsState.hydration.todayLiters+liters; if(newTotal>1.5)newTotal=1.5; goalsState.hydration.todayLiters=newTotal; avatar.needs.body=Math.min(100,avatar.needs.body+Math.floor(liters*6)); avatar.xp+=3; checkLevelUp(); saveGame(); updateUI(); addToast(`💧 +${liters}L agua`); if(newTotal>=1.5) addToast("✨ Meta hidratación cumplida"); }
-    function checkDeath(){ for(let n of NEEDS) if(avatar.needs[n.id]<=0){ avatar.alive=false; if(decayInterval)clearInterval(decayInterval); if(penaltyInterval)clearInterval(penaltyInterval); updateUI(); addToast("🌿 Avatar fallecido · Reinicia"); return true; } return false; }
-    function startDecay(){ if(decayInterval)clearInterval(decayInterval); decayInterval=setInterval(()=>{ if(!avatar.alive)return; NEEDS.forEach(need=>{ let newVal=avatar.needs[need.id]-need.decay; if(newVal<0)newVal=0; avatar.needs[need.id]=newVal; }); updateUI(); checkDeath(); saveGame(); },10000); }
-    function startPenaltyCheck(){ if(penaltyInterval)clearInterval(penaltyInterval); penaltyInterval=setInterval(()=>{ applyDailyPenalty(); }, 60000); }
 
     function updateUI() {
-        if(!avatar.alive){ document.getElementById("needsContainer").innerHTML=`<div style="padding:1rem;">🍂 Avatar muerto · Reinicia</div>`; document.getElementById("levelDisplay").innerText="✧ Muerto ✧"; document.getElementById("dailyHabitsList").innerHTML=`<i>Reinicia para comenzar</i>`; return; }
-        const needsDiv=document.getElementById("needsContainer"); needsDiv.innerHTML="";
-        NEEDS.forEach(need=>{ let val=avatar.needs[need.id]; let percent=(val/need.max)*100; needsDiv.innerHTML+=`<div class="need"><div class="need-label"><span>${need.icon} ${need.name}</span><span>${Math.floor(val)}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${percent}%"></div></div></div>`; });
-        document.getElementById("avatarNameDisplay").innerText=avatar.name; document.getElementById("levelDisplay").innerHTML=`Nivel ${avatar.level} · ${avatar.xp}/${avatar.xpToNext} exp`; document.getElementById("avatarEmoji").innerHTML=avatar.level>=4?"🌳":"🌱";
-        document.getElementById("habitStats").innerHTML=`<div class="stat-badge">📚 Lectura: media ${getReadingAverage().toFixed(0)} min/día</div><div class="stat-badge">👣 Pasos: media ${getStepsAverage().toFixed(0)} · Hoy: ${getTodaySteps()}/10000</div><div class="stat-badge">💪 Calistenia: media ${getCalisthenicsAverage().toFixed(0)} min/día</div>`;
-        let streakHtml=""; for(let hid in streaks){ let s=streaks[hid]; let habit=HABITS.find(h=>h.id===hid); if(habit && s.currentStreak>0) streakHtml+=`<div class="stat-badge">🔥 ${habit.icon} ${habit.name}: racha ${s.currentStreak} día(s)</div>`; }
-        document.getElementById("streaksContainer").innerHTML=streakHtml || "<div class='stat-badge'>🌱 Completa hábitos para crear rachas</div>";
+        if (!avatar.alive) {
+            document.getElementById("needsContainer").innerHTML = `<div style="padding:1rem;">🍂 Avatar muerto · Reinicia</div>`;
+            document.getElementById("levelDisplay").innerText = "✧ Muerto ✧";
+            document.getElementById("dailyHabitsList").innerHTML = `<i>Reinicia para comenzar</i>`;
+            return;
+        }
+        updateHydrationLevel();
+        updateNeedsUI();
+        document.getElementById("avatarNameDisplay").innerText = avatar.name;
+        document.getElementById("levelDisplay").innerHTML = `Nivel ${avatar.level} · ${avatar.xp}/${avatar.xpToNext} exp`;
+        document.getElementById("avatarEmoji").innerHTML = avatar.level >= 4 ? "🌳" : "🌱";
+        document.getElementById("waterStats").innerHTML = `💧 Nivel: ${Math.floor(getHydrationLevel())}% · Bebido hoy: ${getWaterLoggedToday().toFixed(1)}/1.5L`;
         
-        const grid=document.getElementById("goalsGrid");
-        let germanPercent=(goalsState.german.currentHours/660)*100; let levelEst="A1"; if(goalsState.german.currentHours>=200) levelEst="A2"; if(goalsState.german.currentHours>=400) levelEst="B1"; if(goalsState.german.currentHours>=600) levelEst="B2";
-        let cmFaltan=goalsState.spagatt.currentCmToGround; let avgOrder=goalsState.order.currentAvg.toFixed(1); let currentKm=goalsState.running.currentMaxKm; let pace=goalsState.running.paceMinPerKm;
-        grid.innerHTML=`<div class="goal-card"><div class="goal-title">📖 Alemán ${levelEst}→B2</div><div class="progress-stat">${goalsState.german.currentHours}/660h (${Math.min(100,germanPercent).toFixed(0)}%)</div><div class="prediction-text">⏱️ ${Math.max(0,660-goalsState.german.currentHours)}h restantes</div><div class="input-group"><input type="number" id="germanHoursAdd" step="0.5" placeholder="+horas"><button id="addGermanBtn">+</button></div></div>
-        <div class="goal-card"><div class="goal-title">🧘 Spagatt</div><div class="progress-stat">${cmFaltan<=0?"Completado":cmFaltan.toFixed(1)+" cm al suelo"}</div><div class="prediction-text">✨ ${cmFaltan<=0?"Meta alcanzada":`${Math.ceil(cmFaltan/1.5)} semanas aprox`}</div><div class="input-group"><input type="number" id="spagattCm" step="0.5" placeholder="cm"><button id="updateSpagattBtn">Act</button></div></div>
-        <div class="goal-card"><div class="goal-title">🧹 Orden</div><div class="progress-stat">Media ${avgOrder}/10 · ${goalsState.order.dailyScores.length} tests</div><button id="orderTestBtn" class="test-btn">Test orden</button></div>
-        <div class="goal-card"><div class="goal-title">🏃 Correr 20km</div><div class="progress-stat">Máx: ${currentKm}km · Ritmo ${pace}min/km</div><div class="prediction-text">📈 ${currentKm>=20?"Logrado":`${Math.ceil((20-currentKm)/1.5)} semanas estimadas`}</div><div class="input-group"><input type="number" id="runKmAdd" step="0.5" placeholder="km"><button id="addRunBtn">+</button><input type="number" id="paceInput" step="0.1" value="${pace}" style="width:70px"><button id="updatePaceBtn">Ritmo</button></div></div>`;
-        document.getElementById("addGermanBtn")?.addEventListener("click",()=>{ let h=parseFloat(document.getElementById("germanHoursAdd").value); if(!isNaN(h)&&h>0){ goalsState.german.currentHours=Math.min(660,goalsState.german.currentHours+h); saveGame(); updateUI(); addToast(`alemán +${h}h`); } });
-        document.getElementById("updateSpagattBtn")?.addEventListener("click",()=>{ let cm=parseFloat(document.getElementById("spagattCm").value); if(!isNaN(cm)&&cm>=0){ goalsState.spagatt.currentCmToGround=Math.min(50,cm); saveGame(); updateUI(); } });
-        document.getElementById("orderTestBtn")?.addEventListener("click",()=>{ runOrderTest(); updateUI(); });
-        document.getElementById("addRunBtn")?.addEventListener("click",()=>{ let km=parseFloat(document.getElementById("runKmAdd").value); if(!isNaN(km)&&km>0 && km>goalsState.running.currentMaxKm) goalsState.running.currentMaxKm=Math.min(20,km); saveGame(); updateUI(); addToast(`🏅 mejor marca: ${goalsState.running.currentMaxKm}km`); });
-        document.getElementById("updatePaceBtn")?.addEventListener("click",()=>{ let p=parseFloat(document.getElementById("paceInput").value); if(!isNaN(p)&&p>0){ goalsState.running.paceMinPerKm=p; saveGame(); updateUI(); } });
-        document.getElementById("waterStat").innerText=`${goalsState.hydration.todayLiters.toFixed(1)} / 1.5 L`;
+        let streakHtml = "";
+        const now = Date.now();
+        for (let need of NEEDS_CONFIG) {
+            if (need.id === "hydration") continue;
+            const state = needsState[need.id];
+            if (state) {
+                const hoursSince = (now - state.lastFulfilled) / (1000 * 60 * 60);
+                const remaining = Math.max(0, need.maxHoursWithout - hoursSince);
+                const remainingText = need.maxHoursWithout >= 168 ? `${(remaining/24).toFixed(1)}d` : `${remaining.toFixed(1)}h`;
+                streakHtml += `<div class="stat-badge">⏳ ${need.name}: ${remainingText}</div>`;
+            }
+        }
+        document.getElementById("streaksContainer").innerHTML = streakHtml;
+        
+        const grid = document.getElementById("goalsGrid");
+        let germanPercent = (goalsState.german.currentHours / 660) * 100;
+        let levelEst = "A1"; if (goalsState.german.currentHours >= 200) levelEst = "A2"; if (goalsState.german.currentHours >= 400) levelEst = "B1"; if (goalsState.german.currentHours >= 600) levelEst = "B2";
+        grid.innerHTML = `
+            <div class="goal-card"><div class="goal-title">📖 Alemán ${levelEst}→B2</div><div class="progress-stat">${goalsState.german.currentHours}/660h (${Math.min(100, germanPercent).toFixed(0)}%)</div><div class="input-group"><input type="number" id="germanHoursAdd" step="0.5" placeholder="+horas"><button id="addGermanBtn">+</button></div></div>
+            <div class="goal-card"><div class="goal-title">🧘 Spagatt</div><div class="progress-stat">${goalsState.spagatt.currentCmToGround <= 0 ? "Completado" : goalsState.spagatt.currentCmToGround.toFixed(1) + " cm al suelo"}</div><div class="input-group"><input type="number" id="spagattCm" step="0.5" placeholder="cm"><button id="updateSpagattBtn">Act</button></div></div>
+            <div class="goal-card"><div class="goal-title">🧹 Orden</div><div class="progress-stat">Media ${goalsState.order.currentAvg.toFixed(1)}/10 · ${goalsState.order.dailyScores.length} tests</div><button id="orderTestBtn" class="test-btn">Test orden</button></div>
+            <div class="goal-card"><div class="goal-title">🏃 Correr 20km</div><div class="progress-stat">Máx: ${goalsState.running.currentMaxKm}km · Ritmo ${goalsState.running.paceMinPerKm}min/km</div><div class="input-group"><input type="number" id="runKmAdd" step="0.5" placeholder="km"><button id="addRunBtn">+</button><input type="number" id="paceInput" step="0.1" value="${goalsState.running.paceMinPerKm}" style="width:70px"><button id="updatePaceBtn">Ritmo</button></div></div>
+            <div class="goal-card"><div class="goal-title">📚 Lectura</div><div class="progress-stat">Media: ${getReadingAverage().toFixed(0)} min/día</div><div class="input-group"><input type="number" id="readingMinsAdd" step="5" placeholder="minutos"><button id="addReadingGoalBtn">+ Leer</button></div></div>
+        `;
+        
+        document.getElementById("addGermanBtn")?.addEventListener("click", () => { let h = parseFloat(document.getElementById("germanHoursAdd").value); if (!isNaN(h) && h > 0) { goalsState.german.currentHours = Math.min(660, goalsState.german.currentHours + h); saveGame(); updateUI(); addToast(`alemán +${h}h`); } });
+        document.getElementById("updateSpagattBtn")?.addEventListener("click", () => { let cm = parseFloat(document.getElementById("spagattCm").value); if (!isNaN(cm) && cm >= 0) { goalsState.spagatt.currentCmToGround = Math.min(50, cm); saveGame(); updateUI(); } });
+        document.getElementById("orderTestBtn")?.addEventListener("click", () => { runOrderTestAndFulfill(); updateUI(); });
+        document.getElementById("addRunBtn")?.addEventListener("click", () => { let km = parseFloat(document.getElementById("runKmAdd").value); if (!isNaN(km) && km > 0 && km > goalsState.running.currentMaxKm) { goalsState.running.currentMaxKm = Math.min(20, km); saveGame(); updateUI(); addToast(`🏅 mejor marca: ${goalsState.running.currentMaxKm}km`); } });
+        document.getElementById("updatePaceBtn")?.addEventListener("click", () => { let p = parseFloat(document.getElementById("paceInput").value); if (!isNaN(p) && p > 0) { goalsState.running.paceMinPerKm = p; saveGame(); updateUI(); } });
+        document.getElementById("addReadingGoalBtn")?.addEventListener("click", () => { let mins = parseInt(document.getElementById("readingMinsAdd").value); if (!isNaN(mins) && mins > 0) { addReadingTime(mins); updateUI(); } });
+        
         renderDailyHabits();
     }
-    
+
     function renderDailyHabits() {
-        const container=document.getElementById("dailyHabitsList"); if(!avatar.alive){ container.innerHTML="🌱 Reinicia"; return; }
-        container.innerHTML="";
-        HABITS.forEach(habit=>{
-            let cd=cooldowns[habit.id]; let available=cd?.available!==false; let remaining=cd?.remaining||0;
-            let btnHtml=!available?`<span class="cooldown">⏳${Math.ceil(remaining)}s</span>`:`<button data-habit="${habit.id}" class="habit-act">+ ${habit.name}</button>`;
-            if(habit.id==="running_session") btnHtml=!available?`<span class="cooldown">⏳${Math.ceil(remaining)}s</span>`:`<div class="input-group" style="margin:0"><input type="number" id="runKmInline" step="0.5" placeholder="km" style="width:60px"><button data-habit="${habit.id}" class="habit-run">🏃</button></div>`;
-            if(habit.id==="reading") btnHtml=!available?`<span class="cooldown">⏳${Math.ceil(remaining)}s</span>`:`<div class="input-group" style="margin:0"><input type="number" id="readingMins" step="5" placeholder="min" style="width:60px"><button data-habit="${habit.id}" class="habit-reading">📚</button></div>`;
-            if(habit.id==="steps") btnHtml=!available?`<span class="cooldown">⏳${Math.ceil(remaining)}s</span>`:`<div class="input-group" style="margin:0"><input type="number" id="stepsCount" step="500" placeholder="pasos" style="width:70px"><button data-habit="${habit.id}" class="habit-steps">👣</button></div>`;
-            if(habit.id==="calisthenics") btnHtml=!available?`<span class="cooldown">⏳${Math.ceil(remaining)}s</span>`:`<div class="input-group" style="margin:0"><input type="number" id="caliMins" step="5" placeholder="min" style="width:60px"><button data-habit="${habit.id}" class="habit-cali">💪</button></div>`;
-            if(habit.id==="tidy_morning") btnHtml=!available?`<span class="cooldown">⏳${Math.ceil(remaining)}s</span>`:`<button data-habit="${habit.id}" class="habit-act">🧹 Test orden</button>`;
-            container.innerHTML+=`<div class="habit-pill">${habit.icon} ${habit.name} ${btnHtml}</div>`;
+        const container = document.getElementById("dailyHabitsList");
+        if (!avatar.alive) { container.innerHTML = "🌱 Reinicia"; return; }
+        container.innerHTML = "";
+        HABITS.forEach(habit => {
+            let cd = cooldowns[habit.id];
+            let available = cd?.available !== false;
+            let remaining = cd?.remaining || 0;
+            let btnHtml = !available ? `<span class="cooldown">⏳${Math.ceil(remaining)}s</span>` : `<button data-habit="${habit.id}" class="habit-act">+ ${habit.name}</button>`;
+            if (habit.id === "steps_habit") btnHtml = !available ? `<span class="cooldown">⏳${Math.ceil(remaining)}s</span>` : `<div class="input-group" style="margin:0"><input type="number" id="stepsInput" step="1000" placeholder="pasos" style="width:70px"><button data-habit="${habit.id}" class="habit-steps">👣</button></div>`;
+            if (habit.id === "sport_habit") btnHtml = !available ? `<span class="cooldown">⏳${Math.ceil(remaining)}s</span>` : `<div class="input-group" style="margin:0"><input type="number" id="sportKm" step="0.5" placeholder="km" style="width:60px"><button data-habit="${habit.id}" class="habit-sport">🏋️</button></div>`;
+            if (habit.id === "reading_habit") btnHtml = !available ? `<span class="cooldown">⏳${Math.ceil(remaining)}s</span>` : `<div class="input-group" style="margin:0"><input type="number" id="readingMins" step="5" placeholder="min" style="width:60px"><button data-habit="${habit.id}" class="habit-reading">📚</button></div>`;
+            if (habit.id === "order_habit") btnHtml = !available ? `<span class="cooldown">⏳${Math.ceil(remaining)}s</span>` : `<button data-habit="${habit.id}" class="habit-act">🧹 Test orden</button>`;
+            container.innerHTML += `<div class="habit-pill">${habit.icon} ${habit.name} ${btnHtml}</div>`;
         });
-        document.querySelectorAll(".habit-act").forEach(btn=>btn.addEventListener("click",()=>{ let hid=btn.getAttribute("data-habit"); let hobj=HABITS.find(h=>h.id===hid); if(hobj) completeHabit(hobj); }));
-        document.querySelectorAll(".habit-run").forEach(btn=>btn.addEventListener("click",()=>{ let km=parseFloat(document.getElementById("runKmInline")?.value); if(!isNaN(km)&&km>0) completeHabit(HABITS.find(h=>h.id==="running_session"), km); else addToast("km válido"); }));
-        document.querySelectorAll(".habit-reading").forEach(btn=>btn.addEventListener("click",()=>{ let m=parseInt(document.getElementById("readingMins")?.value); if(!isNaN(m)&&m>0) completeHabit(HABITS.find(h=>h.id==="reading"), m); }));
-        document.querySelectorAll(".habit-steps").forEach(btn=>btn.addEventListener("click",()=>{ let s=parseInt(document.getElementById("stepsCount")?.value); if(!isNaN(s)&&s>0) completeHabit(HABITS.find(h=>h.id==="steps"), s); }));
-        document.querySelectorAll(".habit-cali").forEach(btn=>btn.addEventListener("click",()=>{ let m=parseInt(document.getElementById("caliMins")?.value); if(!isNaN(m)&&m>0) completeHabit(HABITS.find(h=>h.id==="calisthenics"), m); }));
+        
+        document.querySelectorAll(".habit-act").forEach(btn => btn.addEventListener("click", () => { let hid = btn.getAttribute("data-habit"); let hobj = HABITS.find(h => h.id === hid); if (hobj) completeHabit(hobj); }));
+        document.querySelectorAll(".habit-steps").forEach(btn => btn.addEventListener("click", () => { let steps = parseInt(document.getElementById("stepsInput")?.value); if (!isNaN(steps) && steps > 0) completeHabit(HABITS.find(h => h.id === "steps_habit"), steps); else addToast("Ingresa pasos válidos"); }));
+        document.querySelectorAll(".habit-sport").forEach(btn => btn.addEventListener("click", () => { let km = parseFloat(document.getElementById("sportKm")?.value); if (!isNaN(km) && km > 0) completeHabit(HABITS.find(h => h.id === "sport_habit"), km); else addToast("Ingresa km válidos"); }));
+        document.querySelectorAll(".habit-reading").forEach(btn => btn.addEventListener("click", () => { let mins = parseInt(document.getElementById("readingMins")?.value); if (!isNaN(mins) && mins > 0) completeHabit(HABITS.find(h => h.id === "reading_habit"), mins); else addToast("Ingresa minutos válidos"); }));
     }
-    
-    document.getElementById("addWaterBtn").addEventListener("click",()=>{ let l=parseFloat(document.getElementById("waterAmount").value); if(!isNaN(l)&&l>0) addWater(l); });
-    document.getElementById("addPhoneBtn").addEventListener("click",()=>{ let h=parseFloat(document.getElementById("phoneHours").value); if(!isNaN(h)&&h>=0) addPhoneHours(h); });
-    document.getElementById("editNameBtn").addEventListener("click",()=>{ let n=prompt("Nombre",avatar.name); if(n) avatar.name=n.slice(0,20); saveGame(); updateUI(); });
-    document.getElementById("resetGameBtn").addEventListener("click",()=>fullResetGame());
+
+    document.getElementById("addWaterBtn")?.addEventListener("click", () => { let l = parseFloat(document.getElementById("waterAmount").value); if (!isNaN(l) && l > 0) addWater(l); });
+    document.getElementById("addPhoneBtn")?.addEventListener("click", () => { let h = parseFloat(document.getElementById("phoneHours").value); if (!isNaN(h) && h >= 0) addPhoneHours(h); });
+    document.getElementById("editNameBtn")?.addEventListener("click", () => { let n = prompt("Nombre", avatar.name); if (n && n.trim()) { avatar.name = n.trim().slice(0, 20); saveGame(); updateUI(); } });
+    document.getElementById("resetGameBtn")?.addEventListener("click", () => fullResetGame());
     
     loadGame();
 </script>
