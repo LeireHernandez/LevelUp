@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>LevelUp · Evolución total</title>
+    <title>LevelUp</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&family=Instrument+Serif&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
@@ -631,7 +631,41 @@
             last7.push(entry ? entry.hours : 0);
         }
         if (phoneChart) phoneChart.destroy();
-        phoneChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Horas de móvil', data: last7, borderColor: '#c46a3a', backgroundColor: 'rgba(196,106,58,0.1)', borderWidth: 2.5, pointRadius: 4, fill: true }] }, options: { responsive: true, maintainAspectRatio: true } });
+        phoneChart = new Chart(ctx, { 
+    type: 'line', 
+    data: { 
+        labels, 
+        datasets: [{ 
+            label: 'Horas de móvil', 
+            data: last7, 
+            borderColor: '#c46a3a', 
+            backgroundColor: 'rgba(196,106,58,0.1)', 
+            borderWidth: 2.5, 
+            pointRadius: 4, 
+            fill: true 
+        }] 
+    }, 
+    options: { 
+        responsive: true, 
+        maintainAspectRatio: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                min: 0,
+                title: {
+                    display: true,
+                    text: 'Horas',
+                    font: { size: 10 }
+                },
+                grid: { color: '#e5d9ce' }
+            },
+            x: {
+                ticks: { font: { size: 10 } },
+                grid: { display: false }
+            }
+        }
+    } 
+});
         const avg = last7.reduce((a, b) => a + b, 0) / 7;
         document.getElementById('todayPhone').innerText = last7[6].toFixed(1);
         document.getElementById('avgPhone').innerText = avg.toFixed(1);
