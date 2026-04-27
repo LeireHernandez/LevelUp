@@ -1,793 +1,1683 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' text-anchor='middle' dy='.35em' font-size='80' fill='%233b5a3c'>🌿</text></svg>">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>LevelUp</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&family=Instrument+Serif&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #ece4d7;
-            background-image: radial-gradient(circle at 10% 20%, rgba(185,150,108,0.08) 2%, transparent 2.5%);
-            background-size: 28px 28px;
-            font-family: 'Inter', sans-serif;
-            padding: 1.8rem 1.5rem;
-            color: #2c2a24;
-        }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 2rem; }
-        .header h1 {
-            font-family: 'Instrument Serif', serif;
-            font-weight: 400;
-            font-size: 2.6rem;
-            color: #3b5a3c;
-            border-bottom: 1px solid #cbbfaa;
-            display: inline-block;
-            padding-bottom: 6px;
-        }
-        .sub { color: #6f6a5c; font-size: 0.85rem; margin-top: 8px; }
-        .card {
-            background: #fefaf3;
-            border-radius: 2rem;
-            padding: 1.2rem 1.5rem;
-            margin-bottom: 1.6rem;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.03), 0 0 0 1px #e2d8cb;
-        }
-        .avatar-row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-        }
-        .avatar-info { display: flex; align-items: center; gap: 1rem; }
-        .avatar-icon {
-            font-size: 3.2rem;
-            background: #e7ddcf;
-            width: 64px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 3rem;
-        }
-        .name-area h2 { font-weight: 500; font-size: 1.5rem; color: #4a6741; }
-        .edit-name {
-            background: none;
-            border: 1px solid #d0c1ad;
-            padding: 4px 12px;
-            border-radius: 40px;
-            font-size: 0.7rem;
-            color: #7b6b55;
-            cursor: pointer;
-        }
-        .level-badge {
-            background: #dfd2c0;
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #4d5a3b;
-        }
-        .needs-grid { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0 0.5rem; }
-        .need { flex: 1; min-width: 130px; }
-        .need-label { font-size: 0.7rem; font-weight: 500; color: #8f7a64; display: flex; justify-content: space-between; }
-        .bar-bg { background: #e5d9ce; border-radius: 20px; height: 8px; margin-top: 4px; }
-        .bar-fill { background: #7c9a6e; height: 8px; border-radius: 20px; width: 0%; transition: width 0.3s ease; }
-        .critical .bar-fill { background: #c46a3a; }
-        .goals-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-            gap: 1.2rem;
-            margin-top: 0.8rem;
-        }
-        .goal-card {
-            background: #fffbf5;
-            border-radius: 1.5rem;
-            padding: 1rem;
-            border: 1px solid #e5d8ca;
-        }
-        .goal-title { font-weight: 600; font-size: 1rem; color: #5c6e4a; margin-bottom: 12px; display: flex; gap: 6px; align-items: center; }
-        .progress-stat { font-size: 0.75rem; color: #6e5b48; margin-top: 8px; }
-        .prediction-text { background: #f2ede4; padding: 6px 10px; border-radius: 1rem; font-size: 0.7rem; color: #5f6a46; margin: 10px 0; }
-        .input-group { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
-        .input-group input { flex: 1; background: #fff7ef; border: 1px solid #e2cfbb; padding: 8px 10px; border-radius: 2rem; font-size: 0.75rem; }
-        button {
-            background: #cbdbb6;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 2rem;
-            font-weight: 500;
-            font-size: 0.7rem;
-            color: #3d4f2f;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-        button:active { transform: scale(0.96); }
-        .daily-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
-        .habit-pill {
-            background: #f2ede2;
-            border-radius: 3rem;
-            padding: 6px 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.75rem;
-            flex-wrap: wrap;
-        }
-        .cooldown { font-size: 0.65rem; color: #aa927a; }
-        .reset-btn { background: #c4b49c; color: #2f3e25; padding: 8px 22px; margin-top: 6px; }
-        footer { text-align: center; font-size: 0.7rem; color: #998f7a; margin-top: 2rem; }
-        .test-btn { background: #cfbc9f; color: #2f3a21; }
-        .stat-badge { background: #e9e0d4; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; display: inline-block; }
-        .offline-warning { background: #f0e0c8; border-left: 4px solid #c46a3a; padding: 8px 12px; border-radius: 1rem; font-size: 0.7rem; margin-bottom: 12px; color: #8b5a3a; }
-        .phone-section { margin-top: 16px; border-top: 1px solid #ece0d2; padding-top: 16px; }
-        .phone-title { font-size: 0.85rem; font-weight: 600; color: #5c6e4a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        .phone-stats-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 20px; }
-        .phone-input-area { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .phone-stats-badges { display: flex; gap: 12px; flex-wrap: wrap; }
-        .chart-wrapper { display: flex; justify-content: center; margin: 20px 0 10px 0; }
-        .chart-container { background: linear-gradient(145deg, #fffbf5, #fef7ef); border-radius: 2rem; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border: 1px solid #e5d8ca; max-width: 550px; width: 100%; }
-        canvas { max-height: 220px; width: 100%; }
-        .warning { color: #c46a3a; font-weight: 500; font-size: 0.75rem; text-align: center; margin-top: 12px; padding: 6px; background: #fff0e6; border-radius: 2rem; }
-        @media (max-width: 700px) { .chart-container { padding: 12px; } canvas { max-height: 180px; } }
-        .water-progress { margin-top: 8px; padding: 6px; background: #eef3e8; border-radius: 1rem; font-size: 0.7rem; text-align: center; }
-        .hydrate-btn { background: #7c9a6e; color: white; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LevelUp · Tu Planta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f2ede5;
+  --card: #faf7f2;
+  --card2: #fff9f0;
+  --border: rgba(160,140,110,0.22);
+  --border2: rgba(160,140,110,0.38);
+  --green-dk: #2d5016;
+  --green-md: #4a7c2f;
+  --green-lt: #7aad52;
+  --green-pale: #e6f0dc;
+  --green-mist: #f0f5eb;
+  --amber: #b87333;
+  --amber-lt: #f5e6d0;
+  --red: #8b2e1a;
+  --red-lt: #fdeee9;
+  --text: #2a2318;
+  --text2: #6b5d4a;
+  --text3: #9c8b72;
+  --nav-w: 220px;
+  --radius: 18px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  width: var(--nav-w);
+  min-height: 100vh;
+  background: var(--green-dk);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+.nav-logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.nav-logo h1 {
+  font-family: 'Lora', serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #d6f0b8;
+  letter-spacing: 0.02em;
+}
+.nav-logo p { font-size: 0.7rem; color: rgba(200,230,160,0.6); margin-top: 2px; }
+.nav-plant-name {
+  padding: 16px 24px;
+  font-size: 0.75rem;
+  color: rgba(200,230,160,0.7);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.nav-plant-name span { color: #d6f0b8; font-weight: 500; font-size: 0.9rem; display: block; }
+.nav-links { flex: 1; padding: 12px 0; overflow-y: auto; }
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 24px;
+  color: rgba(200,230,160,0.7);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+  user-select: none;
+}
+.nav-link:hover { color: #d6f0b8; background: rgba(255,255,255,0.06); }
+.nav-link.active { color: #d6f0b8; background: rgba(255,255,255,0.1); border-left-color: #7aad52; font-weight: 500; }
+.nav-link .icon { font-size: 1rem; width: 20px; text-align: center; }
+.nav-section-label {
+  padding: 14px 24px 4px;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(200,230,160,0.35);
+}
+.nav-bottom {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.level-pill {
+  background: rgba(255,255,255,0.1);
+  border-radius: 30px;
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  color: #d6f0b8;
+  display: flex; align-items: center; gap: 6px;
+}
+.xp-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.15); border-radius: 4px; overflow: hidden; }
+.xp-fill { height: 100%; background: #7aad52; border-radius: 4px; transition: width 0.4s ease; }
+
+/* ── MAIN ── */
+main {
+  margin-left: var(--nav-w);
+  flex: 1;
+  padding: 0;
+  min-height: 100vh;
+}
+.page { display: none; padding: 2rem; max-width: 900px; }
+.page.active { display: block; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 1.2rem;
+}
+.card-title {
+  font-family: 'Lora', serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--green-dk);
+  margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── PLANT HERO ── */
+.plant-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.plant-avatar {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: var(--green-pale);
+  border: 3px solid var(--green-lt);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem;
+  flex-shrink: 0;
+  position: relative;
+}
+.plant-avatar .alive-ring {
+  position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  animation: pulse-ring 2.5s infinite;
+}
+@keyframes pulse-ring {
+  0%, 100% { border-color: rgba(122,173,82,0.3); }
+  50% { border-color: rgba(122,173,82,0.7); }
+}
+.plant-meta h2 {
+  font-family: 'Lora', serif;
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: var(--green-dk);
+}
+.plant-meta .tagline { font-size: 0.8rem; color: var(--text3); margin-top: 2px; }
+.plant-meta .streak-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: linear-gradient(135deg, #ff6b35, #f7c59f);
+  color: white; border-radius: 20px;
+  padding: 3px 10px; font-size: 0.72rem; font-weight: 500;
+  margin-top: 8px;
+}
+.plant-status-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;
+}
+.status-chip {
+  background: var(--green-mist); border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; color: var(--green-dk);
+}
+
+/* ── NEEDS ── */
+.needs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.need-item {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.need-item:hover { border-color: var(--green-lt); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.need-item::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.need-item.ok::before { background: var(--green-lt); }
+.need-item.warn::before { background: #d4a017; }
+.need-item.critical::before { background: var(--red); }
+.need-icon { font-size: 1.4rem; }
+.need-name { font-size: 0.78rem; font-weight: 500; color: var(--text2); margin-top: 4px; }
+.need-pct { font-size: 1.4rem; font-weight: 500; color: var(--text); }
+.need-bar-bg { height: 5px; background: rgba(0,0,0,0.08); border-radius: 5px; margin-top: 6px; overflow: hidden; }
+.need-bar-fill { height: 5px; border-radius: 5px; transition: width 0.5s ease; }
+.need-item.ok .need-bar-fill { background: var(--green-lt); }
+.need-item.warn .need-bar-fill { background: #d4a017; }
+.need-item.critical .need-bar-fill { background: var(--red); }
+.need-habit { font-size: 0.65rem; color: var(--text3); margin-top: 4px; }
+
+/* ── HABIT PAGE ── */
+.habit-form {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.habit-form input {
+  flex: 1; min-width: 100px;
+  background: var(--card2); border: 1px solid var(--border2);
+  padding: 10px 14px; border-radius: 30px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--text);
+  outline: none; transition: border-color 0.15s;
+}
+.habit-form input:focus { border-color: var(--green-lt); }
+.btn {
+  background: var(--green-md); color: white;
+  border: none; padding: 10px 20px; border-radius: 30px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn:hover { background: var(--green-dk); }
+.btn:active { transform: scale(0.97); }
+.btn-secondary {
+  background: transparent; color: var(--green-md);
+  border: 1.5px solid var(--green-lt); padding: 8px 16px;
+}
+.btn-secondary:hover { background: var(--green-pale); }
+.btn-danger { background: var(--red); }
+.btn-danger:hover { background: #6b2015; }
+.btn-amber { background: var(--amber); }
+
+/* ── PROGRESS BARS ── */
+.progress-bar {
+  height: 8px; background: rgba(0,0,0,0.08); border-radius: 8px;
+  overflow: hidden; margin: 8px 0;
+}
+.progress-fill {
+  height: 100%; border-radius: 8px; transition: width 0.5s ease;
+}
+
+/* ── STATS ROW ── */
+.stats-row { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.stat-card {
+  flex: 1; min-width: 100px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 0.9rem;
+  text-align: center;
+}
+.stat-card .stat-val { font-size: 1.6rem; font-weight: 500; color: var(--text); line-height: 1; }
+.stat-card .stat-lbl { font-size: 0.65rem; color: var(--text3); margin-top: 4px; }
+
+/* ── WATER ── */
+.water-tank {
+  position: relative; width: 80px; height: 140px;
+  border: 2px solid #7ab4d4; border-radius: 8px; overflow: hidden;
+  background: rgba(200,230,255,0.15); margin: 0 auto;
+}
+.water-fill {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(180deg, rgba(100,180,230,0.4), rgba(60,140,200,0.7));
+  transition: height 0.6s ease;
+}
+.water-pct {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 0.8rem; font-weight: 500; color: #1a5c80; z-index: 1;
+}
+.water-glasses { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; justify-content: center; }
+.glass {
+  width: 36px; height: 36px; border: 2px solid #7ab4d4;
+  border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; cursor: pointer; transition: all 0.15s;
+  background: rgba(200,230,255,0.1);
+}
+.glass.filled { background: rgba(100,180,230,0.5); border-color: #4a9abf; }
+.glass:hover { transform: scale(1.1); }
+
+/* ── ORDER TEST ── */
+.order-question {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.order-question:last-child { border-bottom: none; }
+.order-toggle {
+  width: 44px; height: 24px; border-radius: 12px;
+  background: rgba(0,0,0,0.1); position: relative;
+  cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+  border: none;
+}
+.order-toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; transition: left 0.2s;
+}
+.order-toggle.on { background: var(--green-lt); }
+.order-toggle.on::after { left: 22px; }
+.order-q-text { font-size: 0.85rem; color: var(--text2); flex: 1; }
+.order-score-display {
+  text-align: center; padding: 1.5rem;
+  background: var(--green-mist); border-radius: var(--radius-sm);
+  margin-top: 1rem;
+}
+.order-score-big { font-size: 3rem; font-weight: 500; color: var(--green-dk); }
+
+/* ── PHONE CHART ── */
+.chart-wrap {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 1rem;
+  margin: 1rem 0;
+}
+
+/* ── GOALS ── */
+.goal-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.goal-row:last-child { border-bottom: none; }
+.goal-icon { font-size: 1.5rem; width: 36px; text-align: center; flex-shrink: 0; }
+.goal-info { flex: 1; }
+.goal-name { font-size: 0.85rem; font-weight: 500; color: var(--text); }
+.goal-sub { font-size: 0.72rem; color: var(--text3); margin-top: 1px; }
+.goal-pct { font-size: 0.85rem; font-weight: 500; color: var(--green-md); }
+
+/* ── INFO PAGE ── */
+.info-section { margin-bottom: 1.5rem; }
+.info-section h3 {
+  font-family: 'Lora', serif; font-size: 1rem; color: var(--green-dk);
+  margin-bottom: 0.6rem; font-weight: 500;
+}
+.info-section p { font-size: 0.85rem; color: var(--text2); line-height: 1.7; }
+.need-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.8rem; }
+.need-table th { background: var(--green-mist); padding: 8px 12px; text-align: left; font-weight: 500; color: var(--green-dk); }
+.need-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text2); }
+.need-table tr:last-child td { border-bottom: none; }
+
+/* ── STREAK ── */
+.streak-days { display: flex; gap: 6px; margin-top: 12px; }
+.streak-day {
+  flex: 1; aspect-ratio: 1;
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; color: var(--text3); border: 1px solid var(--border);
+  background: var(--card2);
+}
+.streak-day.done { background: var(--green-lt); border-color: var(--green-md); color: white; font-size: 0.8rem; }
+.streak-day.today { border-color: var(--green-dk); font-weight: 500; }
+
+/* ── MOBILE BURGER ── */
+.burger {
+  display: none; position: fixed; top: 16px; left: 16px;
+  z-index: 200; background: var(--green-dk); border: none;
+  width: 40px; height: 40px; border-radius: 10px; cursor: pointer;
+  flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+}
+.burger span { width: 18px; height: 2px; background: #d6f0b8; border-radius: 2px; }
+.nav-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; }
+
+/* ── DEATH ── */
+.death-card {
+  background: var(--red-lt); border: 1px solid rgba(139,46,26,0.3);
+  border-radius: var(--radius); padding: 1.5rem; text-align: center;
+  margin-bottom: 1.2rem;
+}
+.death-card h2 { font-family: 'Lora', serif; color: var(--red); margin-bottom: 0.5rem; }
+.death-card p { font-size: 0.85rem; color: #6b2015; }
+
+/* ── TOAST ── */
+#toastBox {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  z-index: 999; display: flex; flex-direction: column; gap: 8px; align-items: center;
+}
+.toast {
+  background: var(--green-dk); color: #d6f0b8;
+  padding: 8px 20px; border-radius: 30px; font-size: 0.78rem;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+  white-space: nowrap;
+}
+@keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes toastOut { to { opacity:0; } }
+
+/* ── ALERTS ── */
+.alert {
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  font-size: 0.8rem; margin-bottom: 1rem;
+}
+.alert-warn { background: #fff8e6; border: 1px solid #d4a017; color: #7a5a00; }
+.alert-info { background: var(--green-mist); border: 1px solid var(--green-lt); color: var(--green-dk); }
+.alert-danger { background: var(--red-lt); border: 1px solid rgba(139,46,26,0.3); color: var(--red); }
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 1.5rem; }
+.page-header h2 { font-family: 'Lora', serif; font-size: 1.6rem; color: var(--green-dk); font-weight: 500; }
+.page-header p { font-size: 0.82rem; color: var(--text3); margin-top: 4px; }
+
+/* ── OFFLINE ── */
+.offline-notice {
+  background: var(--amber-lt); border-left: 3px solid var(--amber);
+  padding: 10px 14px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.78rem; color: #7a4500; margin-bottom: 1rem;
+  display: none;
+}
+
+/* ── COOLDOWN ── */
+.cooldown-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #fff3cd; color: #856404; border: 1px solid #ffc107;
+  padding: 3px 10px; border-radius: 20px; font-size: 0.7rem;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  nav { transform: translateX(-100%); }
+  nav.open { transform: translateX(0); }
+  .burger { display: flex; }
+  .nav-overlay.show { display: block; }
+  main { margin-left: 0; }
+  .page { padding: 1rem; padding-top: 60px; }
+  .needs-grid { grid-template-columns: 1fr 1fr; }
+  .plant-hero { flex-direction: column; text-align: center; gap: 1rem; }
+}
+@media (max-width: 380px) {
+  .needs-grid { grid-template-columns: 1fr; }
+}
+</style>
 </head>
 <body>
-<div class="container">
 
-    <div class="card">
-        <div class="avatar-row">
-            <div class="avatar-info">
-                <div class="avatar-icon" id="avatarEmoji">🌿</div>
-                <div class="name-area">
-                    <h2 id="avatarNameDisplay">Leire</h2>
-                    <button class="edit-name" id="editNameBtn">Renombrar</button>
-                </div>
+<!-- Burger -->
+<button class="burger" id="burgerBtn" aria-label="Menú">
+  <span></span><span></span><span></span>
+</button>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <div class="nav-logo">
+    <h1>🌿 LevelUp</h1>
+    <p>Crecimiento personal</p>
+  </div>
+  <div class="nav-plant-name">
+    Tu planta
+    <span id="navPlantName">Leire</span>
+  </div>
+  <div class="nav-links">
+    <div class="nav-link active" data-page="home"><span class="icon">🏠</span> Inicio</div>
+    <div class="nav-section-label">Hábitos</div>
+    <div class="nav-link" data-page="agua"><span class="icon">💧</span> Hidratación</div>
+    <div class="nav-link" data-page="deporte"><span class="icon">💪</span> Deporte</div>
+    <div class="nav-link" data-page="aleman"><span class="icon">🧠</span> Alemán</div>
+    <div class="nav-link" data-page="pasos"><span class="icon">⚡</span> Pasos diarios</div>
+    <div class="nav-link" data-page="orden"><span class="icon">🍃</span> Orden</div>
+    <div class="nav-link" data-page="estiramientos"><span class="icon">🧘</span> Estiramientos</div>
+    <div class="nav-link" data-page="lectura"><span class="icon">📖</span> Lectura</div>
+    <div class="nav-section-label">Seguimiento</div>
+    <div class="nav-link" data-page="movil"><span class="icon">📱</span> Tiempo de móvil</div>
+    <div class="nav-link" data-page="info"><span class="icon">❓</span> Cómo funciona</div>
+  </div>
+  <div class="nav-bottom">
+    <div class="level-pill" id="navLevelPill">
+      <span id="navLevelText">Nv.1</span>
+      <div class="xp-bar"><div class="xp-fill" id="navXpFill" style="width:0%"></div></div>
+      <span id="navXpText" style="font-size:0.65rem">0/100</span>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <div id="toastBox"></div>
+
+  <!-- ═══ INICIO ═══ -->
+  <div class="page active" id="page-home">
+    <div class="page-header">
+      <h2 id="homeTitle">Hola, Leire 🌱</h2>
+      <p id="homeSubtitle">Nivel 1 · Cuida tu planta con buenos hábitos</p>
+    </div>
+    <div id="deathCardHome" class="death-card" style="display:none">
+      <h2>🍂 Tu planta ha muerto</h2>
+      <p id="deathReasonText"></p>
+      <button class="btn btn-danger" style="margin-top:1rem" onclick="fullResetGame()">🔄 Nueva planta</button>
+    </div>
+    <div id="homeAliveContent">
+      <div class="card">
+        <div class="plant-hero">
+          <div class="plant-avatar">
+            <span id="homePlantEmoji">🌱</span>
+            <div class="alive-ring" id="aliveRing"></div>
+          </div>
+          <div class="plant-meta">
+            <h2 id="homePlantName">Leire</h2>
+            <div class="tagline" id="homePlantTagline">Semilla en crecimiento</div>
+            <div class="streak-badge" id="homeStreakBadge">🔥 0 días de racha</div>
+            <div class="plant-status-row">
+              <span class="status-chip" id="homeLevel">Nivel 1</span>
+              <span class="status-chip" id="homeAlive">Viva ✓</span>
+              <button class="btn-secondary btn" style="padding:4px 12px;font-size:0.72rem" onclick="renamePlant()">Renombrar</button>
             </div>
-            <div class="level-badge" id="levelDisplay">Nivel 1 · 0/100 exp</div>
+          </div>
         </div>
-        <div id="offlineMessage" class="offline-warning" style="display: none;"></div>
-        <div class="needs-grid" id="needsContainer"></div>
+        <div id="offlineNotice" class="offline-notice"></div>
+        <h3 style="font-size:0.75rem;color:var(--text3);margin-bottom:0.8rem;text-transform:uppercase;letter-spacing:0.08em">Necesidades · Toca para ir al hábito</h3>
+        <div class="needs-grid" id="homeNeedsGrid"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏆 Metas a largo plazo</div>
+        <div id="homeGoalsList"></div>
+      </div>
     </div>
+    <div style="text-align:center;margin-top:0.5rem">
+      <button class="btn" style="background:rgba(139,46,26,0.15);color:var(--red);font-size:0.75rem" onclick="if(confirm('¿Reiniciar todo el progreso?'))fullResetGame()">Reiniciar planta</button>
+    </div>
+  </div>
 
+  <!-- ═══ AGUA ═══ -->
+  <div class="page" id="page-agua">
+    <div class="page-header"><h2>💧 Hidratación</h2><p>Beber agua mantiene tu planta hidratada y viva</p></div>
     <div class="card">
-        <div style="font-weight:500; margin-bottom: 6px;">🌱 Metas en evolución</div>
-        <div class="goals-grid" id="goalsGrid"></div>
+      <div id="aguaOfflineAlert" class="alert alert-warn" style="display:none"></div>
+      <div style="display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <div class="water-tank" id="waterTank">
+            <div class="water-fill" id="waterFill" style="height:0%"></div>
+            <div class="water-pct" id="waterPctText">0%</div>
+          </div>
+          <p style="text-align:center;font-size:0.7rem;color:var(--text3);margin-top:8px">Nivel de hidratación</p>
+          <div class="water-glasses" id="waterGlasses"></div>
+          <p style="text-align:center;font-size:0.65rem;color:var(--text3);margin-top:6px">Clic en un vaso = +0.25L</p>
+        </div>
+        <div style="flex:2;min-width:200px">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-val" id="aguaHoy">0.0</div><div class="stat-lbl">Litros hoy</div></div>
+            <div class="stat-card"><div class="stat-val" id="aguaObj">1.5</div><div class="stat-lbl">Objetivo (L)</div></div>
+            <div class="stat-card"><div class="stat-val" id="aguaPct">0%</div><div class="stat-lbl">Completado</div></div>
+          </div>
+          <div class="alert alert-info" id="aguaAlertMsg">Bebe agua para mantener tu planta viva.</div>
+          <div class="habit-form" style="margin-top:1.2rem">
+            <input type="number" id="waterInput" step="0.1" min="0.1" max="2" placeholder="Litros (ej: 0.25)" value="0.25">
+            <button class="btn" onclick="addWater(parseFloat(document.getElementById('waterInput').value))">💧 Beber</button>
+          </div>
+          <div style="margin-top:1rem">
+            <p style="font-size:0.75rem;color:var(--text3);margin-bottom:6px">Atajos rápidos:</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-secondary" onclick="addWater(0.25)">+1 vaso (250ml)</button>
+              <button class="btn btn-secondary" onclick="addWater(0.5)">+500ml</button>
+              <button class="btn btn-secondary" onclick="addWater(1)">+1L</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-
     <div class="card">
-        <div style="font-weight:500;">🍃 Acciones Diarias</div>
-        <div class="daily-actions" id="dailyHabitsList"></div>
-        
-        <div style="margin-top: 20px; border-top: 1px solid #ece0d2; padding-top: 12px;">
-            <div style="font-size:0.75rem; font-weight:500; margin-bottom: 8px;">📊 Tiempos restantes por necesidad</div>
-            <div id="streaksContainer" style="display: flex; flex-wrap: wrap; gap: 12px;"></div>
-        </div>
-
-        <div class="phone-section">
-            <div class="phone-title"><span>📱</span> Tiempo de pantalla (móvil) · Perjudicial</div>
-            <div class="phone-stats-row">
-                <div class="phone-input-area">
-                    <input type="number" id="phoneHours" step="0.5" placeholder="Horas hoy" value="0" style="width: 110px;">
-                    <button id="addPhoneBtn">Registrar</button>
-                </div>
-                <div class="phone-stats-badges">
-                    <div class="stat-badge">📱 Hoy: <span id="todayPhone">0</span> h</div>
-                    <div class="stat-badge">📊 Media semanal: <span id="avgPhone">0</span> h</div>
-                </div>
-            </div>
-            <div class="chart-wrapper"><div class="chart-container"><canvas id="phoneChart" width="500" height="220"></canvas></div></div>
-            <div id="phoneWarning" class="warning"></div>
-        </div>
-        
-        <div style="margin-top: 16px; border-top: 1px solid #ece0d2; padding-top: 12px;">
-            <div style="font-size:0.75rem; font-weight:500;">💧 Hidratación (bebe agua para recargar)</div>
-            <div class="input-group" style="margin-top: 6px;">
-                <input type="number" id="waterAmount" step="0.3" placeholder="litros (0.3L = 1 vaso)" value="0.3">
-                <button id="addWaterBtn" class="hydrate-btn">💧 Beber agua</button>
-            </div>
-            <div id="waterStats" class="water-progress"></div>
-            <div style="font-size:0.65rem; text-align:center; margin-top:6px; color:#8f7a64;">🌊 El nivel baja durante el día · Bebe 1.5L para recuperar el 100%</div>
-        </div>
+      <div class="card-title">📋 Por qué importa</div>
+      <p style="font-size:0.85rem;color:var(--text2);line-height:1.7">La hidratación es la necesidad más crítica: si llega a 0%, tu planta muere inmediatamente. Se recupera bebiendo agua — cada litro repone un gran porcentaje. El objetivo es 1.5L al día, aunque en días de deporte puedes necesitar más.</p>
     </div>
+  </div>
 
-    <div style="display: flex; justify-content: center; margin: 10px 0;">
-        <button class="reset-btn" id="resetGameBtn">🔄 Reiniciar (Avatar nuevo + Todo a cero)</button>
+  <!-- ═══ DEPORTE ═══ -->
+  <div class="page" id="page-deporte">
+    <div class="page-header"><h2>💪 Deporte</h2><p>El ejercicio físico mantiene la fuerza de tu planta</p></div>
+    <div id="deporteCooldownAlert" style="margin-bottom:1rem"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="deporteMaxKm">0</div><div class="stat-lbl">Km máx. corridos</div></div>
+      <div class="stat-card"><div class="stat-val" id="deporteRitmo">7.5</div><div class="stat-lbl">Min/km ritmo</div></div>
+      <div class="stat-card"><div class="stat-val" id="deporteNeed">100%</div><div class="stat-lbl">Fuerza actual</div></div>
     </div>
-    <footer>💧 La hidratación empieza al 100% a las 00:00 y baja hasta 0% a las 24:00 · Bebe 1.5L para recargarla</footer>
-</div>
+    <div class="card">
+      <div class="card-title">🏃 Registrar sesión de running</div>
+      <div class="progress-bar"><div class="progress-fill" id="deporteProgressBar" style="width:0%;background:var(--green-lt)"></div></div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-bottom:1rem" id="deporteProgressText">0/20 km objetivo final</p>
+      <div class="habit-form">
+        <input type="number" id="sportKmInput" step="0.5" min="0.5" max="50" placeholder="Km recorridos">
+        <input type="number" id="sportRitmoInput" step="0.1" min="3" max="15" placeholder="Ritmo min/km (opc.)">
+        <button class="btn" id="sportBtn" onclick="doSport()">💪 Registrar</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:0.8rem">Cualquier distancia cuenta. Llenar este hábito restaura la Fuerza al 100%.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🎯 Meta: Correr 20 km</div>
+      <div class="goal-row">
+        <div class="goal-icon">🏅</div>
+        <div class="goal-info">
+          <div class="goal-name">Distancia máxima</div>
+          <div class="goal-sub" id="deporteGoalSub">Vas mejorando poco a poco</div>
+          <div class="progress-bar" style="margin-top:6px"><div class="progress-fill" id="deporteGoalBar" style="width:0%;background:var(--green-lt)"></div></div>
+        </div>
+        <div class="goal-pct" id="deporteGoalPct">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ALEMÁN ═══ -->
+  <div class="page" id="page-aleman">
+    <div class="page-header"><h2>🧠 Alemán</h2><p>Estudiar alemán mantiene la inteligencia de tu planta</p></div>
+    <div id="alemanCooldownAlert" style="margin-bottom:1rem"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="alemanHoras">0</div><div class="stat-lbl">Horas totales</div></div>
+      <div class="stat-card"><div class="stat-val" id="alemanNivel">A1</div><div class="stat-lbl">Nivel estimado</div></div>
+      <div class="stat-card"><div class="stat-val" id="alemanNeed">100%</div><div class="stat-lbl">Inteligencia</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📖 Registrar horas de estudio</div>
+      <div class="progress-bar"><div class="progress-fill" id="alemanProgressBar" style="width:0%;background:#7aad52"></div></div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-bottom:1rem" id="alemanProgressText">0/660h hacia B2</p>
+      <div class="habit-form">
+        <input type="number" id="germanHoursInput" step="0.5" min="0.5" max="8" placeholder="Horas estudiadas">
+        <button class="btn" id="alemanBtn" onclick="doAleman()">📖 Registrar</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:0.8rem">Cada registro de estudio (+1h mínimo) restaura la Inteligencia al 100%.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🗺️ Hoja de ruta A1 → B2</div>
+      <div id="alemanRoadmap"></div>
+    </div>
+  </div>
+
+  <!-- ═══ PASOS ═══ -->
+  <div class="page" id="page-pasos">
+    <div class="page-header"><h2>⚡ Pasos diarios</h2><p>Caminar 10.000 pasos carga la energía de tu planta</p></div>
+    <div id="pasosCooldownAlert" style="margin-bottom:1rem"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="pasosHoy">0</div><div class="stat-lbl">Pasos hoy</div></div>
+      <div class="stat-card"><div class="stat-val">10k</div><div class="stat-lbl">Objetivo</div></div>
+      <div class="stat-card"><div class="stat-val" id="pasosNeed">100%</div><div class="stat-lbl">Energía actual</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">👣 Registrar pasos</div>
+      <div class="progress-bar"><div class="progress-fill" id="pasosBar" style="width:0%;background:var(--green-lt)"></div></div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-bottom:1rem" id="pasosProgressText">0 / 10.000 pasos</p>
+      <div class="habit-form">
+        <input type="number" id="pasosInput" step="500" min="1" max="30000" placeholder="Pasos (ej: 8500)">
+        <button class="btn" id="pasosBtn" onclick="doPasos()">👣 Registrar</button>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="doPasosVal(5000)">5.000 pasos</button>
+        <button class="btn btn-secondary" onclick="doPasosVal(7500)">7.500 pasos</button>
+        <button class="btn btn-secondary" onclick="doPasosVal(10000)">✅ 10.000 pasos</button>
+        <button class="btn btn-secondary" onclick="doPasosVal(12000)">12.000 pasos</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:0.8rem">Necesitas mínimo 10.000 pasos para restaurar la Energía al 100%.</p>
+    </div>
+  </div>
+
+  <!-- ═══ ORDEN ═══ -->
+  <div class="page" id="page-orden">
+    <div class="page-header"><h2>🍃 Test de Orden</h2><p>El orden y la limpieza mantienen la tranquilidad de tu planta</p></div>
+    <div id="ordenDoneAlert" style="margin-bottom:1rem"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="ordenMedia">0.0</div><div class="stat-lbl">Media semanal</div></div>
+      <div class="stat-card"><div class="stat-val" id="ordenTests">0</div><div class="stat-lbl">Tests realizados</div></div>
+      <div class="stat-card"><div class="stat-val" id="ordenNeed">100%</div><div class="stat-lbl">Tranquilidad</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Test de hoy</div>
+      <p style="font-size:0.82rem;color:var(--text2);margin-bottom:1rem">Responde honestamente. Solo puedes hacer el test una vez al día.</p>
+      <div id="orderQuestionsContainer"></div>
+      <div class="order-score-display" id="orderScoreDisplay" style="display:none">
+        <div style="font-size:0.8rem;color:var(--text3)">Puntuación de hoy</div>
+        <div class="order-score-big" id="orderScoreBig">0/10</div>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="orderSubmitBtn" onclick="submitOrderTest()">✅ Enviar test</button>
+        <div id="ordenCooldownBadge"></div>
+      </div>
+    </div>
+    <div class="card" id="ordenHistCard">
+      <div class="card-title">📈 Historial reciente</div>
+      <div id="ordenHistContent"></div>
+    </div>
+  </div>
+
+  <!-- ═══ ESTIRAMIENTOS ═══ -->
+  <div class="page" id="page-estiramientos">
+    <div class="page-header"><h2>🧘 Estiramientos</h2><p>La flexibilidad de tu planta depende de tus estiramientos diarios</p></div>
+    <div id="estirCooldownAlert" style="margin-bottom:1rem"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="estirCm">32</div><div class="stat-lbl">Cm al suelo</div></div>
+      <div class="stat-card"><div class="stat-val" id="estirProg">0%</div><div class="stat-lbl">Progreso spagatt</div></div>
+      <div class="stat-card"><div class="stat-val" id="estirNeed">100%</div><div class="stat-lbl">Elasticidad</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🧘 Registrar sesión de estiramientos</div>
+      <div style="text-align:center;margin:1rem 0">
+        <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px">Distancia al suelo (spagatt)</div>
+        <div style="font-size:2.5rem;font-weight:500;color:var(--green-dk)" id="estirCmBig">32 cm</div>
+        <div class="progress-bar" style="max-width:300px;margin:8px auto"><div class="progress-fill" id="estirGoalBar" style="width:0%;background:var(--green-lt)"></div></div>
+        <div style="font-size:0.7rem;color:var(--text3)">Meta: 0 cm (spagatt completo)</div>
+      </div>
+      <div class="habit-form">
+        <input type="number" id="estirCmInput" step="0.5" min="0" max="60" placeholder="Cm al suelo hoy">
+        <button class="btn" id="estirBtn" onclick="doEstiramientos()">🧘 Registrar + Completar</button>
+      </div>
+      <div style="margin-top:1rem">
+        <button class="btn btn-secondary" onclick="doEstiramientosNoMedida()">✅ Solo marcar como hecho</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:0.8rem">Registrar estiramientos restaura la Elasticidad al 100%. Si mides la distancia al suelo también actualiza tu progreso hacia el spagatt.</p>
+    </div>
+  </div>
+
+  <!-- ═══ LECTURA ═══ -->
+  <div class="page" id="page-lectura">
+    <div class="page-header"><h2>📖 Lectura</h2><p>Leer cada día nutre el entretenimiento y la mente de tu planta</p></div>
+    <div id="lecturaCooldownAlert" style="margin-bottom:1rem"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="lecturaMedia">0</div><div class="stat-lbl">Min/día (media)</div></div>
+      <div class="stat-card"><div class="stat-val" id="lecturaSesiones">0</div><div class="stat-lbl">Sesiones registradas</div></div>
+      <div class="stat-card"><div class="stat-val" id="lecturaNeed">100%</div><div class="stat-lbl">Entretenimiento</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📚 Registrar sesión de lectura</div>
+      <div class="habit-form">
+        <input type="number" id="lecturaMinsInput" step="5" min="5" max="240" placeholder="Minutos leídos">
+        <button class="btn" id="lecturaBtn" onclick="doLectura()">📚 Registrar</button>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="doLecturaVal(15)">15 min</button>
+        <button class="btn btn-secondary" onclick="doLecturaVal(30)">30 min</button>
+        <button class="btn btn-secondary" onclick="doLecturaVal(45)">45 min</button>
+        <button class="btn btn-secondary" onclick="doLecturaVal(60)">1 hora</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:0.8rem">Cualquier sesión de lectura restaura el Entretenimiento al 100% y da XP extra (1 XP por cada 15 min).</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📅 Últimas sesiones</div>
+      <div id="lecturaHistContent"></div>
+    </div>
+  </div>
+
+  <!-- ═══ MÓVIL ═══ -->
+  <div class="page" id="page-movil">
+    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p>El exceso de pantalla daña la tranquilidad e inteligencia de tu planta</p></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="movilHoy">0</div><div class="stat-lbl">Horas hoy</div></div>
+      <div class="stat-card"><div class="stat-val" id="movilMedia">0</div><div class="stat-lbl">Media semanal (h)</div></div>
+      <div class="stat-card"><div class="stat-val" id="movilMax">0</div><div class="stat-lbl">Máx. semanal</div></div>
+    </div>
+    <div id="movilAlert" class="alert" style="display:none;margin-bottom:1rem"></div>
+    <div class="card">
+      <div class="card-title">📲 Registrar uso de hoy</div>
+      <div id="movilDoneAlert" style="margin-bottom:0.8rem"></div>
+      <div class="habit-form">
+        <input type="number" id="phoneInput" step="0.5" min="0" max="24" placeholder="Horas de móvil hoy" value="0">
+        <button class="btn btn-amber" id="phoneBtn" onclick="doPhone()">📱 Registrar</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:0.8rem">Solo puedes registrar una vez al día. Más de 3h/día empieza a dañar tu planta. Más de 5h = daño severo.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Últimos 7 días</div>
+      <div class="chart-wrap"><canvas id="phoneChart" height="200"></canvas></div>
+      <div id="phoneChartLegend" style="font-size:0.72rem;color:var(--text3);text-align:center;margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">💡 Por qué importa</div>
+      <p style="font-size:0.85rem;color:var(--text2);line-height:1.7">El uso excesivo del móvil reduce la Tranquilidad e Inteligencia de tu planta. Entre 0-2h/día no hay penalización. Entre 2-4h hay penalización moderada. Por encima de 4h el daño es severo. Es una de las pocas acciones que daña activamente tu planta sin matarla directamente.</p>
+    </div>
+  </div>
+
+  <!-- ═══ INFO ═══ -->
+  <div class="page" id="page-info">
+    <div class="page-header"><h2>❓ Cómo funciona LevelUp</h2><p>Todo lo que necesitas saber sobre tu planta</p></div>
+    <div class="card">
+      <div class="info-section">
+        <h3>🌱 Tu planta virtual</h3>
+        <p>LevelUp es una aplicación de seguimiento de hábitos donde tu progreso personal se refleja en el estado de una planta virtual. La planta tiene <strong>7 necesidades</strong>, cada una ligada a un hábito específico. Si no cuidas a tu planta, sus necesidades bajan hasta llegar a 0%... y muere.</p>
+      </div>
+      <div class="info-section">
+        <h3>⏱️ Sistema de decaimiento</h3>
+        <p>Cada necesidad baja de forma gradual a lo largo del tiempo. No es instantáneo — tienes horas para actuar. Cuanto más tiempo pases sin realizar un hábito, más bajará esa necesidad. Si una necesidad llega a 0%, la planta muere y hay que empezar de nuevo.</p>
+      </div>
+      <table class="need-table">
+        <thead><tr><th>Necesidad</th><th>Hábito</th><th>Se agota en</th></tr></thead>
+        <tbody>
+          <tr><td>💧 Hidratación</td><td>Beber 1.5L de agua</td><td>24 horas</td></tr>
+          <tr><td>💪 Fuerza</td><td>Hacer deporte</td><td>7 días</td></tr>
+          <tr><td>🧠 Inteligencia</td><td>Estudiar alemán</td><td>3 días</td></tr>
+          <tr><td>⚡ Energía</td><td>Caminar 10.000 pasos</td><td>3 días</td></tr>
+          <tr><td>🍃 Tranquilidad</td><td>Test de orden</td><td>2 días</td></tr>
+          <tr><td>🧘 Elasticidad</td><td>Estiramientos</td><td>24 horas</td></tr>
+          <tr><td>📖 Entretenimiento</td><td>Leer</td><td>2 días</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="info-section">
+        <h3>🔥 Racha y niveles</h3>
+        <p>Cada día que completas todos tus hábitos, tu racha aumenta. Completar hábitos da XP que sube el nivel de tu planta. El nivel afecta el aspecto de la planta y es una medida de tu constancia a largo plazo.</p>
+      </div>
+      <div class="info-section">
+        <h3>📱 El móvil: la amenaza oculta</h3>
+        <p>El tiempo de pantalla es la única acción que daña activamente tu planta sin un detonante de muerte directo. Registra tu uso diario honestamente — es una herramienta de consciencia, no de castigo.</p>
+      </div>
+      <div class="info-section">
+        <h3>💡 Consejos</h3>
+        <p>• La hidratación y los estiramientos son las más urgentes (se agotan en 24h).<br>• El deporte es el más perdonador (7 días).<br>• El móvil perjudica — úsalo con conciencia.<br>• Los datos se guardan automáticamente en tu dispositivo.</p>
+      </div>
+    </div>
+  </div>
+</main>
 
 <script>
-    // ==================== SISTEMA DE HIDRATACIÓN (basado en hora real del día) ====================
-    // El nivel de hidratación comienza en 100% a las 00:00
-    // Va disminuyendo linealmente a lo largo de 24 horas hasta llegar a 0% a las 24:00
-    // Cada 0.3L de agua bebida aumenta el nivel en un 20% (1.5L = 100% de recarga)
+// ══════════════════════════════════════════════
+// CONFIG & STATE
+// ══════════════════════════════════════════════
+const NEEDS_CONFIG = [
+  { id:"hydration", name:"Hidratación", icon:"💧", habit:"beber agua", page:"agua", deathReason:"deshidratación", hoursToZero:24 },
+  { id:"strength",  name:"Fuerza",      icon:"💪", habit:"hacer deporte", page:"deporte", deathReason:"falta de ejercicio", hoursToZero:168 },
+  { id:"intelligence", name:"Inteligencia", icon:"🧠", habit:"estudiar alemán", page:"aleman", deathReason:"falta de estimulación mental", hoursToZero:72 },
+  { id:"energy",    name:"Energía",     icon:"⚡", habit:"10.000 pasos", page:"pasos", deathReason:"sedentarismo", hoursToZero:72 },
+  { id:"calmness",  name:"Tranquilidad",icon:"🍃", habit:"test de orden", page:"orden", deathReason:"estrés y desorden", hoursToZero:48 },
+  { id:"flexibility",name:"Elasticidad",icon:"🧘", habit:"estiramientos", page:"estiramientos", deathReason:"pérdida de flexibilidad", hoursToZero:24 },
+  { id:"entertainment",name:"Entretenimiento",icon:"📖", habit:"leer", page:"lectura", deathReason:"falta de cultura", hoursToZero:48 }
+];
+
+const ORDER_QUESTIONS = [
+  "¿El suelo está libre de objetos?",
+  "¿La mesa/escritorio está despejada?",
+  "¿La ropa del día siguiente está preparada?",
+  "¿La cama está hecha?",
+  "¿Has ventilado la habitación?",
+  "¿Has pasado la escoba/fregona?"
+];
+
+let plant = {};
+let needsState = {};
+let hydration = {};
+let goals = {};
+let phoneUsage = [];
+let cooldowns = {};
+let dailyActions = {};
+let streak = {};
+let lastDecayTs = Date.now();
+let phoneChartInst = null;
+let decayInterval = null;
+
+const DECAY_PER_HOUR = {
+  hydration:4.167, strength:0.595, intelligence:1.389,
+  energy:1.389, calmness:2.083, flexibility:4.167, entertainment:2.083
+};
+
+function defaultState() {
+  const now = Date.now();
+  plant = { name:"Leire", level:1, xp:0, xpNext:100, alive:true, deathReason:null, createdAt:now };
+  needsState = {};
+  NEEDS_CONFIG.forEach(n => { if(n.id!=="hydration") needsState[n.id] = { value:100, lastFulfilled:now }; });
+  
+  // HIDRATACIÓN: nuevo sistema diario
+  hydration = { 
+    level: 100,           // nivel actual (se recalcula en tiempo real)
+    extraHydration: 0,    // hidratación extra ganada por beber agua (0-100)
+    loggedToday: 0,       // litros bebidos hoy
+    target: 1.5,          // objetivo diario en litros
+    lastResetDate: getTodayKey()  // fecha del último reinicio
+  };
+  
+  goals = {
+    german:{ hours:0, target:660 },
+    spagatt:{ cmToGround:32 },
+    order:{ scores:[], avg:0 },
+    running:{ maxKm:0, target:20, pace:7.5 },
+    reading:{ entries:[] }
+  };
+  phoneUsage = [];
+  cooldowns = {};
+  dailyActions = { orderDone:false, phoneDone:false, date:todayStr() };
+  streak = { current:0, lastCompleteDay:null, habitsToday:new Set() };
+  lastDecayTs = now;
+}
+
+// Obtener clave del día actual (YYYY-MM-DD)
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+// Calcular nivel de hidratación actual basado en la hora del día + agua bebida
+function getCurrentHydrationLevel() {
+  if (!plant.alive) return 0;
+  
+  const now = new Date();
+  const todayKey = getTodayKey();
+  
+  // Si es un nuevo día, resetear la hidratación base
+  if (hydration.lastResetDate !== todayKey) {
+    hydration.lastResetDate = todayKey;
+    hydration.extraHydration = 0;
+    hydration.loggedToday = 0;
+    // No resetear level aquí, se calculará desde 0% al empezar el día
+  }
+  
+  // Calcular horas transcurridas desde medianoche
+  const hoursSinceMidnight = now.getHours() + (now.getMinutes() / 60);
+  
+  // El nivel BASE baja del 100% al 0% durante el día (0% a las 24h)
+  // Fórmula: baseLevel = 100 - (hoursSinceMidnight * 100 / 24)
+  let baseLevel = Math.max(0, 100 - (hoursSinceMidnight * 100 / 24));
+  
+  // Aplicar hidratación extra por beber agua (máximo 100)
+  let finalLevel = Math.min(100, baseLevel + hydration.extraHydration);
+  
+  return Math.max(0, finalLevel);
+}
+
+// Actualizar el nivel de hidratación guardado (para mantener consistencia)
+function updateHydrationLevel() {
+  hydration.level = getCurrentHydrationLevel();
+}
+
+// Función para beber agua (modificada para el nuevo sistema)
+function addWater(liters) {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  if (isNaN(liters) || liters <= 0) { toast("Cantidad inválida"); return; }
+  
+  // Calcular cuánto porcentaje de hidratación extra da este litro
+  const pctFromLiter = (liters / hydration.target) * 100;
+  
+  // Añadir a la hidratación extra (máximo 100)
+  hydration.extraHydration = Math.min(100, hydration.extraHydration + pctFromLiter);
+  
+  // Actualizar litros bebidos hoy
+  hydration.loggedToday = Math.min(hydration.target, hydration.loggedToday + liters);
+  
+  // Actualizar el nivel mostrado
+  updateHydrationLevel();
+  
+  // Marcar hábito de hidratación como completado para la racha
+  streak.habitsToday.add("hydration");
+  
+  // Dar XP
+  plant.xp += 3;
+  checkLevelUp();
+  
+  toast(`💧 +${liters}L · Hidratación ${Math.round(hydration.level)}%`);
+  save();
+  renderAll();
+}
+
+function defaultState() {
+  const now = Date.now();
+  plant = { name:"Leire", level:1, xp:0, xpNext:100, alive:true, deathReason:null, createdAt:now };
+  needsState = {};
+  NEEDS_CONFIG.forEach(n => { if(n.id!=="hydration") needsState[n.id] = { value:100, lastFulfilled:now }; });
+  
+  // HIDRATACIÓN: nuevo sistema diario
+  hydration = { 
+    level: 100,
+    extraHydration: 0,
+    loggedToday: 0,
+    target: 1.5,
+    lastResetDate: getTodayKey()
+  };
+  
+  goals = {
+    german:{ hours:0, target:660 },
+    spagatt:{ cmToGround:32 },
+    order:{ scores:[], avg:0 },
+    running:{ maxKm:0, target:20, pace:7.5 },
+    reading:{ entries:[] }
+  };
+  phoneUsage = [];
+  cooldowns = {};
+  dailyActions = { orderDone:false, phoneDone:false, date:todayStr() };
+  streak = { current:0, lastCompleteDay:null, habitsToday:new Set() };
+  lastDecayTs = now;
+}
+
+function todayStr() { return new Date().toDateString(); }
+
+// ══════════════════════════════════════════════
+// SAVE / LOAD
+// ══════════════════════════════════════════════
+function save() {
+  // Antes de guardar, actualizar el nivel actual
+  updateHydrationLevel();
+  const s = { plant, needsState, hydration, goals, phoneUsage, cooldowns, dailyActions, streak, lastDecayTs };
+  try { localStorage.setItem("levelup_v2", JSON.stringify(s)); } catch(e){}
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem("levelup_v2");
+    if (!raw) { defaultState(); return; }
+    const s = JSON.parse(raw);
+    plant = s.plant || {}; 
+    needsState = s.needsState || {};
+    hydration = s.hydration || {};
+    goals = s.goals || {}; 
+    phoneUsage = s.phoneUsage || [];
+    cooldowns = s.cooldowns || {}; 
+    dailyActions = s.dailyActions || {};
+    streak = s.streak || { current:0, lastCompleteDay:null, habitsToday:[] };
     
-    let hydrationData = {
-        lastDate: null,              // última fecha registrada (para reset diario)
-        currentLevel: 100,          // nivel actual de hidratación (0-100)
-        lastUpdateTimestamp: Date.now(),
-        targetLiters: 1.5,
-        // Agua registrada hoy (para mostrar progreso)
-        waterLoggedToday: 0
-    };
+    // Migrar sistema de hidratación antiguo al nuevo
+    if (hydration.target === undefined) hydration.target = 1.5;
+    if (hydration.extraHydration === undefined) hydration.extraHydration = 0;
+    if (hydration.lastResetDate === undefined) hydration.lastResetDate = getTodayKey();
     
-    // Función que calcula el nivel de hidratación según la hora del día
-    // Devuelve el porcentaje que debería tener según la hora actual (0-100)
-    function getHydrationByTimeOfDay() {
-        const now = new Date();
-        const hours = now.getHours();
-        const minutes = now.getMinutes();
-        const totalMinutes = hours * 60 + minutes;
-        const totalMinutesInDay = 24 * 60;
-        
-        // El porcentaje baja linealmente: 100% a las 00:00, 0% a las 24:00
-        let percent = 100 - (totalMinutes / totalMinutesInDay) * 100;
-        percent = Math.max(0, Math.min(100, percent));
-        return percent;
-    }
+    if (Array.isArray(streak.habitsToday)) streak.habitsToday = new Set(streak.habitsToday);
+    lastDecayTs = s.lastDecayTs || Date.now();
+    if (!goals.reading) goals.reading = { entries:[] };
+    if (!goals.order) goals.order = { scores:[], avg:0 };
     
-    // Actualizar nivel de hidratación (aplica el decaimiento natural + reseteo diario)
-    function updateHydrationLevel() {
-        const now = new Date();
-        const todayStr = now.toDateString();
-        
-        // Si es un nuevo día, resetear el nivel al 100% y limpiar agua registrada
-        if (hydrationData.lastDate !== todayStr) {
-            // Verificar si el día anterior murió por deshidratación (solo si no es la primera vez)
-            if (hydrationData.lastDate !== null && hydrationData.currentLevel <= 0) {
-                if (avatar.alive) {
-                    avatar.alive = false;
-                    addToast(`💀 HIDRATACIÓN: El nivel de agua llegó a 0% al final del día. ¡Tu avatar ha muerto de sed!`);
-                    if (decayInterval) clearInterval(decayInterval);
-                    updateUI();
-                    return false;
-                }
-            }
-            // Nuevo día: resetear
-            hydrationData.lastDate = todayStr;
-            hydrationData.currentLevel = getHydrationByTimeOfDay();
-            hydrationData.waterLoggedToday = 0;
-            hydrationData.lastUpdateTimestamp = now;
-            addToast(`🌅 Nuevo día · Hidratación reiniciada al ${Math.floor(hydrationData.currentLevel)}%`);
-            saveGame();
-            updateUI();
-            return true;
-        }
-        
-        // Mismo día: actualizar nivel según la hora actual
-        const expectedLevel = getHydrationByTimeOfDay();
-        
-        // Si el nivel actual es mayor que el esperado (porque bebió agua), mantener el beneficio
-        // pero aplicar decaimiento natural gradual
-        if (hydrationData.currentLevel > expectedLevel) {
-            // El nivel baja lentamente hacia el nivel esperado
-            const timeSinceLastUpdate = (now - hydrationData.lastUpdateTimestamp) / (1000 * 60); // minutos
-            const decayPerMinute = 0.5; // 0.5% por minuto de decaimiento hacia el nivel natural
-            let newLevel = hydrationData.currentLevel - (decayPerMinute * timeSinceLastUpdate);
-            newLevel = Math.max(expectedLevel, newLevel);
-            hydrationData.currentLevel = newLevel;
-        } else {
-            // Si está por debajo del esperado, sube al nivel esperado (por tiempo)
-            hydrationData.currentLevel = expectedLevel;
-        }
-        
-        hydrationData.currentLevel = Math.max(0, Math.min(100, hydrationData.currentLevel));
-        hydrationData.lastUpdateTimestamp = now;
-        
-        // Verificar si el nivel llegó a 0
-        if (hydrationData.currentLevel <= 0 && avatar.alive) {
-            avatar.alive = false;
-            addToast(`💀 HIDRATACIÓN: ¡Te has quedado sin agua! El avatar ha muerto.`);
-            if (decayInterval) clearInterval(decayInterval);
-            updateUI();
-            return false;
-        }
-        
-        // Aviso si el nivel está bajo
-        if (hydrationData.currentLevel < 20 && hydrationData.currentLevel > 0) {
-            if (!window.lowHydrationWarned) {
-                window.lowHydrationWarned = true;
-                addToast(`⚠️ ¡Cuidado! Nivel de hidratación bajo (${Math.floor(hydrationData.currentLevel)}%). Bebe agua pronto.`);
-                setTimeout(() => { window.lowHydrationWarned = false; }, 60000);
-            }
-        }
-        
-        return true;
+    // Actualizar nivel de hidratación después de cargar
+    updateHydrationLevel();
+  } catch(e) { defaultState(); }
+}
+
+// ══════════════════════════════════════════════
+// DECAY (solo para otras necesidades, la hidratación usa el sistema horario)
+// ══════════════════════════════════════════════
+function applyDecay() {
+  if (!plant.alive) return;
+  const now = Date.now();
+  const hoursPassed = Math.min((now - lastDecayTs) / 3600000, 72);
+  if (hoursPassed < 0.016) return;
+  
+  // La hidratación NO usa este decaimiento, usa el sistema horario
+  // Solo decaen las otras necesidades
+  NEEDS_CONFIG.forEach(n => {
+    if (n.id === "hydration") return;
+    const st = needsState[n.id];
+    if (st) {
+      st.value = Math.max(0, st.value - (DECAY_PER_HOUR[n.id] || 1) * hoursPassed);
     }
-    
-    // Beber agua: aumenta el nivel de hidratación
-    function addWater(liters) {
-        if (!avatar.alive) return;
-        if (isNaN(liters) || liters <= 0) { addToast("Ingresa una cantidad válida (mínimo 0.1L)"); return; }
-        
-        // Actualizar nivel antes de modificarlo
-        updateHydrationLevel();
-        
-        // Cada 0.3L restaura un 20% del nivel (1.5L = 100% completo)
-        const percentPerLiter = (100 / hydrationData.targetLiters);
-        const percentGain = liters * percentPerLiter;
-        
-        let newLevel = hydrationData.currentLevel + percentGain;
-        newLevel = Math.min(100, newLevel);
-        hydrationData.currentLevel = newLevel;
-        hydrationData.lastUpdateTimestamp = Date.now();
-        
-        // Registrar agua bebida hoy
-        hydrationData.waterLoggedToday += liters;
-        if (hydrationData.waterLoggedToday > hydrationData.targetLiters) {
-            hydrationData.waterLoggedToday = hydrationData.targetLiters;
-        }
-        
-        addToast(`💧 +${liters}L de agua · Nivel de hidratación: ${Math.floor(hydrationData.currentLevel)}%`);
-        
-        // Ganar XP por beber agua
-        avatar.xp += 3;
-        checkLevelUp();
-        
-        // Si se alcanza el 100%, mensaje especial
-        if (hydrationData.currentLevel >= 99) {
-            addToast(`✨ ¡Hidratación completa al 100%! +5 XP extra`);
-            avatar.xp += 5;
-            checkLevelUp();
-        }
-        
-        saveGame();
-        updateUI();
+  });
+  
+  lastDecayTs = now;
+  checkDeath();
+}
+
+function checkDeath() {
+  if (!plant.alive) return true;
+  
+  // Verificar hidratación con el nuevo sistema
+  updateHydrationLevel();
+  if (hydration.level <= 0) { 
+    killPlant("deshidratación — no bebiste suficiente agua"); 
+    return true; 
+  }
+  
+  // Verificar otras necesidades
+  for (let n of NEEDS_CONFIG) {
+    if (n.id === "hydration") continue;
+    if ((needsState[n.id]?.value || 0) <= 0) { 
+      killPlant(n.deathReason); 
+      return true; 
     }
-    
-    // Obtener el nivel actual de hidratación para mostrar en UI
-    function getHydrationLevel() {
-        return hydrationData.currentLevel;
+  }
+  return false;
+}
+
+function killPlant(reason) {
+  plant.alive = false;
+  plant.deathReason = reason;
+  streak.current = 0;
+  if (decayInterval) clearInterval(decayInterval);
+  toast(`🍂 ${plant.name} ha muerto: ${reason}`);
+  save();
+  renderAll();
+}
+
+// ══════════════════════════════════════════════
+// STREAK
+// ══════════════════════════════════════════════
+function checkStreak() {
+  const today = todayStr();
+  if (dailyActions.date !== today) resetDailyActions();
+  
+  const allHabits = ["hydration","strength","intelligence","energy","calmness","flexibility","entertainment"];
+  const done = allHabits.every(h => streak.habitsToday.has(h));
+  if (done && streak.lastCompleteDay !== today) {
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+    if (streak.lastCompleteDay === yesterday.toDateString()) streak.current++;
+    else streak.current = 1;
+    streak.lastCompleteDay = today;
+    toast(`🔥 ¡${streak.current} día${streak.current>1?'s':''} de racha!`);
+    save();
+  }
+}
+
+function resetDailyActions() {
+  const today = todayStr();
+  if (dailyActions.date !== today) {
+    dailyActions.orderDone = false;
+    dailyActions.phoneDone = false;
+    dailyActions.date = today;
+    // NO resetear loggedToday aquí porque ya se resetea en getCurrentHydrationLevel cuando cambia el día
+    streak.habitsToday = new Set();
+  }
+}
+
+// ══════════════════════════════════════════════
+// FULFILL NEED
+// ══════════════════════════════════════════════
+function fulfillNeed(needId) {
+  if (!plant.alive) { toast("❌ La planta está muerta. Reinicia primero."); return false; }
+  if (needId === "hydration") return false;
+  if (needsState[needId]) {
+    needsState[needId].value = 100;
+    needsState[needId].lastFulfilled = Date.now();
+  }
+  streak.habitsToday.add(needId);
+  checkStreak();
+  plant.xp += 8; checkLevelUp();
+  save(); renderAll(); return true;
+}
+
+function checkLevelUp() {
+  while (plant.xp >= plant.xpNext) {
+    plant.xp -= plant.xpNext;
+    plant.level++;
+    plant.xpNext = Math.floor(plant.xpNext * 1.2);
+    toast(`🎋 ¡Nivel ${plant.level}! Tu planta creció`);
+  }
+}
+
+// ══════════════════════════════════════════════
+// COOLDOWNS
+// ══════════════════════════════════════════════
+function isCooldown(id) {
+  const cd = cooldowns[id];
+  if (!cd) return false;
+  const elapsed = (Date.now() - cd.setAt) / 1000;
+  return elapsed < cd.duration;
+}
+function setCooldown(id, seconds=86400) {
+  cooldowns[id] = { setAt: Date.now(), duration: seconds };
+}
+function cooldownRemaining(id) {
+  const cd = cooldowns[id];
+  if (!cd) return 0;
+  const remaining = cd.duration - (Date.now() - cd.setAt) / 1000;
+  return Math.max(0, remaining);
+}
+function fmtRemaining(secs) {
+  const h = Math.floor(secs/3600), m = Math.floor((secs%3600)/60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+function showCooldown(elId, label, id) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (isCooldown(id)) {
+    el.innerHTML = `<div class="cooldown-badge">⏳ ${label} disponible en ${fmtRemaining(cooldownRemaining(id))}</div>`;
+  } else {
+    el.innerHTML = "";
+  }
+}
+
+// ══════════════════════════════════════════════
+// ACTIONS (sin cambios excepto addWater que ya está arriba)
+// ══════════════════════════════════════════════
+function doSport() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  const km = parseFloat(document.getElementById("sportKmInput")?.value);
+  const ritmo = parseFloat(document.getElementById("sportRitmoInput")?.value);
+  if (isNaN(km) || km <= 0) { toast("Ingresa los km"); return; }
+  if (km > goals.running.maxKm) goals.running.maxKm = Math.min(goals.running.target, km);
+  if (!isNaN(ritmo) && ritmo > 0) goals.running.pace = ritmo;
+  fulfillNeed("strength");
+  toast(`🏃 +${km}km registrado · Fuerza al 100%`);
+  save(); renderAll();
+}
+
+function doAleman() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  const h = parseFloat(document.getElementById("germanHoursInput")?.value);
+  if (isNaN(h) || h <= 0) { toast("Ingresa las horas"); return; }
+  goals.german.hours = Math.min(goals.german.target, goals.german.hours + h);
+  fulfillNeed("intelligence");
+  toast(`📖 +${h}h de alemán · Inteligencia al 100%`);
+  save(); renderAll();
+}
+
+function doPasos() {
+  const steps = parseInt(document.getElementById("pasosInput")?.value);
+  doPasosVal(steps);
+}
+
+function doPasosVal(steps) {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  if (isNaN(steps) || steps <= 0) { toast("Ingresa los pasos"); return; }
+  const el = document.getElementById("pasosHoy");
+  const current = parseInt(el?.dataset.val || 0);
+  const total = current + steps;
+  if (el) el.dataset.val = total;
+  if (total >= 10000) {
+    fulfillNeed("energy");
+    toast(`👣 ${total.toLocaleString()} pasos · ¡Meta! Energía al 100%`);
+  } else {
+    toast(`👣 ${total.toLocaleString()} pasos (${10000-total} para la meta)`);
+  }
+  const pasosHoyEl = document.getElementById("pasosHoy");
+  if(pasosHoyEl) { pasosHoyEl.textContent = total.toLocaleString(); pasosHoyEl.dataset.val = total; }
+  const pct = Math.min(100, (total/10000)*100);
+  const bar = document.getElementById("pasosBar");
+  if(bar) bar.style.width = pct+"%";
+  const pt = document.getElementById("pasosProgressText");
+  if(pt) pt.textContent = `${total.toLocaleString()} / 10.000 pasos`;
+  if(document.getElementById("pasosInput")) document.getElementById("pasosInput").value = "";
+  save();
+}
+
+function submitOrderTest() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  if (dailyActions.orderDone) { toast("⚠️ Ya hiciste el test de orden hoy"); return; }
+  const toggles = document.querySelectorAll(".order-toggle");
+  let score = 0;
+  toggles.forEach(t => { if(t.classList.contains("on")) score++; });
+  const note = Math.round((score / ORDER_QUESTIONS.length) * 100) / 10;
+  goals.order.scores.push({ date: todayStr(), score: note });
+  if (goals.order.scores.length > 7) goals.order.scores.shift();
+  goals.order.avg = goals.order.scores.reduce((a,b)=>a+b.score,0) / goals.order.scores.length;
+  dailyActions.orderDone = true;
+  fulfillNeed("calmness");
+  const sd = document.getElementById("orderScoreDisplay");
+  if(sd) { sd.style.display="block"; document.getElementById("orderScoreBig").textContent = `${note}/10`; }
+  toast(`🧹 Test de orden: ${note}/10 · Tranquilidad al 100%`);
+  save(); renderAll();
+}
+
+function doEstiramientos() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  const cm = parseFloat(document.getElementById("estirCmInput")?.value);
+  if (!isNaN(cm) && cm >= 0) goals.spagatt.cmToGround = cm;
+  doEstiramientosNoMedida();
+}
+
+function doEstiramientosNoMedida() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  fulfillNeed("flexibility");
+  toast("🧘 Estiramientos completados · Elasticidad al 100%");
+  save(); renderAll();
+}
+
+function doLectura() {
+  const mins = parseInt(document.getElementById("lecturaMinsInput")?.value);
+  doLecturaVal(mins);
+}
+
+function doLecturaVal(mins) {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  if (isNaN(mins) || mins <= 0) { toast("Ingresa los minutos"); return; }
+  goals.reading.entries.push({ date: todayStr(), minutes: mins });
+  if (goals.reading.entries.length > 30) goals.reading.entries.shift();
+  plant.xp += Math.floor(mins/15); checkLevelUp();
+  fulfillNeed("entertainment");
+  toast(`📚 +${mins} min leídos · Entretenimiento al 100%`);
+  save(); renderAll();
+}
+
+function doPhone() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  if (dailyActions.phoneDone) { toast("⚠️ Ya registraste el móvil hoy"); return; }
+  const h = parseFloat(document.getElementById("phoneInput")?.value);
+  if (isNaN(h) || h < 0) { toast("Horas inválidas"); return; }
+  const today = todayStr();
+  const ex = phoneUsage.find(p=>p.date===today);
+  if (ex) ex.hours = h; else phoneUsage.push({ date:today, hours:h });
+  if (phoneUsage.length > 14) phoneUsage.shift();
+  dailyActions.phoneDone = true;
+  
+  if (h > 2) {
+    const damage = (h - 2) * 12;
+    if (needsState.calmness) needsState.calmness.value = Math.max(0, needsState.calmness.value - damage);
+    if (needsState.intelligence) needsState.intelligence.value = Math.max(0, needsState.intelligence.value - damage * 0.6);
+    toast(`📱 ${h}h de móvil · Daño a Tranquilidad e Inteligencia`);
+  } else {
+    toast(`📱 ${h}h de móvil · Sin penalización`);
+  }
+  checkDeath(); save(); renderAll(); renderPhoneChart();
+}
+
+function renamePlant() {
+  const n = prompt("Nombre de tu planta:", plant.name);
+  if (n && n.trim()) { plant.name = n.trim().slice(0,20); save(); renderAll(); }
+}
+
+function fullResetGame() {
+  if (decayInterval) clearInterval(decayInterval);
+  defaultState();
+  save(); renderAll(); renderPhoneChart();
+  startDecay();
+  toast("✨ Nueva planta iniciada. ¡Cuídala bien!");
+}
+
+// ══════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════
+function needValue(id) {
+  if (id === "hydration") {
+    updateHydrationLevel();
+    return hydration.level;
+  }
+  return needsState[id]?.value || 100;
+}
+
+function needClass(v) {
+  if (v >= 50) return "ok";
+  if (v >= 25) return "warn";
+  return "critical";
+}
+
+function plantEmoji() {
+  if (!plant.alive) return "🥀";
+  if (plant.level >= 6) return "🌳";
+  if (plant.level >= 4) return "🌿";
+  if (plant.level >= 2) return "🌱";
+  return "🌱";
+}
+
+function plantTagline() {
+  if (!plant.alive) return "Ha muerto";
+  if (plant.level >= 6) return "Árbol majestuoso";
+  if (plant.level >= 4) return "Planta en plena forma";
+  if (plant.level >= 2) return "Brote en crecimiento";
+  return "Semilla en crecimiento";
+}
+
+function getLevelName() {
+  const h = goals.german.hours;
+  if (h >= 600) return "B2";
+  if (h >= 400) return "B1";
+  if (h >= 200) return "A2";
+  return "A1";
+}
+
+function renderAll() {
+  applyDecay();        // Aplica decaimiento a otras necesidades
+  updateHydrationLevel(); // Actualiza hidratación según hora
+  resetDailyActions();
+  renderNav();
+  renderHome();
+  renderHabits();
+  renderGoalsPage();
+}
+
+function renderNav() {
+  document.getElementById("navPlantName").textContent = plant.name;
+  document.getElementById("navLevelText").textContent = `Nv.${plant.level}`;
+  document.getElementById("navXpText").textContent = `${plant.xp}/${plant.xpNext}`;
+  document.getElementById("navXpFill").style.width = `${(plant.xp/plant.xpNext)*100}%`;
+}
+
+function renderHome() {
+  const alive = plant.alive;
+  document.getElementById("homeAliveContent").style.display = alive ? "" : "none";
+  document.getElementById("deathCardHome").style.display = alive ? "none" : "";
+  if (!alive) {
+    document.getElementById("deathReasonText").textContent = `Motivo: ${plant.deathReason || "desconocido"}`;
+  }
+  document.getElementById("homePlantEmoji").textContent = plantEmoji();
+  document.getElementById("homePlantName").textContent = plant.name;
+  document.getElementById("homePlantTagline").textContent = plantTagline();
+  document.getElementById("homeStreakBadge").textContent = `🔥 ${streak.current} día${streak.current!==1?'s':''} de racha`;
+  document.getElementById("homeLevel").textContent = `Nivel ${plant.level}`;
+  document.getElementById("homeTitle").textContent = `${plant.name} ${plantEmoji()}`;
+  document.getElementById("homeSubtitle").textContent = `Nivel ${plant.level} · ${plant.alive?"Cuida tu planta con buenos hábitos":"Tu planta ha muerto"}`;
+  
+  const grid = document.getElementById("homeNeedsGrid");
+  grid.innerHTML = "";
+  NEEDS_CONFIG.forEach(n => {
+    const v = Math.round(needValue(n.id));
+    const cls = needClass(v);
+    grid.innerHTML += `<div class="need-item ${cls}" onclick="navigateTo('${n.page}')">
+      <div class="need-icon">${n.icon}</div>
+      <div class="need-name">${n.name}</div>
+      <div class="need-pct">${v}%</div>
+      <div class="need-bar-bg"><div class="need-bar-fill" style="width:${v}%"></div></div>
+      <div class="need-habit">→ ${n.habit}</div>
+    </div>`;
+  });
+
+  const gl = document.getElementById("homeGoalsList");
+  const gdata = [
+    { icon:"📖", name:"Alemán B2", sub:`${Math.round(goals.german.hours)}/${goals.german.target}h · ${getLevelName()}`, pct:(goals.german.hours/goals.german.target)*100, color:"#7aad52" },
+    { icon:"🧘", name:"Spagatt", sub: goals.spagatt.cmToGround<=0?"¡Completado!": `${goals.spagatt.cmToGround.toFixed(1)}cm al suelo`, pct:Math.max(0,((32-goals.spagatt.cmToGround)/32)*100), color:"#7aad52" },
+    { icon:"🏃", name:"Correr 20km", sub:`Máx: ${goals.running.maxKm}km · ${goals.running.pace}min/km`, pct:(goals.running.maxKm/goals.running.target)*100, color:"#7aad52" },
+    { icon:"📚", name:"Lectura diaria", sub:`${goals.reading.entries.length} sesiones registradas`, pct:Math.min(100,(goals.reading.entries.length/30)*100), color:"#7aad52" }
+  ];
+  gl.innerHTML = gdata.map(g=>`<div class="goal-row">
+    <div class="goal-icon">${g.icon}</div>
+    <div class="goal-info">
+      <div class="goal-name">${g.name}</div>
+      <div class="goal-sub">${g.sub}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,g.pct).toFixed(1)}%;background:${g.color}"></div></div>
+    </div>
+    <div class="goal-pct">${Math.min(100,g.pct).toFixed(0)}%</div>
+  </div>`).join("");
+}
+
+function renderHabits() {
+  // Agua - usar el nuevo sistema
+  const wl = needValue("hydration");
+  const wt = document.getElementById("waterFill");
+  if(wt) wt.style.height = wl+"%";
+  const wp = document.getElementById("waterPctText");
+  if(wp) wp.textContent = Math.round(wl)+"%";
+  const ah = document.getElementById("aguaHoy");
+  if(ah) ah.textContent = hydration.loggedToday.toFixed(1);
+  const ap = document.getElementById("aguaPct");
+  if(ap) ap.textContent = Math.round((hydration.loggedToday/hydration.target)*100)+"%";
+  const am = document.getElementById("aguaAlertMsg");
+  if(am) {
+    if(wl < 25) am.className = "alert alert-danger", am.textContent = "⚠️ Nivel crítico. ¡Bebe agua ahora!";
+    else if(wl < 50) am.className = "alert alert-warn", am.textContent = "⚠️ Hidratación baja. Bebe agua pronto.";
+    else am.className = "alert alert-info", am.textContent = "✅ Hidratación en buen nivel. Sigue bebiendo.";
+  }
+  
+  const glassEl = document.getElementById("waterGlasses");
+  if(glassEl) {
+    const total = 6;
+    const filled = Math.round((hydration.loggedToday / hydration.target) * total);
+    glassEl.innerHTML = Array.from({length:total},(_,i)=>`<div class="glass ${i<filled?"filled":""}" onclick="addWater(0.25)" title="+0.25L">💧</div>`).join("");
+  }
+
+  // Deporte
+  const dn = Math.round(needValue("strength"));
+  const di = document.getElementById("deporteNeed"); if(di) di.textContent = dn+"%";
+  const dm = document.getElementById("deporteMaxKm"); if(dm) dm.textContent = goals.running.maxKm;
+  const dr = document.getElementById("deporteRitmo"); if(dr) dr.textContent = goals.running.pace;
+  const dpb = document.getElementById("deporteProgressBar"); if(dpb) dpb.style.width = ((goals.running.maxKm/goals.running.target)*100).toFixed(1)+"%";
+  const dpt = document.getElementById("deporteProgressText"); if(dpt) dpt.textContent = `${goals.running.maxKm}/${goals.running.target} km objetivo final`;
+  const dgb = document.getElementById("deporteGoalBar"); if(dgb) dgb.style.width = ((goals.running.maxKm/goals.running.target)*100).toFixed(1)+"%";
+  const dgp = document.getElementById("deporteGoalPct"); if(dgp) dgp.textContent = ((goals.running.maxKm/goals.running.target)*100).toFixed(0)+"%";
+  const dgs = document.getElementById("deporteGoalSub"); if(dgs) dgs.textContent = `Máximo alcanzado: ${goals.running.maxKm}km de ${goals.running.target}km`;
+
+  // Alemán
+  const an = Math.round(needValue("intelligence"));
+  const ai = document.getElementById("alemanNeed"); if(ai) ai.textContent = an+"%";
+  const ah2 = document.getElementById("alemanHoras"); if(ah2) ah2.textContent = Math.round(goals.german.hours);
+  const anv = document.getElementById("alemanNivel"); if(anv) anv.textContent = getLevelName();
+  const apb = document.getElementById("alemanProgressBar"); if(apb) apb.style.width = ((goals.german.hours/goals.german.target)*100).toFixed(1)+"%";
+  const apt = document.getElementById("alemanProgressText"); if(apt) apt.textContent = `${Math.round(goals.german.hours)}/${goals.german.target}h hacia B2`;
+  renderAlemanRoadmap();
+
+  // Pasos
+  const en = Math.round(needValue("energy"));
+  const ep = document.getElementById("pasosNeed"); if(ep) ep.textContent = en+"%";
+  
+  // Orden
+  const on = Math.round(needValue("calmness"));
+  const oi = document.getElementById("ordenNeed"); if(oi) oi.textContent = on+"%";
+  const om = document.getElementById("ordenMedia"); if(om) om.textContent = goals.order.avg.toFixed(1);
+  const ot = document.getElementById("ordenTests"); if(ot) ot.textContent = goals.order.scores.length;
+  renderOrderPage();
+
+  // Estiramientos
+  const fn = Math.round(needValue("flexibility"));
+  const fi = document.getElementById("estirNeed"); if(fi) fi.textContent = fn+"%";
+  const fc = document.getElementById("estirCm"); if(fc) fc.textContent = goals.spagatt.cmToGround.toFixed(1);
+  const fpct = Math.max(0, ((32-goals.spagatt.cmToGround)/32)*100);
+  const fp = document.getElementById("estirProg"); if(fp) fp.textContent = fpct.toFixed(0)+"%";
+  const fcb = document.getElementById("estirCmBig"); if(fcb) fcb.textContent = goals.spagatt.cmToGround>0 ? `${goals.spagatt.cmToGround.toFixed(1)} cm` : "¡Spagatt!";
+  const fgb = document.getElementById("estirGoalBar"); if(fgb) fgb.style.width = fpct.toFixed(1)+"%";
+
+  // Lectura
+  const ln = Math.round(needValue("entertainment"));
+  const li = document.getElementById("lecturaNeed"); if(li) li.textContent = ln+"%";
+  const lm = getReadingAvg();
+  const lma = document.getElementById("lecturaMedia"); if(lma) lma.textContent = Math.round(lm);
+  const ls = document.getElementById("lecturaSesiones"); if(ls) ls.textContent = goals.reading.entries.length;
+  renderReadingHist();
+
+  // Móvil
+  renderMovilStats();
+}
+
+function getReadingAvg() {
+  if (!goals.reading.entries.length) return 0;
+  const recent = goals.reading.entries.slice(-7);
+  return recent.reduce((s,e)=>s+e.minutes,0)/recent.length;
+}
+
+function renderAlemanRoadmap() {
+  const rm = document.getElementById("alemanRoadmap");
+  if(!rm) return;
+  const levels = [{name:"A1",hours:0},{name:"A2",hours:200},{name:"B1",hours:400},{name:"B2",hours:660}];
+  const h = goals.german.hours;
+  rm.innerHTML = levels.map((lv,i)=>{
+    const next = levels[i+1];
+    const done = h >= (next?.hours || lv.hours);
+    const current = !done && (i===0 || h >= lv.hours);
+    const pct = next ? Math.min(100, ((h-lv.hours)/(next.hours-lv.hours))*100) : 100;
+    return `<div class="goal-row">
+      <div class="goal-icon" style="font-size:1.1rem">${done?"✅":current?"🎯":"⬜"}</div>
+      <div class="goal-info">
+        <div class="goal-name">${lv.name}${next?" → "+next.name:""}</div>
+        <div class="goal-sub">${done?"Completado":current?`${Math.round(h-lv.hours)}/${next.hours-lv.hours}h`:`Desde ${lv.hours}h`}</div>
+        ${next?`<div class="progress-bar"><div class="progress-fill" style="width:${current?pct:done?100:0}%;background:var(--green-lt)"></div></div>`:""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderOrderPage() {
+  const qc = document.getElementById("orderQuestionsContainer");
+  if(!qc || qc.innerHTML) return;
+  qc.innerHTML = ORDER_QUESTIONS.map((q,i)=>`
+    <div class="order-question">
+      <button class="order-toggle" id="oq${i}" onclick="this.classList.toggle('on')"></button>
+      <span class="order-q-text">${q}</span>
+    </div>`).join("");
+  
+  const doneAlert = document.getElementById("ordenDoneAlert");
+  if (doneAlert) {
+    if (dailyActions.orderDone) {
+      doneAlert.innerHTML = `<div class="alert alert-info">✅ Ya completaste el test de orden hoy. Puntuación: ${goals.order.scores.slice(-1)[0]?.score?.toFixed(1) || "?"}/10</div>`;
+    } else { doneAlert.innerHTML = ""; }
+  }
+  
+  const hist = document.getElementById("ordenHistContent");
+  if(hist && goals.order.scores.length) {
+    hist.innerHTML = goals.order.scores.slice().reverse().map(s=>`
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.82rem">
+        <span style="color:var(--text3)">${s.date}</span>
+        <span style="font-weight:500;color:${s.score>=7?"var(--green-md)":s.score>=5?"var(--amber)":"var(--red)"}">${s.score.toFixed(1)}/10</span>
+      </div>`).join("");
+  } else if(hist) {
+    hist.innerHTML = `<p style="font-size:0.82rem;color:var(--text3)">Aún no has hecho ningún test.</p>`;
+  }
+}
+
+function renderReadingHist() {
+  const hist = document.getElementById("lecturaHistContent");
+  if(!hist) return;
+  if(!goals.reading.entries.length) { hist.innerHTML = `<p style="font-size:0.82rem;color:var(--text3)">Aún no has registrado ninguna sesión.</p>`; return; }
+  hist.innerHTML = goals.reading.entries.slice().reverse().slice(0,10).map(e=>`
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.82rem">
+      <span style="color:var(--text3)">${e.date}</span>
+      <span style="font-weight:500;color:var(--green-md)">${e.minutes} min</span>
+    </div>`).join("");
+}
+
+function renderMovilStats() {
+  const last7 = [];
+  for(let i=6;i>=0;i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const entry = phoneUsage.find(p=>p.date===d.toDateString());
+    last7.push(entry?.hours || 0);
+  }
+  const today = last7[6];
+  const avg = last7.reduce((a,b)=>a+b,0)/7;
+  const max = Math.max(...last7);
+  
+  const mh = document.getElementById("movilHoy"); if(mh) mh.textContent = today.toFixed(1);
+  const mm = document.getElementById("movilMedia"); if(mm) mm.textContent = avg.toFixed(1);
+  const mx = document.getElementById("movilMax"); if(mx) mx.textContent = max.toFixed(1);
+  
+  const ma = document.getElementById("movilAlert");
+  if(ma) {
+    if(today > 5) { ma.style.display=""; ma.className="alert alert-danger"; ma.textContent="⚠️ Uso muy elevado (>5h). Daño severo en tu planta."; }
+    else if(today > 3) { ma.style.display=""; ma.className="alert alert-warn"; ma.textContent="📱 Uso moderado-alto (>3h). Considera reducir."; }
+    else { ma.style.display="none"; }
+  }
+
+  const doneAlert = document.getElementById("movilDoneAlert");
+  if(doneAlert) {
+    if(dailyActions.phoneDone) doneAlert.innerHTML = `<div class="alert alert-info">✅ Ya registraste el uso de hoy.</div>`;
+    else doneAlert.innerHTML = "";
+  }
+}
+
+function renderPhoneChart() {
+  const canvas = document.getElementById("phoneChart");
+  if(!canvas) return;
+  const labels = [], data = [];
+  for(let i=6;i>=0;i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    labels.push(d.toLocaleDateString("es-ES",{weekday:"short",day:"numeric"}));
+    const entry = phoneUsage.find(p=>p.date===d.toDateString());
+    data.push(entry?.hours||0);
+  }
+  if(phoneChartInst) phoneChartInst.destroy();
+  phoneChartInst = new Chart(canvas.getContext("2d"), {
+    type:"bar",
+    data:{ labels, datasets:[{
+      label:"Horas de móvil",
+      data,
+      backgroundColor: data.map(v => v>5?"rgba(139,46,26,0.7)":v>3?"rgba(184,115,51,0.7)":"rgba(74,124,47,0.7)"),
+      borderColor: data.map(v => v>5?"#8b2e1a":v>3?"#b87333":"#4a7c2f"),
+      borderWidth:1.5, borderRadius:6
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => `${ctx.raw.toFixed(1)}h` }}},
+      scales:{
+        y:{ beginAtZero:true, grid:{ color:"rgba(0,0,0,0.05)" }, ticks:{font:{size:10}} },
+        x:{ grid:{ display:false }, ticks:{font:{size:10}} }
+      }
     }
-    
-    // Obtener el agua bebida hoy
-    function getWaterLoggedToday() {
-        return hydrationData.waterLoggedToday;
-    }
+  });
+  const lg = document.getElementById("phoneChartLegend");
+  if(lg) {
+    const avg = data.reduce((a,b)=>a+b,0)/7;
+    lg.textContent = `Media semanal: ${avg.toFixed(1)}h/día · Verde <2h · Naranja 2-5h · Rojo >5h`;
+  }
+}
 
-    // ==================== RESTO DE NECESIDADES ====================
-    const NEEDS_CONFIG = [
-        { id: "hydration", name: "Hidratación", icon: "💧", habitId: "water_habit", habitName: "Beber agua", maxHoursWithout: 24, initial: 100 },
-        { id: "strength", name: "Fuerza", icon: "💪", habitId: "sport_habit", habitName: "Hacer deporte", maxHoursWithout: 168, initial: 100 },
-        { id: "intelligence", name: "Inteligencia", icon: "🧠", habitId: "german_study", habitName: "Estudiar alemán", maxHoursWithout: 72, initial: 100 },
-        { id: "energy", name: "Energía", icon: "⚡", habitId: "steps_habit", habitName: "Caminar 10k pasos", maxHoursWithout: 72, initial: 100, requiresWeekly: true, requiredDaysPerWeek: 3 },
-        { id: "calmness", name: "Tranquilidad", icon: "🍃", habitId: "order_habit", habitName: "Test de orden (nota 10)", maxHoursWithout: 48, initial: 100, requiresPerfectScore: true },
-        { id: "flexibility", name: "Elasticidad", icon: "🧘", habitId: "stretch_habit", habitName: "Estiramientos", maxHoursWithout: 24, initial: 100 },
-        { id: "entertainment", name: "Entretenimiento", icon: "📖", habitId: "reading_habit", habitName: "Leer", maxHoursWithout: 48, initial: 100 }
-    ];
+function renderGoalsPage() {}
 
-    let needsState = {};
-    let weeklyHabitLog = { steps: [] };
-    let lastOrderTestScore = 0;
-    let lastOrderTestDate = null;
-    let lastReadingDate = null;
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+function navigateTo(pageId) {
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-link").forEach(l=>l.classList.remove("active"));
+  const page = document.getElementById("page-"+pageId);
+  if(page) page.classList.add("active");
+  const link = document.querySelector(`.nav-link[data-page="${pageId}"]`);
+  if(link) link.classList.add("active");
+  window.scrollTo(0,0);
+  closeNav();
+  
+  if(pageId==="movil") { setTimeout(renderPhoneChart,100); }
+  if(pageId==="orden") { document.getElementById("orderQuestionsContainer").innerHTML = ""; renderOrderPage(); }
+  
+  renderHabits();
+}
 
-    let avatar = { name: "Leire", level: 1, xp: 0, xpToNext: 100, alive: true };
-    let goalsState = {
-        german: { currentHours: 0, targetHours: 660 },
-        spagatt: { currentCmToGround: 32 },
-        order: { dailyScores: [], currentAvg: 0 },
-        running: { currentMaxKm: 0, targetKm: 20, paceMinPerKm: 7.5 },
-        reading: { totalMinutes: 0, entries: [] }
-    };
-    
-    let phoneUsage = [];
-    let phoneChart = null;
-    let decayInterval = null;
-    let cooldowns = {};
+function closeNav() {
+  document.getElementById("mainNav").classList.remove("open");
+  document.getElementById("navOverlay").classList.remove("show");
+}
 
-    function initNeedsState() {
-        let state = {};
-        NEEDS_CONFIG.forEach(need => {
-            if (need.id === "hydration") return;
-            state[need.id] = { value: need.initial, lastFulfilled: Date.now() };
-        });
-        return state;
-    }
-
-    function checkDeathByNeeds() {
-        if (!avatar.alive) return true;
-        
-        if (!updateHydrationLevel()) return true;
-        
-        const now = Date.now();
-        
-        for (let need of NEEDS_CONFIG) {
-            if (need.id === "hydration") continue;
-            
-            const state = needsState[need.id];
-            if (!state) continue;
-            
-            const hoursSinceLast = (now - state.lastFulfilled) / (1000 * 60 * 60);
-            
-            if (need.id === "energy") {
-                const lastWeek = now - 7 * 24 * 60 * 60 * 1000;
-                const daysWithSteps = weeklyHabitLog.steps.filter(date => date > lastWeek).length;
-                if (daysWithSteps < need.requiredDaysPerWeek) {
-                    avatar.alive = false;
-                    addToast(`💀 ${need.name}: No caminaste 10.000 pasos al menos 3 días esta semana`);
-                    return true;
-                }
-            }
-            else if (need.id === "calmness") {
-                if (lastOrderTestDate) {
-                    const daysSinceTest = (now - lastOrderTestDate) / (1000 * 60 * 60 * 24);
-                    if (daysSinceTest <= 2 && lastOrderTestScore === 10) continue;
-                    else { avatar.alive = false; addToast(`💀 ${need.name}: Necesitas sacar un 10 en el test de orden cada 2 días`); return true; }
-                } else { avatar.alive = false; addToast(`💀 ${need.name}: No has realizado ningún test de orden`); return true; }
-            }
-            else if (need.id === "entertainment") {
-                if (lastReadingDate) {
-                    const daysSinceReading = (now - lastReadingDate) / (1000 * 60 * 60 * 24);
-                    if (daysSinceReading >= 2) { avatar.alive = false; addToast(`💀 ${need.name}: Llevas más de 2 días sin leer`); return true; }
-                } else { avatar.alive = false; addToast(`💀 ${need.name}: Nunca has leído`); return true; }
-            }
-            else if (hoursSinceLast >= need.maxHoursWithout) {
-                avatar.alive = false;
-                addToast(`💀 ${need.name}: Has pasado más de ${need.maxHoursWithout}h sin ${need.habitName}`);
-                return true;
-            }
-            
-            let newValue = Math.max(0, 100 - (hoursSinceLast / need.maxHoursWithout) * 100);
-            state.value = Math.min(100, newValue);
-        }
-        
-        if (!avatar.alive) {
-            if (decayInterval) clearInterval(decayInterval);
-            updateUI();
-        }
-        return !avatar.alive;
-    }
-
-    function fulfillNeed(needId, habitId, customValue = null) {
-        const need = NEEDS_CONFIG.find(n => n.id === needId);
-        if (!need) return false;
-        
-        const now = Date.now();
-        needsState[need.id].lastFulfilled = now;
-        needsState[need.id].value = 100;
-        
-        if (needId === "energy" && habitId === "steps_habit" && customValue !== null && customValue >= 10000) {
-            weeklyHabitLog.steps.push(now);
-            const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
-            weeklyHabitLog.steps = weeklyHabitLog.steps.filter(t => t > oneWeekAgo);
-        }
-        if (needId === "calmness" && habitId === "order_habit" && customValue !== null) {
-            lastOrderTestScore = customValue;
-            lastOrderTestDate = now;
-        }
-        if (needId === "entertainment" && habitId === "reading_habit") lastReadingDate = now;
-        
-        avatar.xp += 8;
-        checkLevelUp();
-        addToast(`✨ +${need.name}: ¡${need.habitName} completado! +8 XP`);
-        saveGame();
-        updateUI();
-        return true;
-    }
-
-    function addReadingTime(minutes) {
-        if (!avatar.alive) return;
-        if (isNaN(minutes) || minutes <= 0) { addToast("Ingresa minutos válidos"); return; }
-        
-        goalsState.reading.entries.push({ date: new Date().toDateString(), minutes: minutes });
-        if (goalsState.reading.entries.length > 7) goalsState.reading.entries.shift();
-        goalsState.reading.totalMinutes = goalsState.reading.entries.reduce((sum, e) => sum + e.minutes, 0);
-        fulfillNeed("entertainment", "reading_habit");
-        avatar.xp += Math.floor(minutes / 15) + 3;
-        checkLevelUp();
-        addToast(`📚 +${minutes} min de lectura`);
-        saveGame();
-        updateUI();
-    }
-
-    function getReadingAverage() {
-        if (goalsState.reading.entries.length === 0) return 0;
-        return goalsState.reading.entries.reduce((sum, e) => sum + e.minutes, 0) / goalsState.reading.entries.length;
-    }
-
-    function updateNeedsUI() {
-        const container = document.getElementById("needsContainer");
-        container.innerHTML = "";
-        
-        for (let need of NEEDS_CONFIG) {
-            let percent = 0;
-            let extraText = "";
-            
-            if (need.id === "hydration") {
-                percent = getHydrationLevel();
-                const now = new Date();
-                const hours = now.getHours();
-                const minutes = now.getMinutes();
-                const remainingMinutes = (24 * 60) - (hours * 60 + minutes);
-                const remainingHours = (remainingMinutes / 60).toFixed(1);
-                extraText = `<div style="font-size:0.6rem; color:#5c6e4a; margin-top:4px;">⏳ ${remainingHours}h restantes · Bebido: ${getWaterLoggedToday().toFixed(1)}/1.5L</div>`;
-            } else {
-                const state = needsState[need.id];
-                percent = state ? state.value : 100;
-                const now = Date.now();
-                const hoursSince = (now - state.lastFulfilled) / (1000 * 60 * 60);
-                const remaining = Math.max(0, need.maxHoursWithout - hoursSince);
-                const remainingText = need.maxHoursWithout >= 168 ? `${(remaining/24).toFixed(1)}d` : `${remaining.toFixed(1)}h`;
-                extraText = `<div style="font-size:0.6rem; color:#8f7a64; margin-top:4px;">⏰ ${remainingText}</div>`;
-            }
-            
-            const isCritical = percent < 25;
-            container.innerHTML += `<div class="need ${isCritical ? 'critical' : ''}"><div class="need-label"><span>${need.icon} ${need.name}</span><span>${Math.floor(percent)}%</span></div><div class="bar-bg"><div class="bar-fill" style="width: ${percent}%;"></div></div>${extraText}</div>`;
-        }
-    }
-
-    function checkLevelUp() {
-        while (avatar.xp >= avatar.xpToNext) {
-            avatar.xp -= avatar.xpToNext;
-            avatar.level++;
-            avatar.xpToNext = Math.floor(avatar.xpToNext * 1.2);
-            addToast(`🎋 ¡Subiste al nivel ${avatar.level}!`);
-        }
-    }
-
-    function addToast(msg) {
-        let t = document.createElement("div");
-        t.innerText = msg;
-        t.style.position = "fixed"; t.style.bottom = "70px"; t.style.left = "20px";
-        t.style.backgroundColor = "#e6ddcf"; t.style.padding = "6px 16px"; t.style.borderRadius = "40px";
-        t.style.fontSize = "0.7rem"; t.style.zIndex = "999";
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 3000);
-    }
-
-    const HABITS = [
-        { id: "sport_habit", name: "Hacer deporte", icon: "🏋️", xp: 15, needId: "strength", customSport: true },
-        { id: "german_study", name: "Estudiar alemán 1h", icon: "📖", xp: 14, needId: "intelligence", goalEffect: { german: 1 } },
-        { id: "steps_habit", name: "Caminar 10.000 pasos", icon: "👣", xp: 12, needId: "energy", customSteps: true },
-        { id: "order_habit", name: "Test de orden", icon: "🧹", xp: 10, needId: "calmness", customOrder: true },
-        { id: "stretch_habit", name: "Estiramientos", icon: "🧘", xp: 10, needId: "flexibility", goalEffect: { spagatt: -1.2 } },
-        { id: "reading_habit", name: "Leer", icon: "📚", xp: 12, needId: "entertainment", customReading: true }
-    ];
-
-    function completeHabit(habit, customVal = null) {
-        if (!avatar.alive) { addToast("❌ Avatar muerto"); return false; }
-        let cd = cooldowns[habit.id];
-        if (cd && !cd.available) { addToast(`⏳ ${habit.name} en ${Math.ceil(cd.remaining)}s`); return false; }
-        
-        if (habit.needId) fulfillNeed(habit.needId, habit.id, customVal);
-        
-        if (habit.customSteps && customVal !== null) {
-            const steps = parseInt(customVal);
-            if (!isNaN(steps) && steps > 0) {
-                if (steps >= 10000) fulfillNeed("energy", habit.id, steps);
-                addToast(`👣 +${steps} pasos`);
-            }
-        }
-        if (habit.customSport && customVal !== null) {
-            const km = parseFloat(customVal);
-            if (!isNaN(km) && km > 0 && km > goalsState.running.currentMaxKm) {
-                goalsState.running.currentMaxKm = Math.min(20, km);
-                addToast(`🏃 +${km}km · Mejor marca: ${goalsState.running.currentMaxKm}km`);
-            }
-            fulfillNeed("strength", habit.id);
-        }
-        if (habit.customOrder) runOrderTestAndFulfill();
-        if (habit.customReading && customVal !== null) addReadingTime(customVal);
-        
-        if (habit.goalEffect) {
-            if (habit.goalEffect.german) goalsState.german.currentHours = Math.min(660, goalsState.german.currentHours + 1);
-            if (habit.goalEffect.spagatt) goalsState.spagatt.currentCmToGround = Math.max(0, goalsState.spagatt.currentCmToGround + habit.goalEffect.spagatt);
-        }
-        
-        avatar.xp += habit.xp;
-        checkLevelUp();
-        
-        cooldowns[habit.id] = { available: false, remaining: 20 };
-        let itv = setInterval(() => {
-            if (cooldowns[habit.id].remaining <= 1) { cooldowns[habit.id].available = true; clearInterval(itv); renderDailyHabits(); }
-            else { cooldowns[habit.id].remaining--; renderDailyHabits(); }
-        }, 1000);
-        
-        saveGame(); updateUI();
-        return true;
-    }
-
-    function runOrderTestAndFulfill() {
-        let questions = ["¿Suelo libre de objetos?", "¿Mesa despejada?", "¿Ropa preparada?", "¿Cama hecha?", "¿Ventilaste?", "¿Pasaste escoba?"];
-        let score = 0; for (let q of questions) if (confirm(q + "\n\nAceptar=SÍ / Cancelar=NO")) score++;
-        let note = Math.round((score / questions.length) * 10 * 10) / 10;
-        goalsState.order.dailyScores.push({ date: new Date().toDateString(), score: note });
-        if (goalsState.order.dailyScores.length > 7) goalsState.order.dailyScores.shift();
-        let sum = goalsState.order.dailyScores.reduce((a, b) => a + b.score, 0);
-        goalsState.order.currentAvg = goalsState.order.dailyScores.length ? sum / goalsState.order.dailyScores.length : 0;
-        addToast(`📋 Test orden: ${note}/10`);
-        if (note === 10) fulfillNeed("calmness", "order_habit", note);
-    }
-
-    function addPhoneHours(hours) {
-        if (!avatar.alive) return;
-        if (isNaN(hours) || hours < 0) return;
-        const today = new Date().toDateString();
-        const existing = phoneUsage.find(p => p.date === today);
-        if (existing) existing.hours += hours;
-        else phoneUsage.push({ date: today, hours: hours });
-        if (phoneUsage.length > 14) phoneUsage.shift();
-        let damage = hours * 1.2;
-        if (needsState["calmness"]) needsState["calmness"].value = Math.max(0, needsState["calmness"].value - damage);
-        if (needsState["intelligence"]) needsState["intelligence"].value = Math.max(0, needsState["intelligence"].value - damage * 0.8);
-        addToast(`📱 +${hours}h de móvil`);
-        saveGame(); updateUI(); updatePhoneChart();
-    }
-
-    function updatePhoneChart() {
-        const ctx = document.getElementById('phoneChart').getContext('2d');
-        const last7 = [], labels = [];
-        for (let i = 6; i >= 0; i--) {
-            const d = new Date(); d.setDate(d.getDate() - i);
-            labels.push(d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' }));
-            const entry = phoneUsage.find(p => p.date === d.toDateString());
-            last7.push(entry ? entry.hours : 0);
-        }
-        if (phoneChart) phoneChart.destroy();
-        phoneChart = new Chart(ctx, { 
-    type: 'line', 
-    data: { 
-        labels, 
-        datasets: [{ 
-            label: 'Horas de móvil', 
-            data: last7, 
-            borderColor: '#c46a3a', 
-            backgroundColor: 'rgba(196,106,58,0.1)', 
-            borderWidth: 2.5, 
-            pointRadius: 4, 
-            fill: true 
-        }] 
-    }, 
-    options: { 
-        responsive: true, 
-        maintainAspectRatio: true,
-        scales: {
-            y: {
-                beginAtZero: true,
-                min: 0,
-                title: {
-                    display: true,
-                    text: 'Horas',
-                    font: { size: 10 }
-                },
-                grid: { color: '#e5d9ce' }
-            },
-            x: {
-                ticks: { font: { size: 10 } },
-                grid: { display: false }
-            }
-        }
-    } 
+document.getElementById("burgerBtn").addEventListener("click",()=>{
+  document.getElementById("mainNav").classList.toggle("open");
+  document.getElementById("navOverlay").classList.toggle("show");
 });
-        const avg = last7.reduce((a, b) => a + b, 0) / 7;
-        document.getElementById('todayPhone').innerText = last7[6].toFixed(1);
-        document.getElementById('avgPhone').innerText = avg.toFixed(1);
-        document.getElementById('phoneWarning').innerHTML = last7[6] > 5 ? "⚠️ Alto uso de móvil" : (last7[6] > 3 ? "📱 Reduce el móvil" : "🌿 Buen control");
-    }
+document.getElementById("navOverlay").addEventListener("click", closeNav);
 
-    function fullResetGame() {
-        avatar = { name: "Leire", level: 1, xp: 0, xpToNext: 100, alive: true };
-        goalsState = { german: { currentHours: 0, targetHours: 660 }, spagatt: { currentCmToGround: 32 }, order: { dailyScores: [], currentAvg: 0 }, running: { currentMaxKm: 0, targetKm: 20, paceMinPerKm: 7.5 }, reading: { totalMinutes: 0, entries: [] } };
-        needsState = initNeedsState();
-        weeklyHabitLog = { steps: [] };
-        lastOrderTestScore = 0; lastOrderTestDate = null; lastReadingDate = null;
-        phoneUsage = []; cooldowns = {};
-        hydrationData = { lastDate: new Date().toDateString(), currentLevel: getHydrationByTimeOfDay(), lastUpdateTimestamp: Date.now(), targetLiters: 1.5, waterLoggedToday: 0 };
-        saveGame(); updateUI(); updatePhoneChart();
-        addToast("✨ Todo reiniciado");
-    }
+document.querySelectorAll(".nav-link").forEach(link=>{
+  link.addEventListener("click",()=>{
+    navigateTo(link.dataset.page);
+  });
+});
 
-    function saveGame() { localStorage.setItem("LevelUpV6", JSON.stringify({ avatar, goalsState, needsState, weeklyHabitLog, lastOrderTestScore, lastOrderTestDate, lastReadingDate, phoneUsage, cooldowns, hydrationData })); }
-    function loadGame() {
-        const raw = localStorage.getItem("LevelUpV6");
-        if (raw) {
-            try {
-                const p = JSON.parse(raw);
-                avatar = p.avatar; goalsState = p.goalsState; needsState = p.needsState; weeklyHabitLog = p.weeklyHabitLog || { steps: [] };
-                lastOrderTestScore = p.lastOrderTestScore || 0; lastOrderTestDate = p.lastOrderTestDate || null; lastReadingDate = p.lastReadingDate || null;
-                phoneUsage = p.phoneUsage || []; cooldowns = p.cooldowns || {};
-                hydrationData = p.hydrationData || { lastDate: new Date().toDateString(), currentLevel: getHydrationByTimeOfDay(), lastUpdateTimestamp: Date.now(), targetLiters: 1.5, waterLoggedToday: 0 };
-                if (!goalsState.reading) goalsState.reading = { totalMinutes: 0, entries: [] };
-                if (!avatar.name) avatar.name = "Leire";
-                if (!needsState || Object.keys(needsState).length === 0) needsState = initNeedsState();
-            } catch(e) { fullResetGame(); }
-        } else fullResetGame();
-        if (!avatar.alive) avatar.alive = true;
-        updateHydrationLevel();
-        updateUI(); updatePhoneChart();
-        startDecayLoop();
-    }
+function toast(msg) {
+  const box = document.getElementById("toastBox");
+  const t = document.createElement("div");
+  t.className = "toast"; t.textContent = msg;
+  box.appendChild(t);
+  setTimeout(()=>t.remove(), 3100);
+}
 
-    function startDecayLoop() {
-        if (decayInterval) clearInterval(decayInterval);
-        decayInterval = setInterval(() => { if (avatar.alive) { checkDeathByNeeds(); updateNeedsUI(); saveGame(); } }, 5000);
+function startDecay() {
+  if(decayInterval) clearInterval(decayInterval);
+  decayInterval = setInterval(()=>{
+    if(plant.alive) { 
+      applyDecay(); 
+      updateHydrationLevel();
+      renderAll(); 
     }
+  }, 60000);
+}
 
-    function updateUI() {
-        if (!avatar.alive) {
-            document.getElementById("needsContainer").innerHTML = `<div style="padding:1rem;">🍂 Avatar muerto · Reinicia</div>`;
-            document.getElementById("levelDisplay").innerText = "✧ Muerto ✧";
-            document.getElementById("dailyHabitsList").innerHTML = `<i>Reinicia para comenzar</i>`;
-            return;
-        }
-        updateHydrationLevel();
-        updateNeedsUI();
-        document.getElementById("avatarNameDisplay").innerText = avatar.name;
-        document.getElementById("levelDisplay").innerHTML = `Nivel ${avatar.level} · ${avatar.xp}/${avatar.xpToNext} exp`;
-        document.getElementById("avatarEmoji").innerHTML = avatar.level >= 4 ? "🌳" : "🌱";
-        document.getElementById("waterStats").innerHTML = `💧 Nivel: ${Math.floor(getHydrationLevel())}% · Bebido hoy: ${getWaterLoggedToday().toFixed(1)}/1.5L`;
-        
-        let streakHtml = "";
-        const now = Date.now();
-        for (let need of NEEDS_CONFIG) {
-            if (need.id === "hydration") continue;
-            const state = needsState[need.id];
-            if (state) {
-                const hoursSince = (now - state.lastFulfilled) / (1000 * 60 * 60);
-                const remaining = Math.max(0, need.maxHoursWithout - hoursSince);
-                const remainingText = need.maxHoursWithout >= 168 ? `${(remaining/24).toFixed(1)}d` : `${remaining.toFixed(1)}h`;
-                streakHtml += `<div class="stat-badge">⏳ ${need.name}: ${remainingText}</div>`;
-            }
-        }
-        document.getElementById("streaksContainer").innerHTML = streakHtml;
-        
-        const grid = document.getElementById("goalsGrid");
-        let germanPercent = (goalsState.german.currentHours / 660) * 100;
-        let levelEst = "A1"; if (goalsState.german.currentHours >= 200) levelEst = "A2"; if (goalsState.german.currentHours >= 400) levelEst = "B1"; if (goalsState.german.currentHours >= 600) levelEst = "B2";
-        grid.innerHTML = `
-            <div class="goal-card"><div class="goal-title">📖 Alemán ${levelEst}→B2</div><div class="progress-stat">${goalsState.german.currentHours}/660h (${Math.min(100, germanPercent).toFixed(0)}%)</div><div class="input-group"><input type="number" id="germanHoursAdd" step="0.5" placeholder="+horas"><button id="addGermanBtn">+</button></div></div>
-            <div class="goal-card"><div class="goal-title">🧘 Spagatt</div><div class="progress-stat">${goalsState.spagatt.currentCmToGround <= 0 ? "Completado" : goalsState.spagatt.currentCmToGround.toFixed(1) + " cm al suelo"}</div><div class="input-group"><input type="number" id="spagattCm" step="0.5" placeholder="cm"><button id="updateSpagattBtn">Act</button></div></div>
-            <div class="goal-card"><div class="goal-title">🧹 Orden</div><div class="progress-stat">Media ${goalsState.order.currentAvg.toFixed(1)}/10 · ${goalsState.order.dailyScores.length} tests</div><button id="orderTestBtn" class="test-btn">Test orden</button></div>
-            <div class="goal-card"><div class="goal-title">🏃 Correr 20km</div><div class="progress-stat">Máx: ${goalsState.running.currentMaxKm}km · Ritmo ${goalsState.running.paceMinPerKm}min/km</div><div class="input-group"><input type="number" id="runKmAdd" step="0.5" placeholder="km"><button id="addRunBtn">+</button><input type="number" id="paceInput" step="0.1" value="${goalsState.running.paceMinPerKm}" style="width:70px"><button id="updatePaceBtn">Ritmo</button></div></div>
-            <div class="goal-card"><div class="goal-title">📚 Lectura</div><div class="progress-stat">Media: ${getReadingAverage().toFixed(0)} min/día</div><div class="input-group"><input type="number" id="readingMinsAdd" step="5" placeholder="minutos"><button id="addReadingGoalBtn">+ Leer</button></div></div>
-        `;
-        
-        document.getElementById("addGermanBtn")?.addEventListener("click", () => { let h = parseFloat(document.getElementById("germanHoursAdd").value); if (!isNaN(h) && h > 0) { goalsState.german.currentHours = Math.min(660, goalsState.german.currentHours + h); saveGame(); updateUI(); addToast(`alemán +${h}h`); } });
-        document.getElementById("updateSpagattBtn")?.addEventListener("click", () => { let cm = parseFloat(document.getElementById("spagattCm").value); if (!isNaN(cm) && cm >= 0) { goalsState.spagatt.currentCmToGround = Math.min(50, cm); saveGame(); updateUI(); } });
-        document.getElementById("orderTestBtn")?.addEventListener("click", () => { runOrderTestAndFulfill(); updateUI(); });
-        document.getElementById("addRunBtn")?.addEventListener("click", () => { let km = parseFloat(document.getElementById("runKmAdd").value); if (!isNaN(km) && km > 0 && km > goalsState.running.currentMaxKm) { goalsState.running.currentMaxKm = Math.min(20, km); saveGame(); updateUI(); addToast(`🏅 mejor marca: ${goalsState.running.currentMaxKm}km`); } });
-        document.getElementById("updatePaceBtn")?.addEventListener("click", () => { let p = parseFloat(document.getElementById("paceInput").value); if (!isNaN(p) && p > 0) { goalsState.running.paceMinPerKm = p; saveGame(); updateUI(); } });
-        document.getElementById("addReadingGoalBtn")?.addEventListener("click", () => { let mins = parseInt(document.getElementById("readingMinsAdd").value); if (!isNaN(mins) && mins > 0) { addReadingTime(mins); updateUI(); } });
-        
-        renderDailyHabits();
-    }
-
-    function renderDailyHabits() {
-        const container = document.getElementById("dailyHabitsList");
-        if (!avatar.alive) { container.innerHTML = "🌱 Reinicia"; return; }
-        container.innerHTML = "";
-        HABITS.forEach(habit => {
-            let cd = cooldowns[habit.id];
-            let available = cd?.available !== false;
-            let remaining = cd?.remaining || 0;
-            let btnHtml = !available ? `<span class="cooldown">⏳${Math.ceil(remaining)}s</span>` : `<button data-habit="${habit.id}" class="habit-act">+ ${habit.name}</button>`;
-            if (habit.id === "steps_habit") btnHtml = !available ? `<span class="cooldown">⏳${Math.ceil(remaining)}s</span>` : `<div class="input-group" style="margin:0"><input type="number" id="stepsInput" step="1000" placeholder="pasos" style="width:70px"><button data-habit="${habit.id}" class="habit-steps">👣</button></div>`;
-            if (habit.id === "sport_habit") btnHtml = !available ? `<span class="cooldown">⏳${Math.ceil(remaining)}s</span>` : `<div class="input-group" style="margin:0"><input type="number" id="sportKm" step="0.5" placeholder="km" style="width:60px"><button data-habit="${habit.id}" class="habit-sport">🏋️</button></div>`;
-            if (habit.id === "reading_habit") btnHtml = !available ? `<span class="cooldown">⏳${Math.ceil(remaining)}s</span>` : `<div class="input-group" style="margin:0"><input type="number" id="readingMins" step="5" placeholder="min" style="width:60px"><button data-habit="${habit.id}" class="habit-reading">📚</button></div>`;
-            if (habit.id === "order_habit") btnHtml = !available ? `<span class="cooldown">⏳${Math.ceil(remaining)}s</span>` : `<button data-habit="${habit.id}" class="habit-act">🧹 Test orden</button>`;
-            container.innerHTML += `<div class="habit-pill">${habit.icon} ${habit.name} ${btnHtml}</div>`;
-        });
-        
-        document.querySelectorAll(".habit-act").forEach(btn => btn.addEventListener("click", () => { let hid = btn.getAttribute("data-habit"); let hobj = HABITS.find(h => h.id === hid); if (hobj) completeHabit(hobj); }));
-        document.querySelectorAll(".habit-steps").forEach(btn => btn.addEventListener("click", () => { let steps = parseInt(document.getElementById("stepsInput")?.value); if (!isNaN(steps) && steps > 0) completeHabit(HABITS.find(h => h.id === "steps_habit"), steps); else addToast("Ingresa pasos válidos"); }));
-        document.querySelectorAll(".habit-sport").forEach(btn => btn.addEventListener("click", () => { let km = parseFloat(document.getElementById("sportKm")?.value); if (!isNaN(km) && km > 0) completeHabit(HABITS.find(h => h.id === "sport_habit"), km); else addToast("Ingresa km válidos"); }));
-        document.querySelectorAll(".habit-reading").forEach(btn => btn.addEventListener("click", () => { let mins = parseInt(document.getElementById("readingMins")?.value); if (!isNaN(mins) && mins > 0) completeHabit(HABITS.find(h => h.id === "reading_habit"), mins); else addToast("Ingresa minutos válidos"); }));
-    }
-
-    document.getElementById("addWaterBtn")?.addEventListener("click", () => { let l = parseFloat(document.getElementById("waterAmount").value); if (!isNaN(l) && l > 0) addWater(l); });
-    document.getElementById("addPhoneBtn")?.addEventListener("click", () => { let h = parseFloat(document.getElementById("phoneHours").value); if (!isNaN(h) && h >= 0) addPhoneHours(h); });
-    document.getElementById("editNameBtn")?.addEventListener("click", () => { let n = prompt("Nombre", avatar.name); if (n && n.trim()) { avatar.name = n.trim().slice(0, 20); saveGame(); updateUI(); } });
-    document.getElementById("resetGameBtn")?.addEventListener("click", () => fullResetGame());
-    
-    loadGame();
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+load();
+applyDecay();
+updateHydrationLevel();
+renderAll();
+renderPhoneChart();
+startDecay();
 </script>
 </body>
 </html>
