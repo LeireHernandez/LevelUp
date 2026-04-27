@@ -818,13 +818,13 @@ main {
 // CONFIG & STATE
 // ══════════════════════════════════════════════
 const NEEDS_CONFIG = [
-  { id:"hydration", name:"Hidratación", icon:"💧", habit:"beber agua", page:"agua", deathReason:"deshidratación", hoursToZero:24 },
-  { id:"strength",  name:"Fuerza",      icon:"💪", habit:"hacer deporte", page:"deporte", deathReason:"falta de ejercicio", hoursToZero:168 },
-  { id:"intelligence", name:"Inteligencia", icon:"🧠", habit:"estudiar alemán", page:"aleman", deathReason:"falta de estimulación mental", hoursToZero:72 },
-  { id:"energy",    name:"Energía",     icon:"⚡", habit:"10.000 pasos", page:"pasos", deathReason:"sedentarismo", hoursToZero:72 },
-  { id:"calmness",  name:"Tranquilidad",icon:"🍃", habit:"test de orden", page:"orden", deathReason:"estrés y desorden", hoursToZero:48 },
-  { id:"flexibility",name:"Elasticidad",icon:"🧘", habit:"estiramientos", page:"estiramientos", deathReason:"pérdida de flexibilidad", hoursToZero:24 },
-  { id:"entertainment",name:"Entretenimiento",icon:"📖", habit:"leer", page:"lectura", deathReason:"falta de cultura", hoursToZero:48 }
+  { id:"hydration",     name:"Hidratación",    icon:"💧", habit:"beber agua",       page:"agua",          deathReason:"deshidratación",                   hoursToZero:24  },
+  { id:"strength",      name:"Fuerza",         icon:"💪", habit:"hacer deporte",    page:"deporte",       deathReason:"falta de ejercicio",               hoursToZero:168 },
+  { id:"intelligence",  name:"Inteligencia",   icon:"🧠", habit:"estudiar alemán",  page:"aleman",        deathReason:"falta de estimulación mental",     hoursToZero:72  },
+  { id:"energy",        name:"Energía",        icon:"⚡", habit:"10.000 pasos",     page:"pasos",         deathReason:"sedentarismo",                     hoursToZero:72  },
+  { id:"calmness",      name:"Tranquilidad",   icon:"🍃", habit:"test de orden",    page:"orden",         deathReason:"estrés y desorden",                hoursToZero:48  },
+  { id:"flexibility",   name:"Elasticidad",    icon:"🧘", habit:"estiramientos",    page:"estiramientos", deathReason:"pérdida de flexibilidad",          hoursToZero:24  },
+  { id:"entertainment", name:"Entretenimiento",icon:"📖", habit:"leer",             page:"lectura",       deathReason:"falta de cultura",                 hoursToZero:48  }
 ];
 
 const ORDER_QUESTIONS = [
@@ -835,6 +835,11 @@ const ORDER_QUESTIONS = [
   "¿Has ventilado la habitación?",
   "¿Has pasado la escoba/fregona?"
 ];
+
+const DECAY_PER_HOUR = {
+  hydration:4.167, strength:0.595, intelligence:1.389,
+  energy:1.389, calmness:2.083, flexibility:4.167, entertainment:2.083
+};
 
 let plant = {};
 let needsState = {};
@@ -848,217 +853,169 @@ let lastDecayTs = Date.now();
 let phoneChartInst = null;
 let decayInterval = null;
 
-const DECAY_PER_HOUR = {
-  hydration:4.167, strength:0.595, intelligence:1.389,
-  energy:1.389, calmness:2.083, flexibility:4.167, entertainment:2.083
-};
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+function todayStr() { return new Date().toDateString(); }
 
-function defaultState() {
-  const now = Date.now();
-  plant = { name:"Leire", level:1, xp:0, xpNext:100, alive:true, deathReason:null, createdAt:now };
-  needsState = {};
-  NEEDS_CONFIG.forEach(n => { if(n.id!=="hydration") needsState[n.id] = { value:100, lastFulfilled:now }; });
-  
-  // HIDRATACIÓN: nuevo sistema diario
-  hydration = { 
-    level: 100,           // nivel actual (se recalcula en tiempo real)
-    extraHydration: 0,    // hidratación extra ganada por beber agua (0-100)
-    loggedToday: 0,       // litros bebidos hoy
-    target: 1.5,          // objetivo diario en litros
-    lastResetDate: getTodayKey()  // fecha del último reinicio
-  };
-  
-  goals = {
-    german:{ hours:0, target:660 },
-    spagatt:{ cmToGround:32 },
-    order:{ scores:[], avg:0 },
-    running:{ maxKm:0, target:20, pace:7.5 },
-    reading:{ entries:[] }
-  };
-  phoneUsage = [];
-  cooldowns = {};
-  dailyActions = { orderDone:false, phoneDone:false, date:todayStr() };
-  streak = { current:0, lastCompleteDay:null, habitsToday:new Set() };
-  lastDecayTs = now;
-}
-
-// Obtener clave del día actual (YYYY-MM-DD)
 function getTodayKey() {
   const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-// Calcular nivel de hidratación actual basado en la hora del día + agua bebida
-function getCurrentHydrationLevel() {
-  if (!plant.alive) return 0;
-  
-  const now = new Date();
-  const todayKey = getTodayKey();
-  
-  // Si es un nuevo día, resetear la hidratación base
-  if (hydration.lastResetDate !== todayKey) {
-    hydration.lastResetDate = todayKey;
-    hydration.extraHydration = 0;
-    hydration.loggedToday = 0;
-    // No resetear level aquí, se calculará desde 0% al empezar el día
-  }
-  
-  // Calcular horas transcurridas desde medianoche
-  const hoursSinceMidnight = now.getHours() + (now.getMinutes() / 60);
-  
-  // El nivel BASE baja del 100% al 0% durante el día (0% a las 24h)
-  // Fórmula: baseLevel = 100 - (hoursSinceMidnight * 100 / 24)
-  let baseLevel = Math.max(0, 100 - (hoursSinceMidnight * 100 / 24));
-  
-  // Aplicar hidratación extra por beber agua (máximo 100)
-  let finalLevel = Math.min(100, baseLevel + hydration.extraHydration);
-  
-  return Math.max(0, finalLevel);
-}
-
-// Actualizar el nivel de hidratación guardado (para mantener consistencia)
-function updateHydrationLevel() {
-  hydration.level = getCurrentHydrationLevel();
-}
-
-// Función para beber agua (modificada para el nuevo sistema)
-function addWater(liters) {
-  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
-  if (isNaN(liters) || liters <= 0) { toast("Cantidad inválida"); return; }
-  
-  // Calcular cuánto porcentaje de hidratación extra da este litro
-  const pctFromLiter = (liters / hydration.target) * 100;
-  
-  // Añadir a la hidratación extra (máximo 100)
-  hydration.extraHydration = Math.min(100, hydration.extraHydration + pctFromLiter);
-  
-  // Actualizar litros bebidos hoy
-  hydration.loggedToday = Math.min(hydration.target, hydration.loggedToday + liters);
-  
-  // Actualizar el nivel mostrado
-  updateHydrationLevel();
-  
-  // Marcar hábito de hidratación como completado para la racha
-  streak.habitsToday.add("hydration");
-  
-  // Dar XP
-  plant.xp += 3;
-  checkLevelUp();
-  
-  toast(`💧 +${liters}L · Hidratación ${Math.round(hydration.level)}%`);
-  save();
-  renderAll();
-}
-
+// ══════════════════════════════════════════════
+// DEFAULT STATE  (definida UNA SOLA VEZ)
+// ══════════════════════════════════════════════
 function defaultState() {
   const now = Date.now();
   plant = { name:"Leire", level:1, xp:0, xpNext:100, alive:true, deathReason:null, createdAt:now };
   needsState = {};
-  NEEDS_CONFIG.forEach(n => { if(n.id!=="hydration") needsState[n.id] = { value:100, lastFulfilled:now }; });
-  
-  // HIDRATACIÓN: nuevo sistema diario
-  hydration = { 
+  NEEDS_CONFIG.forEach(n => {
+    if (n.id !== "hydration") needsState[n.id] = { value:100, lastFulfilled:now };
+  });
+  hydration = {
     level: 100,
     extraHydration: 0,
     loggedToday: 0,
     target: 1.5,
     lastResetDate: getTodayKey()
   };
-  
   goals = {
-    german:{ hours:0, target:660 },
-    spagatt:{ cmToGround:32 },
-    order:{ scores:[], avg:0 },
-    running:{ maxKm:0, target:20, pace:7.5 },
-    reading:{ entries:[] }
+    german:  { hours:0, target:660 },
+    spagatt: { cmToGround:32 },
+    order:   { scores:[], avg:0 },
+    running: { maxKm:0, target:20, pace:7.5 },
+    reading: { entries:[] }
   };
-  phoneUsage = [];
-  cooldowns = {};
+  phoneUsage   = [];
+  cooldowns    = {};
   dailyActions = { orderDone:false, phoneDone:false, date:todayStr() };
-  streak = { current:0, lastCompleteDay:null, habitsToday:new Set() };
-  lastDecayTs = now;
+  streak       = { current:0, lastCompleteDay:null, habitsToday:new Set() };
+  lastDecayTs  = now;
 }
 
-function todayStr() { return new Date().toDateString(); }
+// ══════════════════════════════════════════════
+// HYDRATION SYSTEM
+// ══════════════════════════════════════════════
+function getCurrentHydrationLevel() {
+  if (!plant.alive) return 0;
+
+  const todayKey = getTodayKey();
+
+  // Reset diario
+  if (hydration.lastResetDate !== todayKey) {
+    hydration.lastResetDate  = todayKey;
+    hydration.extraHydration = 0;
+    hydration.loggedToday    = 0;
+  }
+
+  const now = new Date();
+  const hoursSinceMidnight = now.getHours() + (now.getMinutes() / 60);
+  const baseLevel = Math.max(0, 100 - (hoursSinceMidnight * 100 / 24));
+  const finalLevel = Math.min(100, baseLevel + hydration.extraHydration);
+  return Math.max(0, finalLevel);
+}
+
+function updateHydrationLevel() {
+  hydration.level = getCurrentHydrationLevel();
+}
 
 // ══════════════════════════════════════════════
-// SAVE / LOAD
+// SAVE / LOAD  (Set serializado correctamente)
 // ══════════════════════════════════════════════
 function save() {
-  // Antes de guardar, actualizar el nivel actual
   updateHydrationLevel();
-  const s = { plant, needsState, hydration, goals, phoneUsage, cooldowns, dailyActions, streak, lastDecayTs };
-  try { localStorage.setItem("levelup_v2", JSON.stringify(s)); } catch(e){}
+  const s = {
+    plant,
+    needsState,
+    hydration,
+    goals,
+    phoneUsage,
+    cooldowns,
+    dailyActions,
+    streak: { ...streak, habitsToday: [...streak.habitsToday] }, // ✅ Set → Array
+    lastDecayTs
+  };
+  try { localStorage.setItem("levelup_v2", JSON.stringify(s)); } catch(e) { console.warn("Save failed:", e); }
 }
 
 function load() {
   try {
     const raw = localStorage.getItem("levelup_v2");
     if (!raw) { defaultState(); return; }
+
     const s = JSON.parse(raw);
-    plant = s.plant || {}; 
-    needsState = s.needsState || {};
-    hydration = s.hydration || {};
-    goals = s.goals || {}; 
-    phoneUsage = s.phoneUsage || [];
-    cooldowns = s.cooldowns || {}; 
+
+    // Validación mínima
+    if (!s.plant || typeof s.plant.alive === "undefined") { defaultState(); return; }
+
+    plant        = s.plant;
+    needsState   = s.needsState  || {};
+    hydration    = s.hydration   || {};
+    goals        = s.goals       || {};
+    phoneUsage   = s.phoneUsage  || [];
+    cooldowns    = s.cooldowns   || {};
     dailyActions = s.dailyActions || {};
-    streak = s.streak || { current:0, lastCompleteDay:null, habitsToday:[] };
-    
-    // Migrar sistema de hidratación antiguo al nuevo
-    if (hydration.target === undefined) hydration.target = 1.5;
+    lastDecayTs  = s.lastDecayTs || Date.now();
+
+    // ✅ Array → Set (con protección)
+    const ht = s.streak && s.streak.habitsToday;
+    streak = {
+      current:         (s.streak && s.streak.current)         || 0,
+      lastCompleteDay: (s.streak && s.streak.lastCompleteDay) || null,
+      habitsToday:     new Set(Array.isArray(ht) ? ht : [])
+    };
+
+    // Migraciones de campos opcionales
+    if (hydration.target         === undefined) hydration.target         = 1.5;
     if (hydration.extraHydration === undefined) hydration.extraHydration = 0;
-    if (hydration.lastResetDate === undefined) hydration.lastResetDate = getTodayKey();
-    
-    if (Array.isArray(streak.habitsToday)) streak.habitsToday = new Set(streak.habitsToday);
-    lastDecayTs = s.lastDecayTs || Date.now();
-    if (!goals.reading) goals.reading = { entries:[] };
-    if (!goals.order) goals.order = { scores:[], avg:0 };
-    
-    // Actualizar nivel de hidratación después de cargar
+    if (hydration.lastResetDate  === undefined) hydration.lastResetDate  = getTodayKey();
+    if (!goals.reading) goals.reading = { entries: [] };
+    if (!goals.order)   goals.order   = { scores: [], avg: 0 };
+
     updateHydrationLevel();
-  } catch(e) { defaultState(); }
+
+  } catch(e) {
+    console.warn("Load failed, resetting:", e);
+    defaultState();
+  }
 }
 
 // ══════════════════════════════════════════════
-// DECAY (solo para otras necesidades, la hidratación usa el sistema horario)
+// DECAY
 // ══════════════════════════════════════════════
 function applyDecay() {
   if (!plant.alive) return;
   const now = Date.now();
   const hoursPassed = Math.min((now - lastDecayTs) / 3600000, 72);
-  if (hoursPassed < 0.016) return;
-  
-  // La hidratación NO usa este decaimiento, usa el sistema horario
-  // Solo decaen las otras necesidades
+  if (hoursPassed < 0.016) return; // menos de ~1 min, ignorar
+
   NEEDS_CONFIG.forEach(n => {
-    if (n.id === "hydration") return;
+    if (n.id === "hydration") return; // hidratación tiene su propio sistema
     const st = needsState[n.id];
     if (st) {
       st.value = Math.max(0, st.value - (DECAY_PER_HOUR[n.id] || 1) * hoursPassed);
     }
   });
-  
+
   lastDecayTs = now;
   checkDeath();
 }
 
 function checkDeath() {
   if (!plant.alive) return true;
-  
-  // Verificar hidratación con el nuevo sistema
+
   updateHydrationLevel();
-  if (hydration.level <= 0) { 
-    killPlant("deshidratación — no bebiste suficiente agua"); 
-    return true; 
+  if (hydration.level <= 0) {
+    killPlant("deshidratación — no bebiste suficiente agua");
+    return true;
   }
-  
-  // Verificar otras necesidades
+
   for (let n of NEEDS_CONFIG) {
     if (n.id === "hydration") continue;
-    if ((needsState[n.id]?.value || 0) <= 0) { 
-      killPlant(n.deathReason); 
-      return true; 
+    if ((needsState[n.id]?.value || 0) <= 0) {
+      killPlant(n.deathReason);
+      return true;
     }
   }
   return false;
@@ -1080,15 +1037,16 @@ function killPlant(reason) {
 function checkStreak() {
   const today = todayStr();
   if (dailyActions.date !== today) resetDailyActions();
-  
+
   const allHabits = ["hydration","strength","intelligence","energy","calmness","flexibility","entertainment"];
   const done = allHabits.every(h => streak.habitsToday.has(h));
   if (done && streak.lastCompleteDay !== today) {
-    const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
     if (streak.lastCompleteDay === yesterday.toDateString()) streak.current++;
     else streak.current = 1;
     streak.lastCompleteDay = today;
-    toast(`🔥 ¡${streak.current} día${streak.current>1?'s':''} de racha!`);
+    toast(`🔥 ¡${streak.current} día${streak.current > 1 ? 's' : ''} de racha!`);
     save();
   }
 }
@@ -1099,7 +1057,6 @@ function resetDailyActions() {
     dailyActions.orderDone = false;
     dailyActions.phoneDone = false;
     dailyActions.date = today;
-    // NO resetear loggedToday aquí porque ya se resetea en getCurrentHydrationLevel cuando cambia el día
     streak.habitsToday = new Set();
   }
 }
@@ -1116,8 +1073,11 @@ function fulfillNeed(needId) {
   }
   streak.habitsToday.add(needId);
   checkStreak();
-  plant.xp += 8; checkLevelUp();
-  save(); renderAll(); return true;
+  plant.xp += 8;
+  checkLevelUp();
+  save();
+  renderAll();
+  return true;
 }
 
 function checkLevelUp() {
@@ -1135,36 +1095,42 @@ function checkLevelUp() {
 function isCooldown(id) {
   const cd = cooldowns[id];
   if (!cd) return false;
-  const elapsed = (Date.now() - cd.setAt) / 1000;
-  return elapsed < cd.duration;
+  return ((Date.now() - cd.setAt) / 1000) < cd.duration;
 }
-function setCooldown(id, seconds=86400) {
+function setCooldown(id, seconds = 86400) {
   cooldowns[id] = { setAt: Date.now(), duration: seconds };
 }
 function cooldownRemaining(id) {
   const cd = cooldowns[id];
   if (!cd) return 0;
-  const remaining = cd.duration - (Date.now() - cd.setAt) / 1000;
-  return Math.max(0, remaining);
+  return Math.max(0, cd.duration - (Date.now() - cd.setAt) / 1000);
 }
 function fmtRemaining(secs) {
-  const h = Math.floor(secs/3600), m = Math.floor((secs%3600)/60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-}
-function showCooldown(elId, label, id) {
-  const el = document.getElementById(elId);
-  if (!el) return;
-  if (isCooldown(id)) {
-    el.innerHTML = `<div class="cooldown-badge">⏳ ${label} disponible en ${fmtRemaining(cooldownRemaining(id))}</div>`;
-  } else {
-    el.innerHTML = "";
-  }
+  const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
 // ══════════════════════════════════════════════
-// ACTIONS (sin cambios excepto addWater que ya está arriba)
+// ACTIONS
 // ══════════════════════════════════════════════
+function addWater(liters) {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  if (isNaN(liters) || liters <= 0) { toast("Cantidad inválida"); return; }
+
+  const pctFromLiter = (liters / hydration.target) * 100;
+  hydration.extraHydration = Math.min(100, hydration.extraHydration + pctFromLiter);
+  hydration.loggedToday = Math.min(hydration.target * 2, hydration.loggedToday + liters);
+
+  updateHydrationLevel();
+  streak.habitsToday.add("hydration");
+  checkStreak();
+  plant.xp += 3;
+  checkLevelUp();
+  toast(`💧 +${liters}L · Hidratación ${Math.round(hydration.level)}%`);
+  save();
+  renderAll();
+}
+
 function doSport() {
   if (!plant.alive) { toast("❌ Reinicia primero"); return; }
   const km = parseFloat(document.getElementById("sportKmInput")?.value);
@@ -1172,9 +1138,10 @@ function doSport() {
   if (isNaN(km) || km <= 0) { toast("Ingresa los km"); return; }
   if (km > goals.running.maxKm) goals.running.maxKm = Math.min(goals.running.target, km);
   if (!isNaN(ritmo) && ritmo > 0) goals.running.pace = ritmo;
+  if (document.getElementById("sportKmInput")) document.getElementById("sportKmInput").value = "";
+  if (document.getElementById("sportRitmoInput")) document.getElementById("sportRitmoInput").value = "";
   fulfillNeed("strength");
   toast(`🏃 +${km}km registrado · Fuerza al 100%`);
-  save(); renderAll();
 }
 
 function doAleman() {
@@ -1182,62 +1149,70 @@ function doAleman() {
   const h = parseFloat(document.getElementById("germanHoursInput")?.value);
   if (isNaN(h) || h <= 0) { toast("Ingresa las horas"); return; }
   goals.german.hours = Math.min(goals.german.target, goals.german.hours + h);
+  if (document.getElementById("germanHoursInput")) document.getElementById("germanHoursInput").value = "";
   fulfillNeed("intelligence");
   toast(`📖 +${h}h de alemán · Inteligencia al 100%`);
-  save(); renderAll();
 }
 
 function doPasos() {
   const steps = parseInt(document.getElementById("pasosInput")?.value);
+  if (isNaN(steps) || steps <= 0) { toast("Ingresa los pasos"); return; }
   doPasosVal(steps);
+  if (document.getElementById("pasosInput")) document.getElementById("pasosInput").value = "";
 }
 
 function doPasosVal(steps) {
   if (!plant.alive) { toast("❌ Reinicia primero"); return; }
-  if (isNaN(steps) || steps <= 0) { toast("Ingresa los pasos"); return; }
+  if (isNaN(steps) || steps <= 0) { toast("Pasos inválidos"); return; }
+
   const el = document.getElementById("pasosHoy");
-  const current = parseInt(el?.dataset.val || 0);
+  const current = parseInt(el?.dataset.val || 0) || 0;
   const total = current + steps;
-  if (el) el.dataset.val = total;
+
+  if (el) { el.textContent = total.toLocaleString(); el.dataset.val = total; }
+
+  const pct = Math.min(100, (total / 10000) * 100);
+  const bar = document.getElementById("pasosBar");
+  if (bar) bar.style.width = pct + "%";
+  const pt = document.getElementById("pasosProgressText");
+  if (pt) pt.textContent = `${total.toLocaleString()} / 10.000 pasos`;
+
   if (total >= 10000) {
     fulfillNeed("energy");
     toast(`👣 ${total.toLocaleString()} pasos · ¡Meta! Energía al 100%`);
   } else {
-    toast(`👣 ${total.toLocaleString()} pasos (${10000-total} para la meta)`);
+    toast(`👣 ${total.toLocaleString()} pasos (${(10000 - total).toLocaleString()} para la meta)`);
+    save();
   }
-  const pasosHoyEl = document.getElementById("pasosHoy");
-  if(pasosHoyEl) { pasosHoyEl.textContent = total.toLocaleString(); pasosHoyEl.dataset.val = total; }
-  const pct = Math.min(100, (total/10000)*100);
-  const bar = document.getElementById("pasosBar");
-  if(bar) bar.style.width = pct+"%";
-  const pt = document.getElementById("pasosProgressText");
-  if(pt) pt.textContent = `${total.toLocaleString()} / 10.000 pasos`;
-  if(document.getElementById("pasosInput")) document.getElementById("pasosInput").value = "";
-  save();
 }
 
 function submitOrderTest() {
   if (!plant.alive) { toast("❌ Reinicia primero"); return; }
   if (dailyActions.orderDone) { toast("⚠️ Ya hiciste el test de orden hoy"); return; }
+
   const toggles = document.querySelectorAll(".order-toggle");
   let score = 0;
-  toggles.forEach(t => { if(t.classList.contains("on")) score++; });
+  toggles.forEach(t => { if (t.classList.contains("on")) score++; });
   const note = Math.round((score / ORDER_QUESTIONS.length) * 100) / 10;
+
   goals.order.scores.push({ date: todayStr(), score: note });
   if (goals.order.scores.length > 7) goals.order.scores.shift();
-  goals.order.avg = goals.order.scores.reduce((a,b)=>a+b.score,0) / goals.order.scores.length;
+  goals.order.avg = goals.order.scores.reduce((a, b) => a + b.score, 0) / goals.order.scores.length;
+
   dailyActions.orderDone = true;
-  fulfillNeed("calmness");
+
   const sd = document.getElementById("orderScoreDisplay");
-  if(sd) { sd.style.display="block"; document.getElementById("orderScoreBig").textContent = `${note}/10`; }
+  if (sd) { sd.style.display = "block"; document.getElementById("orderScoreBig").textContent = `${note}/10`; }
+
+  fulfillNeed("calmness");
   toast(`🧹 Test de orden: ${note}/10 · Tranquilidad al 100%`);
-  save(); renderAll();
 }
 
 function doEstiramientos() {
   if (!plant.alive) { toast("❌ Reinicia primero"); return; }
   const cm = parseFloat(document.getElementById("estirCmInput")?.value);
   if (!isNaN(cm) && cm >= 0) goals.spagatt.cmToGround = cm;
+  if (document.getElementById("estirCmInput")) document.getElementById("estirCmInput").value = "";
   doEstiramientosNoMedida();
 }
 
@@ -1245,23 +1220,24 @@ function doEstiramientosNoMedida() {
   if (!plant.alive) { toast("❌ Reinicia primero"); return; }
   fulfillNeed("flexibility");
   toast("🧘 Estiramientos completados · Elasticidad al 100%");
-  save(); renderAll();
 }
 
 function doLectura() {
   const mins = parseInt(document.getElementById("lecturaMinsInput")?.value);
+  if (isNaN(mins) || mins <= 0) { toast("Ingresa los minutos"); return; }
+  if (document.getElementById("lecturaMinsInput")) document.getElementById("lecturaMinsInput").value = "";
   doLecturaVal(mins);
 }
 
 function doLecturaVal(mins) {
   if (!plant.alive) { toast("❌ Reinicia primero"); return; }
-  if (isNaN(mins) || mins <= 0) { toast("Ingresa los minutos"); return; }
+  if (isNaN(mins) || mins <= 0) { toast("Minutos inválidos"); return; }
   goals.reading.entries.push({ date: todayStr(), minutes: mins });
   if (goals.reading.entries.length > 30) goals.reading.entries.shift();
-  plant.xp += Math.floor(mins/15); checkLevelUp();
+  plant.xp += Math.floor(mins / 15);
+  checkLevelUp();
   fulfillNeed("entertainment");
   toast(`📚 +${mins} min leídos · Entretenimiento al 100%`);
-  save(); renderAll();
 }
 
 function doPhone() {
@@ -1269,45 +1245,53 @@ function doPhone() {
   if (dailyActions.phoneDone) { toast("⚠️ Ya registraste el móvil hoy"); return; }
   const h = parseFloat(document.getElementById("phoneInput")?.value);
   if (isNaN(h) || h < 0) { toast("Horas inválidas"); return; }
+
   const today = todayStr();
-  const ex = phoneUsage.find(p=>p.date===today);
-  if (ex) ex.hours = h; else phoneUsage.push({ date:today, hours:h });
+  const ex = phoneUsage.find(p => p.date === today);
+  if (ex) ex.hours = h; else phoneUsage.push({ date: today, hours: h });
   if (phoneUsage.length > 14) phoneUsage.shift();
+
   dailyActions.phoneDone = true;
-  
+
   if (h > 2) {
     const damage = (h - 2) * 12;
-    if (needsState.calmness) needsState.calmness.value = Math.max(0, needsState.calmness.value - damage);
+    if (needsState.calmness)     needsState.calmness.value     = Math.max(0, needsState.calmness.value - damage);
     if (needsState.intelligence) needsState.intelligence.value = Math.max(0, needsState.intelligence.value - damage * 0.6);
     toast(`📱 ${h}h de móvil · Daño a Tranquilidad e Inteligencia`);
   } else {
     toast(`📱 ${h}h de móvil · Sin penalización`);
   }
-  checkDeath(); save(); renderAll(); renderPhoneChart();
+
+  checkDeath();
+  save();
+  renderAll();
+  renderPhoneChart();
 }
 
 function renamePlant() {
   const n = prompt("Nombre de tu planta:", plant.name);
-  if (n && n.trim()) { plant.name = n.trim().slice(0,20); save(); renderAll(); }
+  if (n && n.trim()) { plant.name = n.trim().slice(0, 20); save(); renderAll(); }
 }
 
 function fullResetGame() {
   if (decayInterval) clearInterval(decayInterval);
   defaultState();
-  save(); renderAll(); renderPhoneChart();
+  save();
+  renderAll();
+  renderPhoneChart();
   startDecay();
   toast("✨ Nueva planta iniciada. ¡Cuídala bien!");
 }
 
 // ══════════════════════════════════════════════
-// RENDER
+// RENDER HELPERS
 // ══════════════════════════════════════════════
 function needValue(id) {
   if (id === "hydration") {
     updateHydrationLevel();
     return hydration.level;
   }
-  return needsState[id]?.value || 100;
+  return needsState[id]?.value ?? 100;
 }
 
 function needClass(v) {
@@ -1317,18 +1301,17 @@ function needClass(v) {
 }
 
 function plantEmoji() {
-  if (!plant.alive) return "🥀";
-  if (plant.level >= 6) return "🌳";
-  if (plant.level >= 4) return "🌿";
-  if (plant.level >= 2) return "🌱";
+  if (!plant.alive)      return "🥀";
+  if (plant.level >= 6)  return "🌳";
+  if (plant.level >= 4)  return "🌿";
   return "🌱";
 }
 
 function plantTagline() {
-  if (!plant.alive) return "Ha muerto";
-  if (plant.level >= 6) return "Árbol majestuoso";
-  if (plant.level >= 4) return "Planta en plena forma";
-  if (plant.level >= 2) return "Brote en crecimiento";
+  if (!plant.alive)      return "Ha muerto";
+  if (plant.level >= 6)  return "Árbol majestuoso";
+  if (plant.level >= 4)  return "Planta en plena forma";
+  if (plant.level >= 2)  return "Brote en crecimiento";
   return "Semilla en crecimiento";
 }
 
@@ -1340,38 +1323,39 @@ function getLevelName() {
   return "A1";
 }
 
+// ══════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════
 function renderAll() {
-  applyDecay();        // Aplica decaimiento a otras necesidades
-  updateHydrationLevel(); // Actualiza hidratación según hora
+  applyDecay();
+  updateHydrationLevel();
   resetDailyActions();
   renderNav();
   renderHome();
   renderHabits();
-  renderGoalsPage();
 }
 
 function renderNav() {
   document.getElementById("navPlantName").textContent = plant.name;
   document.getElementById("navLevelText").textContent = `Nv.${plant.level}`;
-  document.getElementById("navXpText").textContent = `${plant.xp}/${plant.xpNext}`;
-  document.getElementById("navXpFill").style.width = `${(plant.xp/plant.xpNext)*100}%`;
+  document.getElementById("navXpText").textContent    = `${plant.xp}/${plant.xpNext}`;
+  document.getElementById("navXpFill").style.width    = `${(plant.xp / plant.xpNext) * 100}%`;
 }
 
 function renderHome() {
   const alive = plant.alive;
   document.getElementById("homeAliveContent").style.display = alive ? "" : "none";
-  document.getElementById("deathCardHome").style.display = alive ? "none" : "";
-  if (!alive) {
-    document.getElementById("deathReasonText").textContent = `Motivo: ${plant.deathReason || "desconocido"}`;
-  }
-  document.getElementById("homePlantEmoji").textContent = plantEmoji();
-  document.getElementById("homePlantName").textContent = plant.name;
+  document.getElementById("deathCardHome").style.display    = alive ? "none" : "";
+  if (!alive) document.getElementById("deathReasonText").textContent = `Motivo: ${plant.deathReason || "desconocido"}`;
+
+  document.getElementById("homePlantEmoji").textContent  = plantEmoji();
+  document.getElementById("homePlantName").textContent   = plant.name;
   document.getElementById("homePlantTagline").textContent = plantTagline();
-  document.getElementById("homeStreakBadge").textContent = `🔥 ${streak.current} día${streak.current!==1?'s':''} de racha`;
-  document.getElementById("homeLevel").textContent = `Nivel ${plant.level}`;
-  document.getElementById("homeTitle").textContent = `${plant.name} ${plantEmoji()}`;
-  document.getElementById("homeSubtitle").textContent = `Nivel ${plant.level} · ${plant.alive?"Cuida tu planta con buenos hábitos":"Tu planta ha muerto"}`;
-  
+  document.getElementById("homeStreakBadge").textContent  = `🔥 ${streak.current} día${streak.current !== 1 ? 's' : ''} de racha`;
+  document.getElementById("homeLevel").textContent        = `Nivel ${plant.level}`;
+  document.getElementById("homeTitle").textContent        = `${plant.name} ${plantEmoji()}`;
+  document.getElementById("homeSubtitle").textContent     = `Nivel ${plant.level} · ${alive ? "Cuida tu planta con buenos hábitos" : "Tu planta ha muerto"}`;
+
   const grid = document.getElementById("homeNeedsGrid");
   grid.innerHTML = "";
   NEEDS_CONFIG.forEach(n => {
@@ -1388,121 +1372,118 @@ function renderHome() {
 
   const gl = document.getElementById("homeGoalsList");
   const gdata = [
-    { icon:"📖", name:"Alemán B2", sub:`${Math.round(goals.german.hours)}/${goals.german.target}h · ${getLevelName()}`, pct:(goals.german.hours/goals.german.target)*100, color:"#7aad52" },
-    { icon:"🧘", name:"Spagatt", sub: goals.spagatt.cmToGround<=0?"¡Completado!": `${goals.spagatt.cmToGround.toFixed(1)}cm al suelo`, pct:Math.max(0,((32-goals.spagatt.cmToGround)/32)*100), color:"#7aad52" },
-    { icon:"🏃", name:"Correr 20km", sub:`Máx: ${goals.running.maxKm}km · ${goals.running.pace}min/km`, pct:(goals.running.maxKm/goals.running.target)*100, color:"#7aad52" },
-    { icon:"📚", name:"Lectura diaria", sub:`${goals.reading.entries.length} sesiones registradas`, pct:Math.min(100,(goals.reading.entries.length/30)*100), color:"#7aad52" }
+    { icon:"📖", name:"Alemán B2",     sub:`${Math.round(goals.german.hours)}/${goals.german.target}h · ${getLevelName()}`,                           pct:(goals.german.hours/goals.german.target)*100 },
+    { icon:"🧘", name:"Spagatt",       sub: goals.spagatt.cmToGround<=0 ? "¡Completado!" : `${goals.spagatt.cmToGround.toFixed(1)}cm al suelo`,       pct:Math.max(0,((32-goals.spagatt.cmToGround)/32)*100) },
+    { icon:"🏃", name:"Correr 20km",   sub:`Máx: ${goals.running.maxKm}km · ${goals.running.pace}min/km`,                                              pct:(goals.running.maxKm/goals.running.target)*100 },
+    { icon:"📚", name:"Lectura diaria",sub:`${goals.reading.entries.length} sesiones registradas`,                                                      pct:Math.min(100,(goals.reading.entries.length/30)*100) }
   ];
-  gl.innerHTML = gdata.map(g=>`<div class="goal-row">
+  gl.innerHTML = gdata.map(g => `<div class="goal-row">
     <div class="goal-icon">${g.icon}</div>
     <div class="goal-info">
       <div class="goal-name">${g.name}</div>
       <div class="goal-sub">${g.sub}</div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,g.pct).toFixed(1)}%;background:${g.color}"></div></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,g.pct).toFixed(1)}%;background:var(--green-lt)"></div></div>
     </div>
     <div class="goal-pct">${Math.min(100,g.pct).toFixed(0)}%</div>
   </div>`).join("");
 }
 
 function renderHabits() {
-  // Agua - usar el nuevo sistema
+  // ── AGUA ──
   const wl = needValue("hydration");
-  const wt = document.getElementById("waterFill");
-  if(wt) wt.style.height = wl+"%";
-  const wp = document.getElementById("waterPctText");
-  if(wp) wp.textContent = Math.round(wl)+"%";
-  const ah = document.getElementById("aguaHoy");
-  if(ah) ah.textContent = hydration.loggedToday.toFixed(1);
-  const ap = document.getElementById("aguaPct");
-  if(ap) ap.textContent = Math.round((hydration.loggedToday/hydration.target)*100)+"%";
+  const wt = document.getElementById("waterFill");      if(wt) wt.style.height = wl + "%";
+  const wp = document.getElementById("waterPctText");   if(wp) wp.textContent = Math.round(wl) + "%";
+  const ah = document.getElementById("aguaHoy");        if(ah) ah.textContent = hydration.loggedToday.toFixed(1);
+  const ap = document.getElementById("aguaPct");        if(ap) ap.textContent = Math.round((hydration.loggedToday / hydration.target) * 100) + "%";
   const am = document.getElementById("aguaAlertMsg");
-  if(am) {
-    if(wl < 25) am.className = "alert alert-danger", am.textContent = "⚠️ Nivel crítico. ¡Bebe agua ahora!";
-    else if(wl < 50) am.className = "alert alert-warn", am.textContent = "⚠️ Hidratación baja. Bebe agua pronto.";
-    else am.className = "alert alert-info", am.textContent = "✅ Hidratación en buen nivel. Sigue bebiendo.";
+  if (am) {
+    if (wl < 25)      { am.className = "alert alert-danger"; am.textContent = "⚠️ Nivel crítico. ¡Bebe agua ahora!"; }
+    else if (wl < 50) { am.className = "alert alert-warn";   am.textContent = "⚠️ Hidratación baja. Bebe agua pronto."; }
+    else              { am.className = "alert alert-info";   am.textContent = "✅ Hidratación en buen nivel. Sigue bebiendo."; }
   }
-  
   const glassEl = document.getElementById("waterGlasses");
-  if(glassEl) {
-    const total = 6;
+  if (glassEl) {
+    const total  = 6;
     const filled = Math.round((hydration.loggedToday / hydration.target) * total);
-    glassEl.innerHTML = Array.from({length:total},(_,i)=>`<div class="glass ${i<filled?"filled":""}" onclick="addWater(0.25)" title="+0.25L">💧</div>`).join("");
+    glassEl.innerHTML = Array.from({length:total}, (_,i) =>
+      `<div class="glass ${i < filled ? "filled" : ""}" onclick="addWater(0.25)" title="+0.25L">💧</div>`
+    ).join("");
   }
 
-  // Deporte
+  // ── DEPORTE ──
   const dn = Math.round(needValue("strength"));
-  const di = document.getElementById("deporteNeed"); if(di) di.textContent = dn+"%";
-  const dm = document.getElementById("deporteMaxKm"); if(dm) dm.textContent = goals.running.maxKm;
-  const dr = document.getElementById("deporteRitmo"); if(dr) dr.textContent = goals.running.pace;
-  const dpb = document.getElementById("deporteProgressBar"); if(dpb) dpb.style.width = ((goals.running.maxKm/goals.running.target)*100).toFixed(1)+"%";
-  const dpt = document.getElementById("deporteProgressText"); if(dpt) dpt.textContent = `${goals.running.maxKm}/${goals.running.target} km objetivo final`;
-  const dgb = document.getElementById("deporteGoalBar"); if(dgb) dgb.style.width = ((goals.running.maxKm/goals.running.target)*100).toFixed(1)+"%";
-  const dgp = document.getElementById("deporteGoalPct"); if(dgp) dgp.textContent = ((goals.running.maxKm/goals.running.target)*100).toFixed(0)+"%";
-  const dgs = document.getElementById("deporteGoalSub"); if(dgs) dgs.textContent = `Máximo alcanzado: ${goals.running.maxKm}km de ${goals.running.target}km`;
+  const di = document.getElementById("deporteNeed");        if(di) di.textContent = dn + "%";
+  const dm = document.getElementById("deporteMaxKm");       if(dm) dm.textContent = goals.running.maxKm;
+  const dr = document.getElementById("deporteRitmo");       if(dr) dr.textContent = goals.running.pace;
+  const dpb = document.getElementById("deporteProgressBar"); if(dpb) dpb.style.width = ((goals.running.maxKm/goals.running.target)*100).toFixed(1) + "%";
+  const dpt = document.getElementById("deporteProgressText");if(dpt) dpt.textContent = `${goals.running.maxKm}/${goals.running.target} km objetivo final`;
+  const dgb = document.getElementById("deporteGoalBar");    if(dgb) dgb.style.width = ((goals.running.maxKm/goals.running.target)*100).toFixed(1) + "%";
+  const dgp = document.getElementById("deporteGoalPct");    if(dgp) dgp.textContent = ((goals.running.maxKm/goals.running.target)*100).toFixed(0) + "%";
+  const dgs = document.getElementById("deporteGoalSub");    if(dgs) dgs.textContent = `Máximo alcanzado: ${goals.running.maxKm}km de ${goals.running.target}km`;
 
-  // Alemán
+  // ── ALEMÁN ──
   const an = Math.round(needValue("intelligence"));
-  const ai = document.getElementById("alemanNeed"); if(ai) ai.textContent = an+"%";
-  const ah2 = document.getElementById("alemanHoras"); if(ah2) ah2.textContent = Math.round(goals.german.hours);
-  const anv = document.getElementById("alemanNivel"); if(anv) anv.textContent = getLevelName();
-  const apb = document.getElementById("alemanProgressBar"); if(apb) apb.style.width = ((goals.german.hours/goals.german.target)*100).toFixed(1)+"%";
-  const apt = document.getElementById("alemanProgressText"); if(apt) apt.textContent = `${Math.round(goals.german.hours)}/${goals.german.target}h hacia B2`;
+  const ai  = document.getElementById("alemanNeed");         if(ai)  ai.textContent  = an + "%";
+  const ah2 = document.getElementById("alemanHoras");        if(ah2) ah2.textContent = Math.round(goals.german.hours);
+  const anv = document.getElementById("alemanNivel");        if(anv) anv.textContent = getLevelName();
+  const apb = document.getElementById("alemanProgressBar"); if(apb) apb.style.width = ((goals.german.hours/goals.german.target)*100).toFixed(1) + "%";
+  const apt = document.getElementById("alemanProgressText");if(apt) apt.textContent = `${Math.round(goals.german.hours)}/${goals.german.target}h hacia B2`;
   renderAlemanRoadmap();
 
-  // Pasos
+  // ── PASOS ──
   const en = Math.round(needValue("energy"));
-  const ep = document.getElementById("pasosNeed"); if(ep) ep.textContent = en+"%";
-  
-  // Orden
-  const on = Math.round(needValue("calmness"));
-  const oi = document.getElementById("ordenNeed"); if(oi) oi.textContent = on+"%";
-  const om = document.getElementById("ordenMedia"); if(om) om.textContent = goals.order.avg.toFixed(1);
-  const ot = document.getElementById("ordenTests"); if(ot) ot.textContent = goals.order.scores.length;
+  const ep = document.getElementById("pasosNeed"); if(ep) ep.textContent = en + "%";
+
+  // ── ORDEN ──
+  const on2 = Math.round(needValue("calmness"));
+  const oi  = document.getElementById("ordenNeed");  if(oi)  oi.textContent  = on2 + "%";
+  const om  = document.getElementById("ordenMedia"); if(om)  om.textContent  = goals.order.avg.toFixed(1);
+  const ot  = document.getElementById("ordenTests"); if(ot)  ot.textContent  = goals.order.scores.length;
   renderOrderPage();
 
-  // Estiramientos
-  const fn = Math.round(needValue("flexibility"));
-  const fi = document.getElementById("estirNeed"); if(fi) fi.textContent = fn+"%";
-  const fc = document.getElementById("estirCm"); if(fc) fc.textContent = goals.spagatt.cmToGround.toFixed(1);
-  const fpct = Math.max(0, ((32-goals.spagatt.cmToGround)/32)*100);
-  const fp = document.getElementById("estirProg"); if(fp) fp.textContent = fpct.toFixed(0)+"%";
-  const fcb = document.getElementById("estirCmBig"); if(fcb) fcb.textContent = goals.spagatt.cmToGround>0 ? `${goals.spagatt.cmToGround.toFixed(1)} cm` : "¡Spagatt!";
-  const fgb = document.getElementById("estirGoalBar"); if(fgb) fgb.style.width = fpct.toFixed(1)+"%";
+  // ── ESTIRAMIENTOS ──
+  const fn  = Math.round(needValue("flexibility"));
+  const fi  = document.getElementById("estirNeed");    if(fi)  fi.textContent  = fn + "%";
+  const fc  = document.getElementById("estirCm");      if(fc)  fc.textContent  = goals.spagatt.cmToGround.toFixed(1);
+  const fpct = Math.max(0, ((32 - goals.spagatt.cmToGround) / 32) * 100);
+  const fp  = document.getElementById("estirProg");    if(fp)  fp.textContent  = fpct.toFixed(0) + "%";
+  const fcb = document.getElementById("estirCmBig");   if(fcb) fcb.textContent = goals.spagatt.cmToGround > 0 ? `${goals.spagatt.cmToGround.toFixed(1)} cm` : "¡Spagatt!";
+  const fgb = document.getElementById("estirGoalBar"); if(fgb) fgb.style.width = fpct.toFixed(1) + "%";
 
-  // Lectura
-  const ln = Math.round(needValue("entertainment"));
-  const li = document.getElementById("lecturaNeed"); if(li) li.textContent = ln+"%";
-  const lm = getReadingAvg();
-  const lma = document.getElementById("lecturaMedia"); if(lma) lma.textContent = Math.round(lm);
-  const ls = document.getElementById("lecturaSesiones"); if(ls) ls.textContent = goals.reading.entries.length;
+  // ── LECTURA ──
+  const ln  = Math.round(needValue("entertainment"));
+  const li  = document.getElementById("lecturaNeed");     if(li)  li.textContent  = ln + "%";
+  const lm  = getReadingAvg();
+  const lma = document.getElementById("lecturaMedia");    if(lma) lma.textContent = Math.round(lm);
+  const ls  = document.getElementById("lecturaSesiones"); if(ls)  ls.textContent  = goals.reading.entries.length;
   renderReadingHist();
 
-  // Móvil
+  // ── MÓVIL ──
   renderMovilStats();
 }
 
 function getReadingAvg() {
   if (!goals.reading.entries.length) return 0;
   const recent = goals.reading.entries.slice(-7);
-  return recent.reduce((s,e)=>s+e.minutes,0)/recent.length;
+  return recent.reduce((s, e) => s + e.minutes, 0) / recent.length;
 }
 
 function renderAlemanRoadmap() {
   const rm = document.getElementById("alemanRoadmap");
-  if(!rm) return;
+  if (!rm) return;
   const levels = [{name:"A1",hours:0},{name:"A2",hours:200},{name:"B1",hours:400},{name:"B2",hours:660}];
   const h = goals.german.hours;
-  rm.innerHTML = levels.map((lv,i)=>{
-    const next = levels[i+1];
-    const done = h >= (next?.hours || lv.hours);
-    const current = !done && (i===0 || h >= lv.hours);
-    const pct = next ? Math.min(100, ((h-lv.hours)/(next.hours-lv.hours))*100) : 100;
+  rm.innerHTML = levels.map((lv, i) => {
+    const next  = levels[i+1];
+    const done    = h >= (next?.hours || lv.hours);
+    const current = !done && (i === 0 || h >= lv.hours);
+    const pct   = next ? Math.min(100, ((h - lv.hours) / (next.hours - lv.hours)) * 100) : 100;
     return `<div class="goal-row">
-      <div class="goal-icon" style="font-size:1.1rem">${done?"✅":current?"🎯":"⬜"}</div>
+      <div class="goal-icon" style="font-size:1.1rem">${done ? "✅" : current ? "🎯" : "⬜"}</div>
       <div class="goal-info">
-        <div class="goal-name">${lv.name}${next?" → "+next.name:""}</div>
-        <div class="goal-sub">${done?"Completado":current?`${Math.round(h-lv.hours)}/${next.hours-lv.hours}h`:`Desde ${lv.hours}h`}</div>
-        ${next?`<div class="progress-bar"><div class="progress-fill" style="width:${current?pct:done?100:0}%;background:var(--green-lt)"></div></div>`:""}
+        <div class="goal-name">${lv.name}${next ? " → " + next.name : ""}</div>
+        <div class="goal-sub">${done ? "Completado" : current ? `${Math.round(h - lv.hours)}/${next.hours - lv.hours}h` : `Desde ${lv.hours}h`}</div>
+        ${next ? `<div class="progress-bar"><div class="progress-fill" style="width:${current ? pct : done ? 100 : 0}%;background:var(--green-lt)"></div></div>` : ""}
       </div>
     </div>`;
   }).join("");
@@ -1510,37 +1491,42 @@ function renderAlemanRoadmap() {
 
 function renderOrderPage() {
   const qc = document.getElementById("orderQuestionsContainer");
-  if(!qc || qc.innerHTML) return;
-  qc.innerHTML = ORDER_QUESTIONS.map((q,i)=>`
+  if (!qc || qc.innerHTML) return; // ya renderizado
+  qc.innerHTML = ORDER_QUESTIONS.map((q, i) => `
     <div class="order-question">
       <button class="order-toggle" id="oq${i}" onclick="this.classList.toggle('on')"></button>
       <span class="order-q-text">${q}</span>
     </div>`).join("");
-  
+
   const doneAlert = document.getElementById("ordenDoneAlert");
   if (doneAlert) {
-    if (dailyActions.orderDone) {
-      doneAlert.innerHTML = `<div class="alert alert-info">✅ Ya completaste el test de orden hoy. Puntuación: ${goals.order.scores.slice(-1)[0]?.score?.toFixed(1) || "?"}/10</div>`;
-    } else { doneAlert.innerHTML = ""; }
+    doneAlert.innerHTML = dailyActions.orderDone
+      ? `<div class="alert alert-info">✅ Ya completaste el test de orden hoy. Puntuación: ${goals.order.scores.slice(-1)[0]?.score?.toFixed(1) || "?"}/10</div>`
+      : "";
   }
-  
+
   const hist = document.getElementById("ordenHistContent");
-  if(hist && goals.order.scores.length) {
-    hist.innerHTML = goals.order.scores.slice().reverse().map(s=>`
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.82rem">
-        <span style="color:var(--text3)">${s.date}</span>
-        <span style="font-weight:500;color:${s.score>=7?"var(--green-md)":s.score>=5?"var(--amber)":"var(--red)"}">${s.score.toFixed(1)}/10</span>
-      </div>`).join("");
-  } else if(hist) {
-    hist.innerHTML = `<p style="font-size:0.82rem;color:var(--text3)">Aún no has hecho ningún test.</p>`;
+  if (hist) {
+    if (goals.order.scores.length) {
+      hist.innerHTML = goals.order.scores.slice().reverse().map(s => `
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.82rem">
+          <span style="color:var(--text3)">${s.date}</span>
+          <span style="font-weight:500;color:${s.score>=7?"var(--green-md)":s.score>=5?"var(--amber)":"var(--red)"}">${s.score.toFixed(1)}/10</span>
+        </div>`).join("");
+    } else {
+      hist.innerHTML = `<p style="font-size:0.82rem;color:var(--text3)">Aún no has hecho ningún test.</p>`;
+    }
   }
 }
 
 function renderReadingHist() {
   const hist = document.getElementById("lecturaHistContent");
-  if(!hist) return;
-  if(!goals.reading.entries.length) { hist.innerHTML = `<p style="font-size:0.82rem;color:var(--text3)">Aún no has registrado ninguna sesión.</p>`; return; }
-  hist.innerHTML = goals.reading.entries.slice().reverse().slice(0,10).map(e=>`
+  if (!hist) return;
+  if (!goals.reading.entries.length) {
+    hist.innerHTML = `<p style="font-size:0.82rem;color:var(--text3)">Aún no has registrado ninguna sesión.</p>`;
+    return;
+  }
+  hist.innerHTML = goals.reading.entries.slice().reverse().slice(0, 10).map(e => `
     <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.82rem">
       <span style="color:var(--text3)">${e.date}</span>
       <span style="font-weight:500;color:var(--green-md)">${e.minutes} min</span>
@@ -1549,87 +1535,91 @@ function renderReadingHist() {
 
 function renderMovilStats() {
   const last7 = [];
-  for(let i=6;i>=0;i--) {
-    const d = new Date(); d.setDate(d.getDate()-i);
-    const entry = phoneUsage.find(p=>p.date===d.toDateString());
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const entry = phoneUsage.find(p => p.date === d.toDateString());
     last7.push(entry?.hours || 0);
   }
   const today = last7[6];
-  const avg = last7.reduce((a,b)=>a+b,0)/7;
-  const max = Math.max(...last7);
-  
-  const mh = document.getElementById("movilHoy"); if(mh) mh.textContent = today.toFixed(1);
-  const mm = document.getElementById("movilMedia"); if(mm) mm.textContent = avg.toFixed(1);
-  const mx = document.getElementById("movilMax"); if(mx) mx.textContent = max.toFixed(1);
-  
+  const avg   = last7.reduce((a, b) => a + b, 0) / 7;
+  const max   = Math.max(...last7);
+
+  const mh = document.getElementById("movilHoy");   if(mh) mh.textContent = today.toFixed(1);
+  const mm = document.getElementById("movilMedia");  if(mm) mm.textContent = avg.toFixed(1);
+  const mx = document.getElementById("movilMax");    if(mx) mx.textContent = max.toFixed(1);
+
   const ma = document.getElementById("movilAlert");
-  if(ma) {
-    if(today > 5) { ma.style.display=""; ma.className="alert alert-danger"; ma.textContent="⚠️ Uso muy elevado (>5h). Daño severo en tu planta."; }
-    else if(today > 3) { ma.style.display=""; ma.className="alert alert-warn"; ma.textContent="📱 Uso moderado-alto (>3h). Considera reducir."; }
-    else { ma.style.display="none"; }
+  if (ma) {
+    if (today > 5)      { ma.style.display=""; ma.className="alert alert-danger"; ma.textContent="⚠️ Uso muy elevado (>5h). Daño severo en tu planta."; }
+    else if (today > 3) { ma.style.display=""; ma.className="alert alert-warn";   ma.textContent="📱 Uso moderado-alto (>3h). Considera reducir."; }
+    else                { ma.style.display="none"; }
   }
 
   const doneAlert = document.getElementById("movilDoneAlert");
-  if(doneAlert) {
-    if(dailyActions.phoneDone) doneAlert.innerHTML = `<div class="alert alert-info">✅ Ya registraste el uso de hoy.</div>`;
-    else doneAlert.innerHTML = "";
+  if (doneAlert) {
+    doneAlert.innerHTML = dailyActions.phoneDone
+      ? `<div class="alert alert-info">✅ Ya registraste el uso de hoy.</div>`
+      : "";
   }
 }
 
 function renderPhoneChart() {
   const canvas = document.getElementById("phoneChart");
-  if(!canvas) return;
+  if (!canvas) return;
   const labels = [], data = [];
-  for(let i=6;i>=0;i--) {
-    const d = new Date(); d.setDate(d.getDate()-i);
-    labels.push(d.toLocaleDateString("es-ES",{weekday:"short",day:"numeric"}));
-    const entry = phoneUsage.find(p=>p.date===d.toDateString());
-    data.push(entry?.hours||0);
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    labels.push(d.toLocaleDateString("es-ES", {weekday:"short", day:"numeric"}));
+    const entry = phoneUsage.find(p => p.date === d.toDateString());
+    data.push(entry?.hours || 0);
   }
-  if(phoneChartInst) phoneChartInst.destroy();
+  if (phoneChartInst) phoneChartInst.destroy();
   phoneChartInst = new Chart(canvas.getContext("2d"), {
-    type:"bar",
-    data:{ labels, datasets:[{
-      label:"Horas de móvil",
-      data,
-      backgroundColor: data.map(v => v>5?"rgba(139,46,26,0.7)":v>3?"rgba(184,115,51,0.7)":"rgba(74,124,47,0.7)"),
-      borderColor: data.map(v => v>5?"#8b2e1a":v>3?"#b87333":"#4a7c2f"),
-      borderWidth:1.5, borderRadius:6
-    }]},
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => `${ctx.raw.toFixed(1)}h` }}},
-      scales:{
-        y:{ beginAtZero:true, grid:{ color:"rgba(0,0,0,0.05)" }, ticks:{font:{size:10}} },
-        x:{ grid:{ display:false }, ticks:{font:{size:10}} }
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Horas de móvil",
+        data,
+        backgroundColor: data.map(v => v>5 ? "rgba(139,46,26,0.7)" : v>3 ? "rgba(184,115,51,0.7)" : "rgba(74,124,47,0.7)"),
+        borderColor:      data.map(v => v>5 ? "#8b2e1a" : v>3 ? "#b87333" : "#4a7c2f"),
+        borderWidth: 1.5, borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display:false }, tooltip: { callbacks: { label: ctx => `${ctx.raw.toFixed(1)}h` }}},
+      scales: {
+        y: { beginAtZero:true, grid:{ color:"rgba(0,0,0,0.05)" }, ticks:{font:{size:10}} },
+        x: { grid:{ display:false }, ticks:{font:{size:10}} }
       }
     }
   });
   const lg = document.getElementById("phoneChartLegend");
-  if(lg) {
-    const avg = data.reduce((a,b)=>a+b,0)/7;
+  if (lg) {
+    const avg = data.reduce((a, b) => a + b, 0) / 7;
     lg.textContent = `Media semanal: ${avg.toFixed(1)}h/día · Verde <2h · Naranja 2-5h · Rojo >5h`;
   }
 }
-
-function renderGoalsPage() {}
 
 // ══════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════
 function navigateTo(pageId) {
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.querySelectorAll(".nav-link").forEach(l=>l.classList.remove("active"));
-  const page = document.getElementById("page-"+pageId);
-  if(page) page.classList.add("active");
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+
+  const page = document.getElementById("page-" + pageId);
+  if (page) page.classList.add("active");
   const link = document.querySelector(`.nav-link[data-page="${pageId}"]`);
-  if(link) link.classList.add("active");
-  window.scrollTo(0,0);
+  if (link) link.classList.add("active");
+
+  window.scrollTo(0, 0);
   closeNav();
-  
-  if(pageId==="movil") { setTimeout(renderPhoneChart,100); }
-  if(pageId==="orden") { document.getElementById("orderQuestionsContainer").innerHTML = ""; renderOrderPage(); }
-  
+
+  if (pageId === "movil")  { setTimeout(renderPhoneChart, 100); }
+  if (pageId === "orden")  { document.getElementById("orderQuestionsContainer").innerHTML = ""; renderOrderPage(); }
+
   renderHabits();
 }
 
@@ -1638,33 +1628,37 @@ function closeNav() {
   document.getElementById("navOverlay").classList.remove("show");
 }
 
-document.getElementById("burgerBtn").addEventListener("click",()=>{
+document.getElementById("burgerBtn").addEventListener("click", () => {
   document.getElementById("mainNav").classList.toggle("open");
   document.getElementById("navOverlay").classList.toggle("show");
 });
 document.getElementById("navOverlay").addEventListener("click", closeNav);
-
-document.querySelectorAll(".nav-link").forEach(link=>{
-  link.addEventListener("click",()=>{
-    navigateTo(link.dataset.page);
-  });
+document.querySelectorAll(".nav-link").forEach(link => {
+  link.addEventListener("click", () => navigateTo(link.dataset.page));
 });
 
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
 function toast(msg) {
   const box = document.getElementById("toastBox");
   const t = document.createElement("div");
-  t.className = "toast"; t.textContent = msg;
+  t.className = "toast";
+  t.textContent = msg;
   box.appendChild(t);
-  setTimeout(()=>t.remove(), 3100);
+  setTimeout(() => t.remove(), 3100);
 }
 
+// ══════════════════════════════════════════════
+// DECAY INTERVAL
+// ══════════════════════════════════════════════
 function startDecay() {
-  if(decayInterval) clearInterval(decayInterval);
-  decayInterval = setInterval(()=>{
-    if(plant.alive) { 
-      applyDecay(); 
+  if (decayInterval) clearInterval(decayInterval);
+  decayInterval = setInterval(() => {
+    if (plant.alive) {
+      applyDecay();
       updateHydrationLevel();
-      renderAll(); 
+      renderAll();
     }
   }, 60000);
 }
