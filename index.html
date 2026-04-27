@@ -852,6 +852,8 @@ let streak = {};
 let lastDecayTs = Date.now();
 let phoneChartInst = null;
 let decayInterval = null;
+let stepsToday = 0;
+let stepsTodayDate = "";
 
 // ══════════════════════════════════════════════
 // HELPERS
@@ -864,7 +866,7 @@ function getTodayKey() {
 }
 
 // ══════════════════════════════════════════════
-// DEFAULT STATE  (definida UNA SOLA VEZ)
+// DEFAULT STATE
 // ══════════════════════════════════════════════
 function defaultState() {
   const now = Date.now();
@@ -892,6 +894,8 @@ function defaultState() {
   dailyActions = { orderDone:false, phoneDone:false, date:todayStr() };
   streak       = { current:0, lastCompleteDay:null, habitsToday:new Set() };
   lastDecayTs  = now;
+  stepsToday = 0;
+  stepsTodayDate = getTodayKey();
 }
 
 // ══════════════════════════════════════════════
@@ -921,7 +925,7 @@ function updateHydrationLevel() {
 }
 
 // ══════════════════════════════════════════════
-// SAVE / LOAD  (Set serializado correctamente)
+// SAVE / LOAD
 // ══════════════════════════════════════════════
 function save() {
   updateHydrationLevel();
@@ -933,8 +937,10 @@ function save() {
     phoneUsage,
     cooldowns,
     dailyActions,
-    streak: { ...streak, habitsToday: [...streak.habitsToday] }, // ✅ Set → Array
-    lastDecayTs
+    streak: { ...streak, habitsToday: [...streak.habitsToday] },
+    lastDecayTs,
+    stepsToday,
+    stepsTodayDate
   };
   try { localStorage.setItem("levelup_v2", JSON.stringify(s)); } catch(e) { console.warn("Save failed:", e); }
 }
@@ -946,7 +952,6 @@ function load() {
 
     const s = JSON.parse(raw);
 
-    // Validación mínima
     if (!s.plant || typeof s.plant.alive === "undefined") { defaultState(); return; }
 
     plant        = s.plant;
@@ -957,8 +962,9 @@ function load() {
     cooldowns    = s.cooldowns   || {};
     dailyActions = s.dailyActions || {};
     lastDecayTs  = s.lastDecayTs || Date.now();
+    stepsToday   = s.stepsToday || 0;
+    stepsTodayDate = s.stepsTodayDate || getTodayKey();
 
-    // ✅ Array → Set (con protección)
     const ht = s.streak && s.streak.habitsToday;
     streak = {
       current:         (s.streak && s.streak.current)         || 0,
@@ -966,12 +972,18 @@ function load() {
       habitsToday:     new Set(Array.isArray(ht) ? ht : [])
     };
 
-    // Migraciones de campos opcionales
     if (hydration.target         === undefined) hydration.target         = 1.5;
     if (hydration.extraHydration === undefined) hydration.extraHydration = 0;
     if (hydration.lastResetDate  === undefined) hydration.lastResetDate  = getTodayKey();
     if (!goals.reading) goals.reading = { entries: [] };
     if (!goals.order)   goals.order   = { scores: [], avg: 0 };
+
+    // Reset steps if new day
+    const today = getTodayKey();
+    if (stepsTodayDate !== today) {
+      stepsToday = 0;
+      stepsTodayDate = today;
+    }
 
     updateHydrationLevel();
 
@@ -988,10 +1000,10 @@ function applyDecay() {
   if (!plant.alive) return;
   const now = Date.now();
   const hoursPassed = Math.min((now - lastDecayTs) / 3600000, 72);
-  if (hoursPassed < 0.016) return; // menos de ~1 min, ignorar
+  if (hoursPassed < 0.016) return;
 
   NEEDS_CONFIG.forEach(n => {
-    if (n.id === "hydration") return; // hidratación tiene su propio sistema
+    if (n.id === "hydration") return;
     const st = needsState[n.id];
     if (st) {
       st.value = Math.max(0, st.value - (DECAY_PER_HOUR[n.id] || 1) * hoursPassed);
@@ -1165,11 +1177,17 @@ function doPasosVal(steps) {
   if (!plant.alive) { toast("❌ Reinicia primero"); return; }
   if (isNaN(steps) || steps <= 0) { toast("Pasos inválidos"); return; }
 
+  const today = getTodayKey();
+  if (stepsTodayDate !== today) {
+    stepsToday = 0;
+    stepsTodayDate = today;
+  }
+  
+  stepsToday += steps;
+  
+  const total = stepsToday;
   const el = document.getElementById("pasosHoy");
-  const current = parseInt(el?.dataset.val || 0) || 0;
-  const total = current + steps;
-
-  if (el) { el.textContent = total.toLocaleString(); el.dataset.val = total; }
+  if (el) el.textContent = total.toLocaleString();
 
   const pct = Math.min(100, (total / 10000) * 100);
   const bar = document.getElementById("pasosBar");
@@ -1178,12 +1196,23 @@ function doPasosVal(steps) {
   if (pt) pt.textContent = `${total.toLocaleString()} / 10.000 pasos`;
 
   if (total >= 10000) {
-    fulfillNeed("energy");
-    toast(`👣 ${total.toLocaleString()} pasos · ¡Meta! Energía al 100%`);
+    if (!streak.habitsToday.has("energy")) {
+      fulfillNeed("energy");
+      toast(`👣 ${total.toLocaleString()} pasos · ¡Meta! Energía al 100%`);
+      plant.xp += 15;
+      checkLevelUp();
+    }
   } else {
-    toast(`👣 ${total.toLocaleString()} pasos (${(10000 - total).toLocaleString()} para la meta)`);
-    save();
+    const xpGain = Math.floor(steps / 500);
+    if (xpGain > 0) {
+      plant.xp += xpGain;
+      checkLevelUp();
+    }
+    toast(`👣 +${steps.toLocaleString()} pasos · Total hoy: ${total.toLocaleString()}`);
   }
+  
+  save();
+  renderAll();
 }
 
 function submitOrderTest() {
@@ -1330,6 +1359,14 @@ function renderAll() {
   applyDecay();
   updateHydrationLevel();
   resetDailyActions();
+  
+  // Reset steps if new day
+  const today = getTodayKey();
+  if (stepsTodayDate !== today) {
+    stepsToday = 0;
+    stepsTodayDate = today;
+  }
+  
   renderNav();
   renderHome();
   renderHabits();
@@ -1389,7 +1426,7 @@ function renderHome() {
 }
 
 function renderHabits() {
-  // ── AGUA ──
+  // AGUA
   const wl = needValue("hydration");
   const wt = document.getElementById("waterFill");      if(wt) wt.style.height = wl + "%";
   const wp = document.getElementById("waterPctText");   if(wp) wp.textContent = Math.round(wl) + "%";
@@ -1410,7 +1447,7 @@ function renderHabits() {
     ).join("");
   }
 
-  // ── DEPORTE ──
+  // DEPORTE
   const dn = Math.round(needValue("strength"));
   const di = document.getElementById("deporteNeed");        if(di) di.textContent = dn + "%";
   const dm = document.getElementById("deporteMaxKm");       if(dm) dm.textContent = goals.running.maxKm;
@@ -1421,7 +1458,7 @@ function renderHabits() {
   const dgp = document.getElementById("deporteGoalPct");    if(dgp) dgp.textContent = ((goals.running.maxKm/goals.running.target)*100).toFixed(0) + "%";
   const dgs = document.getElementById("deporteGoalSub");    if(dgs) dgs.textContent = `Máximo alcanzado: ${goals.running.maxKm}km de ${goals.running.target}km`;
 
-  // ── ALEMÁN ──
+  // ALEMÁN
   const an = Math.round(needValue("intelligence"));
   const ai  = document.getElementById("alemanNeed");         if(ai)  ai.textContent  = an + "%";
   const ah2 = document.getElementById("alemanHoras");        if(ah2) ah2.textContent = Math.round(goals.german.hours);
@@ -1430,18 +1467,27 @@ function renderHabits() {
   const apt = document.getElementById("alemanProgressText");if(apt) apt.textContent = `${Math.round(goals.german.hours)}/${goals.german.target}h hacia B2`;
   renderAlemanRoadmap();
 
-  // ── PASOS ──
+  // PASOS
   const en = Math.round(needValue("energy"));
   const ep = document.getElementById("pasosNeed"); if(ep) ep.textContent = en + "%";
+  
+  // Mostrar pasos acumulados
+  const totalSteps = stepsToday;
+  const ps = document.getElementById("pasosHoy");
+  if (ps) ps.textContent = totalSteps.toLocaleString();
+  const pb = document.getElementById("pasosBar");
+  if (pb) pb.style.width = Math.min(100, (totalSteps / 10000) * 100) + "%";
+  const ptxt = document.getElementById("pasosProgressText");
+  if (ptxt) ptxt.textContent = `${totalSteps.toLocaleString()} / 10.000 pasos`;
 
-  // ── ORDEN ──
+  // ORDEN
   const on2 = Math.round(needValue("calmness"));
   const oi  = document.getElementById("ordenNeed");  if(oi)  oi.textContent  = on2 + "%";
   const om  = document.getElementById("ordenMedia"); if(om)  om.textContent  = goals.order.avg.toFixed(1);
   const ot  = document.getElementById("ordenTests"); if(ot)  ot.textContent  = goals.order.scores.length;
   renderOrderPage();
 
-  // ── ESTIRAMIENTOS ──
+  // ESTIRAMIENTOS
   const fn  = Math.round(needValue("flexibility"));
   const fi  = document.getElementById("estirNeed");    if(fi)  fi.textContent  = fn + "%";
   const fc  = document.getElementById("estirCm");      if(fc)  fc.textContent  = goals.spagatt.cmToGround.toFixed(1);
@@ -1450,7 +1496,7 @@ function renderHabits() {
   const fcb = document.getElementById("estirCmBig");   if(fcb) fcb.textContent = goals.spagatt.cmToGround > 0 ? `${goals.spagatt.cmToGround.toFixed(1)} cm` : "¡Spagatt!";
   const fgb = document.getElementById("estirGoalBar"); if(fgb) fgb.style.width = fpct.toFixed(1) + "%";
 
-  // ── LECTURA ──
+  // LECTURA
   const ln  = Math.round(needValue("entertainment"));
   const li  = document.getElementById("lecturaNeed");     if(li)  li.textContent  = ln + "%";
   const lm  = getReadingAvg();
@@ -1458,7 +1504,7 @@ function renderHabits() {
   const ls  = document.getElementById("lecturaSesiones"); if(ls)  ls.textContent  = goals.reading.entries.length;
   renderReadingHist();
 
-  // ── MÓVIL ──
+  // MÓVIL
   renderMovilStats();
 }
 
@@ -1491,12 +1537,13 @@ function renderAlemanRoadmap() {
 
 function renderOrderPage() {
   const qc = document.getElementById("orderQuestionsContainer");
-  if (!qc || qc.innerHTML) return; // ya renderizado
-  qc.innerHTML = ORDER_QUESTIONS.map((q, i) => `
-    <div class="order-question">
-      <button class="order-toggle" id="oq${i}" onclick="this.classList.toggle('on')"></button>
-      <span class="order-q-text">${q}</span>
-    </div>`).join("");
+  if (qc && qc.children.length === 0) {
+    qc.innerHTML = ORDER_QUESTIONS.map((q, i) => `
+      <div class="order-question">
+        <button class="order-toggle" id="oq${i}" onclick="this.classList.toggle('on')"></button>
+        <span class="order-q-text">${q}</span>
+      </div>`).join("");
+  }
 
   const doneAlert = document.getElementById("ordenDoneAlert");
   if (doneAlert) {
@@ -1618,7 +1665,7 @@ function navigateTo(pageId) {
   closeNav();
 
   if (pageId === "movil")  { setTimeout(renderPhoneChart, 100); }
-  if (pageId === "orden")  { document.getElementById("orderQuestionsContainer").innerHTML = ""; renderOrderPage(); }
+  if (pageId === "orden")  { renderOrderPage(); }
 
   renderHabits();
 }
