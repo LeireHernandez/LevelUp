@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LevelUp · Tu Planta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f2ede5;
+  --card: #faf7f2;
+  --card2: #fff9f0;
+  --border: rgba(160,140,110,0.22);
+  --border2: rgba(160,140,110,0.38);
+  --green-dk: #2d5016;
+  --green-md: #4a7c2f;
+  --green-lt: #7aad52;
+  --green-pale: #e6f0dc;
+  --green-mist: #f0f5eb;
+  --amber: #b87333;
+  --amber-lt: #f5e6d0;
+  --red: #8b2e1a;
+  --red-lt: #fdeee9;
+  --text: #2a2318;
+  --text2: #6b5d4a;
+  --text3: #9c8b72;
+  --nav-w: 220px;
+  --radius: 18px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  width: var(--nav-w);
+  min-height: 100vh;
+  background: var(--green-dk);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+.nav-logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.nav-logo h1 {
+  font-family: 'Lora', serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #d6f0b8;
+  letter-spacing: 0.02em;
+}
+.nav-logo p { font-size: 0.7rem; color: rgba(200,230,160,0.6); margin-top: 2px; }
+.nav-plant-name {
+  padding: 16px 24px;
+  font-size: 0.75rem;
+  color: rgba(200,230,160,0.7);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.nav-plant-name span { color: #d6f0b8; font-weight: 500; font-size: 0.9rem; display: block; }
+.nav-links { flex: 1; padding: 12px 0; overflow-y: auto; }
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 24px;
+  color: rgba(200,230,160,0.7);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+  user-select: none;
+}
+.nav-link:hover { color: #d6f0b8; background: rgba(255,255,255,0.06); }
+.nav-link.active { color: #d6f0b8; background: rgba(255,255,255,0.1); border-left-color: #7aad52; font-weight: 500; }
+.nav-link .icon { font-size: 1rem; width: 20px; text-align: center; }
+.nav-section-label {
+  padding: 14px 24px 4px;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(200,230,160,0.35);
+}
+.nav-bottom {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.level-pill {
+  background: rgba(255,255,255,0.1);
+  border-radius: 30px;
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  color: #d6f0b8;
+  display: flex; align-items: center; gap: 6px;
+}
+.xp-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.15); border-radius: 4px; overflow: hidden; }
+.xp-fill { height: 100%; background: #7aad52; border-radius: 4px; transition: width 0.4s ease; }
+
+/* ── MAIN ── */
+main {
+  margin-left: var(--nav-w);
+  flex: 1;
+  padding: 0;
+  min-height: 100vh;
+}
+.page { display: none; padding: 2rem; max-width: 900px; }
+.page.active { display: block; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 1.2rem;
+}
+.card-title {
+  font-family: 'Lora', serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--green-dk);
+  margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── PLANT HERO ── */
+.plant-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.plant-avatar {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: var(--green-pale);
+  border: 3px solid var(--green-lt);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem;
+  flex-shrink: 0;
+  position: relative;
+}
+.plant-avatar .alive-ring {
+  position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  animation: pulse-ring 2.5s infinite;
+}
+@keyframes pulse-ring {
+  0%, 100% { border-color: rgba(122,173,82,0.3); }
+  50% { border-color: rgba(122,173,82,0.7); }
+}
+.plant-meta h2 {
+  font-family: 'Lora', serif;
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: var(--green-dk);
+}
+.plant-meta .tagline { font-size: 0.8rem; color: var(--text3); margin-top: 2px; }
+.plant-meta .streak-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: linear-gradient(135deg, #ff6b35, #f7c59f);
+  color: white; border-radius: 20px;
+  padding: 3px 10px; font-size: 0.72rem; font-weight: 500;
+  margin-top: 8px;
+}
+.plant-status-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;
+}
+.status-chip {
+  background: var(--green-mist); border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; color: var(--green-dk);
+}
+
+/* ── NEEDS ── */
+.needs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.need-item {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.need-item:hover { border-color: var(--green-lt); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.need-item::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.need-item.ok::before { background: var(--green-lt); }
+.need-item.warn::before { background: #d4a017; }
+.need-item.critical::before { background: var(--red); }
+.need-icon { font-size: 1.4rem; }
+.need-name { font-size: 0.78rem; font-weight: 500; color: var(--text2); margin-top: 4px; }
+.need-pct { font-size: 1.4rem; font-weight: 500; color: var(--text); }
+.need-bar-bg { height: 5px; background: rgba(0,0,0,0.08); border-radius: 5px; margin-top: 6px; overflow: hidden; }
+.need-bar-fill { height: 5px; border-radius: 5px; transition: width 0.5s ease; }
+.need-item.ok .need-bar-fill { background: var(--green-lt); }
+.need-item.warn .need-bar-fill { background: #d4a017; }
+.need-item.critical .need-bar-fill { background: var(--red); }
+.need-habit { font-size: 0.65rem; color: var(--text3); margin-top: 4px; }
+
+/* ── HABIT PAGE ── */
+.habit-form {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.habit-form input {
+  flex: 1; min-width: 100px;
+  background: var(--card2); border: 1px solid var(--border2);
+  padding: 10px 14px; border-radius: 30px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--text);
+  outline: none; transition: border-color 0.15s;
+}
+.habit-form input:focus { border-color: var(--green-lt); }
+.btn {
+  background: var(--green-md); color: white;
+  border: none; padding: 10px 20px; border-radius: 30px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn:hover { background: var(--green-dk); }
+.btn:active { transform: scale(0.97); }
+.btn-secondary {
+  background: transparent; color: var(--green-md);
+  border: 1.5px solid var(--green-lt); padding: 8px 16px;
+}
+.btn-secondary:hover { background: var(--green-pale); }
+.btn-danger { background: var(--red); }
+.btn-danger:hover { background: #6b2015; }
+.btn-amber { background: var(--amber); }
+
+/* ── PROGRESS BARS ── */
+.progress-bar {
+  height: 8px; background: rgba(0,0,0,0.08); border-radius: 8px;
+  overflow: hidden; margin: 8px 0;
+}
+.progress-fill {
+  height: 100%; border-radius: 8px; transition: width 0.5s ease;
+}
+
+/* ── STATS ROW ── */
+.stats-row { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.stat-card {
+  flex: 1; min-width: 100px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 0.9rem;
+  text-align: center;
+}
+.stat-card .stat-val { font-size: 1.6rem; font-weight: 500; color: var(--text); line-height: 1; }
+.stat-card .stat-lbl { font-size: 0.65rem; color: var(--text3); margin-top: 4px; }
+
+/* ── WATER ── */
+.water-tank {
+  position: relative; width: 80px; height: 140px;
+  border: 2px solid #7ab4d4; border-radius: 8px; overflow: hidden;
+  background: rgba(200,230,255,0.15); margin: 0 auto;
+}
+.water-fill {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(180deg, rgba(100,180,230,0.4), rgba(60,140,200,0.7));
+  transition: height 0.6s ease;
+}
+.water-pct {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 0.8rem; font-weight: 500; color: #1a5c80; z-index: 1;
+}
+.water-glasses { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; justify-content: center; }
+.glass {
+  width: 36px; height: 36px; border: 2px solid #7ab4d4;
+  border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; cursor: pointer; transition: all 0.15s;
+  background: rgba(200,230,255,0.1);
+}
+.glass.filled { background: rgba(100,180,230,0.5); border-color: #4a9abf; }
+.glass:hover { transform: scale(1.1); }
+
+/* ── ORDER TEST ── */
+.order-question {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.order-question:last-child { border-bottom: none; }
+.order-toggle {
+  width: 44px; height: 24px; border-radius: 12px;
+  background: rgba(0,0,0,0.1); position: relative;
+  cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+  border: none;
+}
+.order-toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; transition: left 0.2s;
+}
+.order-toggle.on { background: var(--green-lt); }
+.order-toggle.on::after { left: 22px; }
+.order-q-text { font-size: 0.85rem; color: var(--text2); flex: 1; }
+.order-score-display {
+  text-align: center; padding: 1.5rem;
+  background: var(--green-mist); border-radius: var(--radius-sm);
+  margin-top: 1rem;
+}
+.order-score-big { font-size: 3rem; font-weight: 500; color: var(--green-dk); }
+
+/* ── PHONE CHART ── */
+.chart-wrap {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 1rem;
+  margin: 1rem 0;
+}
+
+/* ── GOALS ── */
+.goal-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.goal-row:last-child { border-bottom: none; }
+.goal-icon { font-size: 1.5rem; width: 36px; text-align: center; flex-shrink: 0; }
+.goal-info { flex: 1; }
+.goal-name { font-size: 0.85rem; font-weight: 500; color: var(--text); }
+.goal-sub { font-size: 0.72rem; color: var(--text3); margin-top: 1px; }
+.goal-pct { font-size: 0.85rem; font-weight: 500; color: var(--green-md); }
+
+/* ── INFO PAGE ── */
+.info-section { margin-bottom: 1.5rem; }
+.info-section h3 {
+  font-family: 'Lora', serif; font-size: 1rem; color: var(--green-dk);
+  margin-bottom: 0.6rem; font-weight: 500;
+}
+.info-section p { font-size: 0.85rem; color: var(--text2); line-height: 1.7; }
+.need-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.8rem; }
+.need-table th { background: var(--green-mist); padding: 8px 12px; text-align: left; font-weight: 500; color: var(--green-dk); }
+.need-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text2); }
+.need-table tr:last-child td { border-bottom: none; }
+
+/* ── STREAK ── */
+.streak-days { display: flex; gap: 6px; margin-top: 12px; }
+.streak-day {
+  flex: 1; aspect-ratio: 1;
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; color: var(--text3); border: 1px solid var(--border);
+  background: var(--card2);
+}
+.streak-day.done { background: var(--green-lt); border-color: var(--green-md); color: white; font-size: 0.8rem; }
+.streak-day.today { border-color: var(--green-dk); font-weight: 500; }
+
+/* ── MOBILE BURGER ── */
+.burger {
+  display: none; position: fixed; top: 16px; left: 16px;
+  z-index: 200; background: var(--green-dk); border: none;
+  width: 40px; height: 40px; border-radius: 10px; cursor: pointer;
+  flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+}
+.burger span { width: 18px; height: 2px; background: #d6f0b8; border-radius: 2px; }
+.nav-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; }
+
+/* ── DEATH ── */
+.death-card {
+  background: var(--red-lt); border: 1px solid rgba(139,46,26,0.3);
+  border-radius: var(--radius); padding: 1.5rem; text-align: center;
+  margin-bottom: 1.2rem;
+}
+.death-card h2 { font-family: 'Lora', serif; color: var(--red); margin-bottom: 0.5rem; }
+.death-card p { font-size: 0.85rem; color: #6b2015; }
+
+/* ── TOAST ── */
+#toastBox {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  z-index: 999; display: flex; flex-direction: column; gap: 8px; align-items: center;
+}
+.toast {
+  background: var(--green-dk); color: #d6f0b8;
+  padding: 8px 20px; border-radius: 30px; font-size: 0.78rem;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+  white-space: nowrap;
+}
+@keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes toastOut { to { opacity:0; } }
+
+/* ── ALERTS ── */
+.alert {
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  font-size: 0.8rem; margin-bottom: 1rem;
+}
+.alert-warn { background: #fff8e6; border: 1px solid #d4a017; color: #7a5a00; }
+.alert-info { background: var(--green-mist); border: 1px solid var(--green-lt); color: var(--green-dk); }
+.alert-danger { background: var(--red-lt); border: 1px solid rgba(139,46,26,0.3); color: var(--red); }
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 1.5rem; }
+.page-header h2 { font-family: 'Lora', serif; font-size: 1.6rem; color: var(--green-dk); font-weight: 500; }
+.page-header p { font-size: 0.82rem; color: var(--text3); margin-top: 4px; }
+
+/* ── OFFLINE ── */
+.offline-notice {
+  background: var(--amber-lt); border-left: 3px solid var(--amber);
+  padding: 10px 14px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.78rem; color: #7a4500; margin-bottom: 1rem;
+  display: none;
+}
+
+/* ── COOLDOWN ── */
+.cooldown-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #fff3cd; color: #856404; border: 1px solid #ffc107;
+  padding: 3px 10px; border-radius: 20px; font-size: 0.7rem;
+}
+
+/* ── OBLIGATORIO badge ── */
+.obligatorio-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--red-lt); color: var(--red); border: 1px solid rgba(139,46,26,0.3);
+  padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  nav { transform: translateX(-100%); }
+  nav.open { transform: translateX(0); }
+  .burger { display: flex; }
+  .nav-overlay.show { display: block; }
+  main { margin-left: 0; }
+  .page { padding: 1rem; padding-top: 60px; }
+  .needs-grid { grid-template-columns: 1fr 1fr; }
+  .plant-hero { flex-direction: column; text-align: center; gap: 1rem; }
+}
+@media (max-width: 380px) {
+  .needs-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Burger -->
+<button class="burger" id="burgerBtn" aria-label="Menú">
+  <span></span><span></span><span></span>
+</button>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <div class="nav-logo">
+    <h1>🌿 LevelUp</h1>
+    <p>Crecimiento personal</p>
+  </div>
+  <div class="nav-plant-name">
+    Tu planta
+    <span id="navPlantName">Leire</span>
+  </div>
+  <div class="nav-links">
+    <div class="nav-link active" data-page="home"><span class="icon">🏠</span> Inicio</div>
+    <div class="nav-section-label">Hábitos</div>
+    <div class="nav-link" data-page="agua"><span class="icon">💧</span> Hidratación</div>
+    <div class="nav-link" data-page="deporte"><span class="icon">💪</span> Deporte</div>
+    <div class="nav-link" data-page="aleman"><span class="icon">🧠</span> Alemán</div>
+    <div class="nav-link" data-page="pasos"><span class="icon">⚡</span> Pasos diarios</div>
+    <div class="nav-link" data-page="orden"><span class="icon">🍃</span> Orden</div>
+    <div class="nav-link" data-page="estiramientos"><span class="icon">🧘</span> Estiramientos</div>
+    <div class="nav-link" data-page="lectura"><span class="icon">📖</span> Lectura</div>
+    <div class="nav-section-label">Seguimiento</div>
+    <div class="nav-link" data-page="movil"><span class="icon">📱</span> Tiempo de móvil</div>
+    <div class="nav-link" data-page="info"><span class="icon">❓</span> Cómo funciona</div>
+  </div>
+  <div class="nav-bottom">
+    <div class="level-pill" id="navLevelPill">
+      <span id="navLevelText">Nv.1</span>
+      <div class="xp-bar"><div class="xp-fill" id="navXpFill" style="width:0%"></div></div>
+      <span id="navXpText" style="font-size:0.65rem">0/100</span>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <div id="toastBox"></div>
+
+  <!-- ═══ INICIO ═══ -->
+  <div class="page active" id="page-home">
+    <div class="page-header">
+      <h2 id="homeTitle">Hola, Leire 🌱</h2>
+      <p id="homeSubtitle">Nivel 1 · Cuida tu planta con buenos hábitos</p>
+    </div>
+    <div id="deathCardHome" class="death-card" style="display:none">
+      <h2>🍂 Tu planta ha muerto</h2>
+      <p id="deathReasonText"></p>
+      <button class="btn btn-danger" style="margin-top:1rem" onclick="fullResetGame()">🔄 Nueva planta</button>
+    </div>
+    <div id="homeAliveContent">
+      <div class="card">
+        <div class="plant-hero">
+          <div class="plant-avatar">
+            <span id="homePlantEmoji">🌱</span>
+            <div class="alive-ring" id="aliveRing"></div>
+          </div>
+          <div class="plant-meta">
+            <h2 id="homePlantName">Leire</h2>
+            <div class="tagline" id="homePlantTagline">Semilla en crecimiento</div>
+            <div class="streak-badge" id="homeStreakBadge">🔥 0 días de racha</div>
+            <div class="plant-status-row">
+              <span class="status-chip" id="homeLevel">Nivel 1</span>
+              <span class="status-chip" id="homeAlive">Viva ✓</span>
+              <button class="btn-secondary btn" style="padding:4px 12px;font-size:0.72rem" onclick="renamePlant()">Renombrar</button>
+            </div>
+          </div>
+        </div>
+        <div id="offlineNotice" class="offline-notice"></div>
+        <h3 style="font-size:0.75rem;color:var(--text3);margin-bottom:0.8rem;text-transform:uppercase;letter-spacing:0.08em">Necesidades · Toca para ir al hábito</h3>
+        <div class="needs-grid" id="homeNeedsGrid"></div>
+      </div>
+      <!-- Pendientes obligatorios del día -->
+      <div class="card" id="pendientesCard" style="display:none">
+        <div class="card-title">⚠️ Pendientes obligatorios hoy</div>
+        <div id="pendientesList"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏆 Metas a largo plazo</div>
+        <div id="homeGoalsList"></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:0.5rem">
+      <button class="btn" style="background:rgba(139,46,26,0.15);color:var(--red);font-size:0.75rem" onclick="if(confirm('¿Reiniciar todo el progreso?'))fullResetGame()">Reiniciar planta</button>
+    </div>
+  </div>
+
+  <!-- ═══ AGUA ═══ -->
+  <div class="page" id="page-agua">
+    <div class="page-header"><h2>💧 Hidratación</h2><p>Beber agua mantiene tu planta hidratada y viva</p></div>
+    <div class="card">
+      <div id="aguaOfflineAlert" class="alert alert-warn" style="display:none"></div>
+      <div style="display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <div class="water-tank" id="waterTank">
+            <div class="water-fill" id="waterFill" style="height:0%"></div>
+            <div class="water-pct" id="waterPctText">0%</div>
+          </div>
+          <p style="text-align:center;font-size:0.7rem;color:var(--text3);margin-top:8px">Nivel de hidratación</p>
+          <div class="water-glasses" id="waterGlasses"></div>
+          <p style="text-align:center;font-size:0.65rem;color:var(--text3);margin-top:6px">Clic en un vaso = +0.25L</p>
+        </div>
+        <div style="flex:2;min-width:200px">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-val" id="aguaHoy">0.0</div><div class="stat-lbl">Litros hoy</div></div>
+            <div class="stat-card"><div class="stat-val" id="aguaObj">1.5</div><div class="stat-lbl">Objetivo (L)</div></div>
+            <div class="stat-card"><div class="stat-val" id="aguaPct">0%</div><div class="stat-lbl">Completado</div></div>
+          </div>
+          <div class="alert alert-info" id="aguaAlertMsg">Bebe agua para mantener tu planta viva.</div>
+          <div class="habit-form" style="margin-top:1.2rem">
+            <input type="number" id="waterInput" step="0.1" min="0.1" max="2" placeholder="Litros (ej: 0.25)" value="0.25">
+            <button class="btn" onclick="addWater(parseFloat(document.getElementById('waterInput').value))">💧 Beber</button>
+          </div>
+          <div style="margin-top:1rem">
+            <p style="font-size:0.75rem;color:var(--text3);margin-bottom:6px">Atajos rápidos:</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-secondary" onclick="addWater(0.25)">+1 vaso (250ml)</button>
+              <button class="btn btn-secondary" onclick="addWater(0.5)">+500ml</button>
+              <button class="btn btn-secondary" onclick="addWater(1)">+1L</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Por qué importa</div>
+      <p style="font-size:0.85rem;color:var(--text2);line-height:1.7">La hidratación es la necesidad más crítica: si llega a 0%, tu planta muere inmediatamente. Se recupera bebiendo agua — cada litro repone un gran porcentaje. El objetivo es 1.5L al día, aunque en días de deporte puedes necesitar más.</p>
+    </div>
+  </div>
+
+  <!-- ═══ DEPORTE ═══ -->
+  <div class="page" id="page-deporte">
+    <div class="page-header"><h2>💪 Deporte</h2><p>El ejercicio físico mantiene la fuerza de tu planta</p></div>
+    <div id="deporteCooldownAlert" style="margin-bottom:1rem"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="deporteMaxKm">0</div><div class="stat-lbl">Km máx. corridos</div></div>
+      <div class="stat-card"><div class="stat-val" id="deporteRitmo">7.5</div><div class="stat-lbl">Min/km ritmo</div></div>
+      <div class="stat-card"><div class="stat-val" id="deporteNeed">100%</div><div class="stat-lbl">Fuerza actual</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏃 Registrar sesión de running</div>
+      <div class="progress-bar"><div class="progress-fill" id="deporteProgressBar" style="width:0%;background:var(--green-lt)"></div></div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-bottom:1rem" id="deporteProgressText">0/20 km objetivo final</p>
+      <div class="habit-form">
+        <input type="number" id="sportKmInput" step="0.5" min="0.5" max="50" placeholder="Km recorridos">
+        <input type="number" id="sportRitmoInput" step="0.1" min="3" max="15" placeholder="Ritmo min/km (opc.)">
+        <button class="btn" id="sportBtn" onclick="doSport()">💪 Registrar</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:0.8rem">Cualquier distancia cuenta. Llenar este hábito restaura la Fuerza al 100%.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🎯 Meta: Correr 20 km</div>
+      <div class="goal-row">
+        <div class="goal-icon">🏅</div>
+        <div class="goal-info">
+          <div class="goal-name">Distancia máxima</div>
+          <div class="goal-sub" id="deporteGoalSub">Vas mejorando poco a poco</div>
+          <div class="progress-bar" style="margin-top:6px"><div class="progress-fill" id="deporteGoalBar" style="width:0%;background:var(--green-lt)"></div></div>
+        </div>
+        <div class="goal-pct" id="deporteGoalPct">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ALEMÁN ═══ -->
+  <div class="page" id="page-aleman">
+    <div class="page-header"><h2>🧠 Alemán</h2><p>Estudiar alemán mantiene la inteligencia de tu planta</p></div>
+    <div id="alemanCooldownAlert" style="margin-bottom:1rem"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="alemanHoras">0</div><div class="stat-lbl">Horas totales</div></div>
+      <div class="stat-card"><div class="stat-val" id="alemanNivel">A1</div><div class="stat-lbl">Nivel estimado</div></div>
+      <div class="stat-card"><div class="stat-val" id="alemanNeed">100%</div><div class="stat-lbl">Inteligencia</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📖 Registrar horas de estudio</div>
+      <div class="progress-bar"><div class="progress-fill" id="alemanProgressBar" style="width:0%;background:#7aad52"></div></div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-bottom:1rem" id="alemanProgressText">0/660h hacia B2</p>
+      <div class="habit-form">
+        <input type="number" id="germanHoursInput" step="0.5" min="0.5" max="8" placeholder="Horas estudiadas">
+        <button class="btn" id="alemanBtn" onclick="doAleman()">📖 Registrar</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:0.8rem">Cada registro de estudio (+1h mínimo) restaura la Inteligencia al 100%.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🗺️ Hoja de ruta A1 → B2</div>
+      <div id="alemanRoadmap"></div>
+    </div>
+  </div>
+
+  <!-- ═══ PASOS ═══ -->
+  <div class="page" id="page-pasos">
+    <div class="page-header"><h2>⚡ Pasos diarios</h2><p>Caminar carga la energía de tu planta · Se resetea cada medianoche · Mínimo 7.000 para sobrevivir</p></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="pasosHoy">0</div><div class="stat-lbl">Pasos hoy</div></div>
+      <div class="stat-card"><div class="stat-val">10k</div><div class="stat-lbl">Objetivo</div></div>
+      <div class="stat-card"><div class="stat-val" id="pasosNeed">100%</div><div class="stat-lbl">Energía actual</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">👣 Registrar pasos</div>
+      <div class="progress-bar"><div class="progress-fill" id="pasosBar" style="width:0%;background:var(--green-lt)"></div></div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-bottom:1rem" id="pasosProgressText">0 / 10.000 pasos</p>
+      <div class="habit-form">
+        <input type="number" id="pasosInput" step="500" min="1" max="30000" placeholder="Pasos (ej: 8500)">
+        <button class="btn" id="pasosBtn" onclick="doPasos()">👣 Registrar</button>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="doPasosVal(5000)">5.000 pasos</button>
+        <button class="btn btn-secondary" onclick="doPasosVal(7500)">7.500 pasos</button>
+        <button class="btn btn-secondary" onclick="doPasosVal(10000)">✅ 10.000 pasos</button>
+        <button class="btn btn-secondary" onclick="doPasosVal(12000)">12.000 pasos</button>
+      </div>
+      <div class="alert alert-warn" style="margin-top:1rem">
+        ⚠️ Los pasos se reinician cada medianoche (como el agua y los estiramientos). Si registras menos de 7.000 en un día, tu planta muere. 10.000 pasos = Energía al 100%.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Cómo funciona la energía</div>
+      <p style="font-size:0.85rem;color:var(--text2);line-height:1.7">La energía empieza en 100% al inicio del día y baja conforme pasan las horas sin registrar pasos. Registrar pasos la restaura proporcionalmente: 10.000 pasos = 100%, 7.000 pasos = 70%, etc. Al llegar a medianoche, los pasos se reinician a 0.</p>
+    </div>
+  </div>
+
+  <!-- ═══ ORDEN ═══ -->
+  <div class="page" id="page-orden">
+    <div class="page-header"><h2>🍃 Test de Orden</h2><p>El orden y la limpieza mantienen la tranquilidad de tu planta · <strong style="color:var(--red)">Obligatorio cada día</strong></p></div>
+    <div id="ordenDoneAlert" style="margin-bottom:1rem"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="ordenMedia">0.0</div><div class="stat-lbl">Media semanal</div></div>
+      <div class="stat-card"><div class="stat-val" id="ordenTests">0</div><div class="stat-lbl">Tests realizados</div></div>
+      <div class="stat-card"><div class="stat-val" id="ordenNeed">100%</div><div class="stat-lbl">Tranquilidad</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Test de hoy</div>
+      <div class="alert alert-danger" style="margin-bottom:1rem">
+        🚨 <strong>Obligatorio:</strong> Si no completas el test de orden antes de medianoche, tu planta muere.
+      </div>
+      <p style="font-size:0.82rem;color:var(--text2);margin-bottom:1rem">Responde honestamente. Solo puedes hacer el test una vez al día.</p>
+      <div id="orderQuestionsContainer"></div>
+      <div class="order-score-display" id="orderScoreDisplay" style="display:none">
+        <div style="font-size:0.8rem;color:var(--text3)">Puntuación de hoy</div>
+        <div class="order-score-big" id="orderScoreBig">0/10</div>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="orderSubmitBtn" onclick="submitOrderTest()">✅ Enviar test</button>
+        <div id="ordenCooldownBadge"></div>
+      </div>
+    </div>
+    <div class="card" id="ordenHistCard">
+      <div class="card-title">📈 Historial reciente</div>
+      <div id="ordenHistContent"></div>
+    </div>
+  </div>
+
+  <!-- ═══ ESTIRAMIENTOS ═══ -->
+  <div class="page" id="page-estiramientos">
+    <div class="page-header"><h2>🧘 Estiramientos</h2><p>La flexibilidad de tu planta depende de tus estiramientos diarios</p></div>
+    <div id="estirCooldownAlert" style="margin-bottom:1rem"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="estirCm">32</div><div class="stat-lbl">Cm al suelo</div></div>
+      <div class="stat-card"><div class="stat-val" id="estirProg">0%</div><div class="stat-lbl">Progreso spagatt</div></div>
+      <div class="stat-card"><div class="stat-val" id="estirNeed">100%</div><div class="stat-lbl">Elasticidad</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🧘 Registrar sesión de estiramientos</div>
+      <div style="text-align:center;margin:1rem 0">
+        <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px">Distancia al suelo (spagatt)</div>
+        <div style="font-size:2.5rem;font-weight:500;color:var(--green-dk)" id="estirCmBig">32 cm</div>
+        <div class="progress-bar" style="max-width:300px;margin:8px auto"><div class="progress-fill" id="estirGoalBar" style="width:0%;background:var(--green-lt)"></div></div>
+        <div style="font-size:0.7rem;color:var(--text3)">Meta: 0 cm (spagatt completo)</div>
+      </div>
+      <div class="habit-form">
+        <input type="number" id="estirCmInput" step="0.5" min="0" max="60" placeholder="Cm al suelo hoy">
+        <button class="btn" id="estirBtn" onclick="doEstiramientos()">🧘 Registrar + Completar</button>
+      </div>
+      <div style="margin-top:1rem">
+        <button class="btn btn-secondary" onclick="doEstiramientosNoMedida()">✅ Solo marcar como hecho</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:0.8rem">Registrar estiramientos restaura la Elasticidad al 100%. Si mides la distancia al suelo también actualiza tu progreso hacia el spagatt.</p>
+    </div>
+  </div>
+
+  <!-- ═══ LECTURA ═══ -->
+  <div class="page" id="page-lectura">
+    <div class="page-header"><h2>📖 Lectura</h2><p>Leer cada día nutre el entretenimiento y la mente de tu planta</p></div>
+    <div id="lecturaCooldownAlert" style="margin-bottom:1rem"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="lecturaMedia">0</div><div class="stat-lbl">Min/día (media)</div></div>
+      <div class="stat-card"><div class="stat-val" id="lecturaSesiones">0</div><div class="stat-lbl">Sesiones registradas</div></div>
+      <div class="stat-card"><div class="stat-val" id="lecturaNeed">100%</div><div class="stat-lbl">Entretenimiento</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📚 Registrar sesión de lectura</div>
+      <div class="habit-form">
+        <input type="number" id="lecturaMinsInput" step="5" min="5" max="240" placeholder="Minutos leídos">
+        <button class="btn" id="lecturaBtn" onclick="doLectura()">📚 Registrar</button>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="doLecturaVal(15)">15 min</button>
+        <button class="btn btn-secondary" onclick="doLecturaVal(30)">30 min</button>
+        <button class="btn btn-secondary" onclick="doLecturaVal(45)">45 min</button>
+        <button class="btn btn-secondary" onclick="doLecturaVal(60)">1 hora</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:0.8rem">Cualquier sesión de lectura restaura el Entretenimiento al 100% y da XP extra (1 XP por cada 15 min).</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📅 Últimas sesiones</div>
+      <div id="lecturaHistContent"></div>
+    </div>
+  </div>
+
+  <!-- ═══ MÓVIL ═══ -->
+  <div class="page" id="page-movil">
+    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p>El exceso de pantalla daña tu planta · <strong style="color:var(--red)">Obligatorio registrar cada día</strong></p></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="movilHoy">0</div><div class="stat-lbl">Horas hoy</div></div>
+      <div class="stat-card"><div class="stat-val" id="movilMedia">0</div><div class="stat-lbl">Media semanal (h)</div></div>
+      <div class="stat-card"><div class="stat-val" id="movilMax">0</div><div class="stat-lbl">Máx. semanal</div></div>
+    </div>
+    <div id="movilAlert" class="alert" style="display:none;margin-bottom:1rem"></div>
+    <div class="card">
+      <div class="card-title">📲 Registrar uso de hoy</div>
+      <div class="alert alert-danger" style="margin-bottom:1rem">
+        🚨 <strong>Obligatorio:</strong> Si no registras las horas de móvil antes de medianoche, tu planta muere.
+      </div>
+      <div id="movilDoneAlert" style="margin-bottom:0.8rem"></div>
+      <div class="habit-form">
+        <input type="number" id="phoneInput" step="0.5" min="0" max="24" placeholder="Horas de móvil hoy" value="0">
+        <button class="btn btn-amber" id="phoneBtn" onclick="doPhone()">📱 Registrar</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:0.8rem">Solo puedes registrar una vez al día. Más de 2h/día empieza a dañar tu planta. <strong style="color:var(--red)">Más de 5h = muerte instantánea.</strong></p>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Últimos 7 días</div>
+      <div class="chart-wrap"><canvas id="phoneChart" height="200"></canvas></div>
+      <div id="phoneChartLegend" style="font-size:0.72rem;color:var(--text3);text-align:center;margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">💡 Por qué importa</div>
+      <p style="font-size:0.85rem;color:var(--text2);line-height:1.7">El uso excesivo del móvil daña y puede matar tu planta. Entre 0-2h/día no hay penalización. Entre 2-5h hay daño progresivo en Tranquilidad e Inteligencia. <strong>Por encima de 5h, la planta muere instantáneamente.</strong> <strong style="color:var(--red)">Si no registras el uso antes de medianoche, la planta muere.</strong> Registra tu uso honestamente.</p>
+    </div>
+  </div>
+
+  <!-- ═══ INFO ═══ -->
+  <div class="page" id="page-info">
+    <div class="page-header"><h2>❓ Cómo funciona LevelUp</h2><p>Todo lo que necesitas saber sobre tu planta</p></div>
+    <div class="card">
+      <div class="info-section">
+        <h3>🌱 Tu planta virtual</h3>
+        <p>LevelUp es una aplicación de seguimiento de hábitos donde tu progreso personal se refleja en el estado de una planta virtual. La planta tiene <strong>7 necesidades</strong>, cada una ligada a un hábito específico. Si no cuidas a tu planta, sus necesidades bajan hasta llegar a 0%... y muere.</p>
+      </div>
+      <div class="info-section">
+        <h3>⏱️ Sistema de decaimiento</h3>
+        <p>Cada necesidad baja de forma gradual a lo largo del tiempo. No es instantáneo — tienes horas para actuar. Cuanto más tiempo pases sin realizar un hábito, más bajará esa necesidad. Si una necesidad llega a 0%, la planta muere y hay que empezar de nuevo.</p>
+      </div>
+      <table class="need-table">
+        <thead><tr><th>Necesidad</th><th>Hábito</th><th>Se agota en</th><th>Obligatorio</th></tr></thead>
+        <tbody>
+          <tr><td>💧 Hidratación</td><td>Beber 1.5L de agua</td><td>24 horas (reset medianoche)</td><td>—</td></tr>
+          <tr><td>💪 Fuerza</td><td>Hacer deporte</td><td>7 días</td><td>—</td></tr>
+          <tr><td>🧠 Inteligencia</td><td>Estudiar alemán</td><td>3 días</td><td>—</td></tr>
+          <tr><td>⚡ Energía</td><td>Pasos diarios (mín. 7.000)</td><td>24 h (reset medianoche)</td><td>—</td></tr>
+          <tr><td>🍃 Tranquilidad</td><td>Test de orden</td><td>24 h si no haces el test</td><td>✅ Sí</td></tr>
+          <tr><td>🧘 Elasticidad</td><td>Estiramientos</td><td>24 horas (reset medianoche)</td><td>—</td></tr>
+          <tr><td>📖 Entretenimiento</td><td>Leer</td><td>2 días</td><td>—</td></tr>
+          <tr><td>📱 Móvil</td><td>Registrar horas de pantalla</td><td>Muere si no registras</td><td>✅ Sí</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="info-section">
+        <h3>🚨 Hábitos obligatorios diarios</h3>
+        <p><strong>Test de orden</strong> y <strong>registro de horas de móvil</strong> son obligatorios cada día. Si no los completas antes de medianoche, tu planta muere automáticamente al cambiar de día. Recibirás avisos en la pantalla de inicio cuando aún no los hayas completado.</p>
+      </div>
+      <div class="info-section">
+        <h3>⚡ Pasos y energía (reset diario)</h3>
+        <p>Los pasos funcionan igual que el agua: se reinician a 0 cada medianoche. La energía empieza alta y va bajando durante el día. Registrar pasos la restaura proporcionalmente. <strong>Si al final del día tienes menos de 7.000 pasos, tu planta muere.</strong></p>
+      </div>
+      <div class="info-section">
+        <h3>🔥 Racha de supervivencia</h3>
+        <p>La racha aumenta cada día que tu planta sigue viva. ¡Cuídala bien!</p>
+      </div>
+      <div class="info-section">
+        <h3>💡 Consejos</h3>
+        <p>• La hidratación, elasticidad y pasos son los más urgentes (se resetean a medianoche).<br>• Test de orden y móvil son obligatorios — no te olvides de completarlos antes de dormir.<br>• El deporte es el más perdonador (7 días).<br>• Los datos se guardan automáticamente en tu dispositivo.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG & STATE
+// ══════════════════════════════════════════════
+const NEEDS_CONFIG = [
+  { id:"hydration",     name:"Hidratación",    icon:"💧", habit:"beber agua",       page:"agua",          deathReason:"deshidratación",                   hoursToZero:24  },
+  { id:"strength",      name:"Fuerza",         icon:"💪", habit:"hacer deporte",    page:"deporte",       deathReason:"falta de ejercicio",               hoursToZero:168 },
+  { id:"intelligence",  name:"Inteligencia",   icon:"🧠", habit:"estudiar alemán",  page:"aleman",        deathReason:"falta de estimulación mental",     hoursToZero:72  },
+  { id:"energy",        name:"Energía",        icon:"⚡", habit:"registrar pasos",  page:"pasos",         deathReason:"sedentarismo — menos de 7.000 pasos", hoursToZero:24 },
+  { id:"calmness",      name:"Tranquilidad",   icon:"🍃", habit:"test de orden",    page:"orden",         deathReason:"estrés y desorden",                hoursToZero:48  },
+  { id:"flexibility",   name:"Elasticidad",    icon:"🧘", habit:"estiramientos",    page:"estiramientos", deathReason:"pérdida de flexibilidad",          hoursToZero:24  },
+  { id:"entertainment", name:"Entretenimiento",icon:"📖", habit:"leer",             page:"lectura",       deathReason:"falta de cultura",                 hoursToZero:48  }
+];
+
+const ORDER_QUESTIONS = [
+  "¿El suelo está libre de objetos?",
+  "¿La mesa/escritorio está despejada?",
+  "¿La ropa del día siguiente está preparada?",
+  "¿La cama está hecha?",
+  "¿Has ventilado la habitación?",
+  "¿Has pasado la escoba/fregona?"
+];
+
+const DECAY_PER_HOUR = {
+  hydration:4.167, strength:0.595, intelligence:1.389,
+  calmness:2.083, entertainment:2.083
+};
+
+let plant = {};
+let needsState = {};
+let hydration = {};
+let flexibility = {};
+let energy = {};      // NEW: same system as hydration/flexibility
+let goals = {};
+let phoneUsage = [];
+let cooldowns = {};
+let dailyActions = {};
+let streak = {};
+let lastDecayTs = Date.now();
+let phoneChartInst = null;
+let decayInterval = null;
+
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+function todayStr() { return new Date().toDateString(); }
+
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ══════════════════════════════════════════════
+// DEFAULT STATE
+// ══════════════════════════════════════════════
+function defaultState() {
+  const now = Date.now();
+  plant = { name:"Leire", level:1, xp:0, xpNext:100, alive:true, deathReason:null, createdAt:now };
+  needsState = {};
+  NEEDS_CONFIG.forEach(n => {
+    if (n.id !== "hydration" && n.id !== "flexibility" && n.id !== "energy") {
+      needsState[n.id] = { value:100, lastFulfilled:now };
+    }
+  });
+  hydration = {
+    level: 100,
+    extraHydration: 0,
+    loggedToday: 0,
+    target: 1.5,
+    lastResetDate: getTodayKey()
+  };
+  flexibility = {
+    level: 100,
+    extraFlexibility: 0,
+    doneToday: false,
+    lastResetDate: getTodayKey()
+  };
+  // NEW: energy works exactly like hydration/flexibility — time-based daily reset
+  energy = {
+    level: 100,
+    extraEnergy: 0,         // boost from registering steps
+    stepsToday: 0,
+    doneToday: false,
+    lastResetDate: getTodayKey()
+  };
+  goals = {
+    german:  { hours:0, target:660 },
+    spagatt: { cmToGround:32 },
+    order:   { scores:[], avg:0 },
+    running: { maxKm:0, target:20, pace:7.5 },
+    reading: { entries:[] }
+  };
+  phoneUsage   = [];
+  cooldowns    = {};
+  // dailyActions tracks obligatory tasks: orderDone, phoneDone
+  dailyActions = { orderDone:false, phoneDone:false, date:todayStr() };
+  streak       = { current:0, lastAliveDay:null };
+  lastDecayTs  = now;
+}
+
+// ══════════════════════════════════════════════
+// HYDRATION SYSTEM
+// ══════════════════════════════════════════════
+function getCurrentHydrationLevel() {
+  if (!plant.alive) return 0;
+  const todayKey = getTodayKey();
+  if (hydration.lastResetDate !== todayKey) {
+    hydration.lastResetDate  = todayKey;
+    hydration.extraHydration = 0;
+    hydration.loggedToday    = 0;
+  }
+  const now = new Date();
+  const hoursSinceMidnight = now.getHours() + (now.getMinutes() / 60);
+  const baseLevel = Math.max(0, 100 - (hoursSinceMidnight * 100 / 24));
+  return Math.min(100, Math.max(0, baseLevel + hydration.extraHydration));
+}
+
+function updateHydrationLevel() {
+  hydration.level = getCurrentHydrationLevel();
+}
+
+// ══════════════════════════════════════════════
+// FLEXIBILITY SYSTEM
+// ══════════════════════════════════════════════
+function getCurrentFlexibilityLevel() {
+  if (!plant.alive) return 0;
+  const todayKey = getTodayKey();
+  if (flexibility.lastResetDate !== todayKey) {
+    flexibility.lastResetDate    = todayKey;
+    flexibility.extraFlexibility = 0;
+    flexibility.doneToday        = false;
+  }
+  const now = new Date();
+  const hoursSinceMidnight = now.getHours() + (now.getMinutes() / 60);
+  const baseLevel = Math.max(0, 100 - (hoursSinceMidnight * 100 / 24));
+  return Math.min(100, Math.max(0, baseLevel + flexibility.extraFlexibility));
+}
+
+function updateFlexibilityLevel() {
+  flexibility.level = getCurrentFlexibilityLevel();
+}
+
+// ══════════════════════════════════════════════
+// ENERGY / STEPS SYSTEM — NEW: mirrors hydration
+// Decays time-based during the day (resets at midnight).
+// Registering steps boosts energy proportionally to steps/10000.
+// If at midnight stepsToday < 7000 and doneToday, plant dies.
+// ══════════════════════════════════════════════
+function getCurrentEnergyLevel() {
+  if (!plant.alive) return 0;
+  const todayKey = getTodayKey();
+  if (energy.lastResetDate !== todayKey) {
+    // Crossing midnight: check if yesterday had steps < 7000
+    if (energy.doneToday && energy.stepsToday < 7000) {
+      // Will trigger death in checkDailyObligatory
+    }
+    energy.lastResetDate = todayKey;
+    energy.extraEnergy   = 0;
+    energy.stepsToday    = 0;
+    energy.doneToday     = false;
+  }
+  const now = new Date();
+  const hoursSinceMidnight = now.getHours() + (now.getMinutes() / 60);
+  const baseLevel = Math.max(0, 100 - (hoursSinceMidnight * 100 / 24));
+  return Math.min(100, Math.max(0, baseLevel + energy.extraEnergy));
+}
+
+function updateEnergyLevel() {
+  energy.level = getCurrentEnergyLevel();
+}
+
+// ══════════════════════════════════════════════
+// DAILY OBLIGATORY CHECK
+// Called on load and on every daily reset.
+// Kills plant if yesterday's obligatory tasks were not done.
+// ══════════════════════════════════════════════
+function checkDailyObligatory() {
+  if (!plant.alive) return;
+  const today = todayStr();
+
+  // If we're in a new day and yesterday's actions aren't reset yet
+  if (dailyActions.date !== today) {
+    // Check if phone was NOT registered yesterday
+    if (!dailyActions.phoneDone) {
+      killPlant("no registraste las horas de móvil ayer");
+      return;
+    }
+    // Check if order test was NOT done yesterday
+    if (!dailyActions.orderDone) {
+      killPlant("no hiciste el test de orden ayer");
+      return;
+    }
+    // Check if steps were registered and < 7000
+    if (energy.doneToday && energy.stepsToday < 7000) {
+      killPlant("sedentarismo — registraste solo " + energy.stepsToday.toLocaleString() + " pasos ayer (mínimo 7.000)");
+      return;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+// SAVE / LOAD
+// ══════════════════════════════════════════════
+function save() {
+  updateHydrationLevel();
+  updateFlexibilityLevel();
+  updateEnergyLevel();
+  const s = {
+    plant,
+    needsState,
+    hydration,
+    flexibility,
+    energy,
+    goals,
+    phoneUsage,
+    cooldowns,
+    dailyActions,
+    streak,
+    lastDecayTs
+  };
+  try { localStorage.setItem("levelup_v4", JSON.stringify(s)); } catch(e) { console.warn("Save failed:", e); }
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem("levelup_v4");
+    if (!raw) {
+      // Try to migrate from v3/v2
+      const rawV3 = localStorage.getItem("levelup_v3");
+      if (rawV3) { migrateFromV3(rawV3); return; }
+      const rawV2 = localStorage.getItem("levelup_v2");
+      if (rawV2) { migrateFromV3(rawV2); return; }
+      defaultState();
+      return;
+    }
+    const s = JSON.parse(raw);
+    if (!s.plant || typeof s.plant.alive === "undefined") { defaultState(); return; }
+
+    plant        = s.plant;
+    needsState   = s.needsState  || {};
+    hydration    = s.hydration   || {};
+    flexibility  = s.flexibility || {};
+    energy       = s.energy      || {};
+    goals        = s.goals       || {};
+    phoneUsage   = s.phoneUsage  || [];
+    cooldowns    = s.cooldowns   || {};
+    dailyActions = s.dailyActions || {};
+    lastDecayTs  = s.lastDecayTs || Date.now();
+
+    streak = {
+      current:      (s.streak && s.streak.current)      || 0,
+      lastAliveDay: (s.streak && s.streak.lastAliveDay) || null
+    };
+
+    // Defaults
+    if (hydration.target         === undefined) hydration.target         = 1.5;
+    if (hydration.extraHydration === undefined) hydration.extraHydration = 0;
+    if (hydration.lastResetDate  === undefined) hydration.lastResetDate  = getTodayKey();
+
+    if (!flexibility.lastResetDate)              flexibility.lastResetDate    = getTodayKey();
+    if (flexibility.extraFlexibility === undefined) flexibility.extraFlexibility = 0;
+    if (flexibility.doneToday        === undefined) flexibility.doneToday        = false;
+
+    if (!energy.lastResetDate)           energy.lastResetDate = getTodayKey();
+    if (energy.extraEnergy   === undefined) energy.extraEnergy   = 0;
+    if (energy.stepsToday    === undefined) energy.stepsToday    = 0;
+    if (energy.doneToday     === undefined) energy.doneToday     = false;
+
+    if (!goals.reading) goals.reading = { entries: [] };
+    if (!goals.order)   goals.order   = { scores: [], avg: 0 };
+
+    // Check obligatory tasks from yesterday before resetting
+    checkDailyObligatory();
+
+    // Reset daily actions if new day
+    const today = todayStr();
+    if (dailyActions.date !== today) {
+      dailyActions.orderDone = false;
+      dailyActions.phoneDone = false;
+      dailyActions.date = today;
+    }
+
+    updateHydrationLevel();
+    updateFlexibilityLevel();
+    updateEnergyLevel();
+
+    // Remove energy from needsState if present (now handled separately)
+    delete needsState.energy;
+
+  } catch(e) {
+    console.warn("Load failed, resetting:", e);
+    defaultState();
+  }
+}
+
+function migrateFromV3(rawV3) {
+  try {
+    const s = JSON.parse(rawV3);
+    defaultState();
+    if (s.plant)        plant      = s.plant;
+    if (s.needsState)   needsState = s.needsState;
+    if (s.hydration)    hydration  = s.hydration;
+    if (s.goals)        goals      = s.goals;
+    if (s.phoneUsage)   phoneUsage = s.phoneUsage;
+    if (s.cooldowns)    cooldowns  = s.cooldowns;
+    if (s.lastDecayTs)  lastDecayTs = s.lastDecayTs;
+    streak = { current: (s.streak && s.streak.current) || 0, lastAliveDay: null };
+    if (!goals.reading) goals.reading = { entries: [] };
+    if (!goals.order)   goals.order   = { scores: [], avg: 0 };
+    delete needsState.flexibility;
+    delete needsState.energy;
+    updateHydrationLevel();
+    updateFlexibilityLevel();
+    updateEnergyLevel();
+    save();
+  } catch(e) {
+    defaultState();
+  }
+}
+
+// ══════════════════════════════════════════════
+// DECAY (energy/hydration/flexibility handled separately)
+// ══════════════════════════════════════════════
+function applyDecay() {
+  if (!plant.alive) return;
+  const now = Date.now();
+  const hoursPassed = Math.min((now - lastDecayTs) / 3600000, 72);
+  if (hoursPassed < 0.016) return;
+
+  NEEDS_CONFIG.forEach(n => {
+    if (n.id === "hydration" || n.id === "flexibility" || n.id === "energy") return;
+    const st = needsState[n.id];
+    if (st) {
+      st.value = Math.max(0, st.value - (DECAY_PER_HOUR[n.id] || 1) * hoursPassed);
+    }
+  });
+
+  lastDecayTs = now;
+  checkDeath();
+}
+
+function checkDeath() {
+  if (!plant.alive) return true;
+
+  updateHydrationLevel();
+  updateFlexibilityLevel();
+  updateEnergyLevel();
+
+  if (hydration.level <= 0) {
+    killPlant("deshidratación — no bebiste suficiente agua");
+    return true;
+  }
+
+  if (flexibility.level <= 0) {
+    killPlant("rigidez total — no hiciste estiramientos");
+    return true;
+  }
+
+  if (energy.level <= 0) {
+    killPlant("sedentarismo — energía agotada sin pasos registrados");
+    return true;
+  }
+
+  for (let n of NEEDS_CONFIG) {
+    if (n.id === "hydration" || n.id === "flexibility" || n.id === "energy") continue;
+    if ((needsState[n.id]?.value || 0) <= 0) {
+      killPlant(n.deathReason);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function killPlant(reason) {
+  plant.alive = false;
+  plant.deathReason = reason;
+  streak.current = 0;
+  if (decayInterval) clearInterval(decayInterval);
+  toast(`🍂 ${plant.name} ha muerto: ${reason}`);
+  save();
+  renderAll();
+}
+
+// ══════════════════════════════════════════════
+// STREAK — survival-based, one fire per day
+// ══════════════════════════════════════════════
+function updateSurvivalStreak() {
+  if (!plant.alive) return;
+  const today = todayStr();
+  if (streak.lastAliveDay === today) return;
+
+  if (streak.lastAliveDay === null) {
+    streak.current = 1;
+  } else {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (streak.lastAliveDay === yesterday.toDateString()) {
+      streak.current++;
+    } else {
+      streak.current = 1;
+    }
+  }
+  streak.lastAliveDay = today;
+  save();
+}
+
+function resetDailyActions() {
+  const today = todayStr();
+  if (dailyActions.date !== today) {
+    checkDailyObligatory();
+    if (!plant.alive) return;
+    dailyActions.orderDone = false;
+    dailyActions.phoneDone = false;
+    dailyActions.date = today;
+  }
+}
+
+// ══════════════════════════════════════════════
+// FULFILL NEED
+// ══════════════════════════════════════════════
+function fulfillNeed(needId) {
+  if (!plant.alive) { toast("❌ La planta está muerta. Reinicia primero."); return false; }
+  if (needId === "hydration" || needId === "flexibility" || needId === "energy") return false;
+  if (needsState[needId]) {
+    needsState[needId].value = 100;
+    needsState[needId].lastFulfilled = Date.now();
+  }
+  plant.xp += 8;
+  checkLevelUp();
+  save();
+  renderAll();
+  return true;
+}
+
+function checkLevelUp() {
+  while (plant.xp >= plant.xpNext) {
+    plant.xp -= plant.xpNext;
+    plant.level++;
+    plant.xpNext = Math.floor(plant.xpNext * 1.2);
+    toast(`🎋 ¡Nivel ${plant.level}! Tu planta creció`);
+  }
+}
+
+// ══════════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════════
+function addWater(liters) {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  if (isNaN(liters) || liters <= 0) { toast("Cantidad inválida"); return; }
+  const pctFromLiter = (liters / hydration.target) * 100;
+  hydration.extraHydration = Math.min(100, hydration.extraHydration + pctFromLiter);
+  hydration.loggedToday = Math.min(hydration.target * 2, hydration.loggedToday + liters);
+  updateHydrationLevel();
+  plant.xp += 3;
+  checkLevelUp();
+  toast(`💧 +${liters}L · Hidratación ${Math.round(hydration.level)}%`);
+  save();
+  renderAll();
+}
+
+function doSport() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  const km = parseFloat(document.getElementById("sportKmInput")?.value);
+  const ritmo = parseFloat(document.getElementById("sportRitmoInput")?.value);
+  if (isNaN(km) || km <= 0) { toast("Ingresa los km"); return; }
+  if (km > goals.running.maxKm) goals.running.maxKm = Math.min(goals.running.target, km);
+  if (!isNaN(ritmo) && ritmo > 0) goals.running.pace = ritmo;
+  if (document.getElementById("sportKmInput")) document.getElementById("sportKmInput").value = "";
+  if (document.getElementById("sportRitmoInput")) document.getElementById("sportRitmoInput").value = "";
+  fulfillNeed("strength");
+  toast(`🏃 +${km}km registrado · Fuerza al 100%`);
+}
+
+function doAleman() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  const h = parseFloat(document.getElementById("germanHoursInput")?.value);
+  if (isNaN(h) || h <= 0) { toast("Ingresa las horas"); return; }
+  goals.german.hours = Math.min(goals.german.target, goals.german.hours + h);
+  if (document.getElementById("germanHoursInput")) document.getElementById("germanHoursInput").value = "";
+  fulfillNeed("intelligence");
+  toast(`📖 +${h}h de alemán · Inteligencia al 100%`);
+}
+
+// ── PASOS (NEW — same system as hydration, reset daily at midnight) ──
+function doPasos() {
+  const steps = parseInt(document.getElementById("pasosInput")?.value);
+  if (isNaN(steps) || steps <= 0) { toast("Ingresa los pasos"); return; }
+  doPasosVal(steps);
+  if (document.getElementById("pasosInput")) document.getElementById("pasosInput").value = "";
+}
+
+function doPasosVal(steps) {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  if (isNaN(steps) || steps <= 0) { toast("Pasos inválidos"); return; }
+
+  // Reset if new day
+  const todayKey = getTodayKey();
+  if (energy.lastResetDate !== todayKey) {
+    energy.lastResetDate = todayKey;
+    energy.extraEnergy   = 0;
+    energy.stepsToday    = 0;
+    energy.doneToday     = false;
+  }
+
+  // Accumulate steps for today
+  energy.stepsToday += steps;
+  energy.doneToday = true;
+
+  // Energy boost: proportional to total steps today (10000 = 100%)
+  // We set extraEnergy so that base + extra = proportion from steps
+  const targetEnergy = Math.min(100, (energy.stepsToday / 10000) * 100);
+  const now = new Date();
+  const hoursSinceMidnight = now.getHours() + (now.getMinutes() / 60);
+  const baseLevel = Math.max(0, 100 - (hoursSinceMidnight * 100 / 24));
+  // extra = targetEnergy - base (can be negative if base is higher)
+  energy.extraEnergy = Math.max(0, targetEnergy - baseLevel);
+  updateEnergyLevel();
+
+  const total = energy.stepsToday;
+  const pct = Math.min(100, (total / 10000) * 100);
+
+  let xpGain = Math.floor(steps / 500);
+  if (xpGain > 0) { plant.xp += xpGain; checkLevelUp(); }
+
+  if (total >= 10000) {
+    toast(`👣 ${total.toLocaleString()} pasos · ¡Meta! Energía al 100% 🎉`);
+  } else if (total >= 7000) {
+    toast(`👣 ${total.toLocaleString()} pasos · Energía ${Math.round(energy.level)}% · ✅ Zona segura`);
+  } else {
+    toast(`👣 ${total.toLocaleString()} pasos · Energía ${Math.round(energy.level)}% · ⚠️ Necesitas 7.000`);
+  }
+
+  save();
+  renderAll();
+}
+
+function submitOrderTest() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  if (dailyActions.orderDone) { toast("⚠️ Ya hiciste el test de orden hoy"); return; }
+  const toggles = document.querySelectorAll(".order-toggle");
+  let score = 0;
+  toggles.forEach(t => { if (t.classList.contains("on")) score++; });
+  const note = Math.round((score / ORDER_QUESTIONS.length) * 100) / 10;
+  goals.order.scores.push({ date: todayStr(), score: note });
+  if (goals.order.scores.length > 7) goals.order.scores.shift();
+  goals.order.avg = goals.order.scores.reduce((a, b) => a + b.score, 0) / goals.order.scores.length;
+  dailyActions.orderDone = true;
+  const sd = document.getElementById("orderScoreDisplay");
+  if (sd) { sd.style.display = "block"; document.getElementById("orderScoreBig").textContent = `${note}/10`; }
+  fulfillNeed("calmness");
+  toast(`🧹 Test de orden: ${note}/10 · Tranquilidad al 100%`);
+}
+
+function doEstiramientos() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  const cm = parseFloat(document.getElementById("estirCmInput")?.value);
+  if (!isNaN(cm) && cm >= 0) goals.spagatt.cmToGround = cm;
+  if (document.getElementById("estirCmInput")) document.getElementById("estirCmInput").value = "";
+  doEstiramientosNoMedida();
+}
+
+function doEstiramientosNoMedida() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  const todayKey = getTodayKey();
+  if (flexibility.lastResetDate !== todayKey) {
+    flexibility.lastResetDate    = todayKey;
+    flexibility.extraFlexibility = 0;
+    flexibility.doneToday        = false;
+  }
+  const currentBase = getCurrentFlexibilityLevel() - flexibility.extraFlexibility;
+  flexibility.extraFlexibility = Math.min(100, 100 - Math.max(0, currentBase));
+  flexibility.doneToday = true;
+  updateFlexibilityLevel();
+  plant.xp += 8;
+  checkLevelUp();
+  toast("🧘 Estiramientos completados · Elasticidad al 100%");
+  save();
+  renderAll();
+}
+
+function doLectura() {
+  const mins = parseInt(document.getElementById("lecturaMinsInput")?.value);
+  if (isNaN(mins) || mins <= 0) { toast("Ingresa los minutos"); return; }
+  if (document.getElementById("lecturaMinsInput")) document.getElementById("lecturaMinsInput").value = "";
+  doLecturaVal(mins);
+}
+
+function doLecturaVal(mins) {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  if (isNaN(mins) || mins <= 0) { toast("Minutos inválidos"); return; }
+  goals.reading.entries.push({ date: todayStr(), minutes: mins });
+  if (goals.reading.entries.length > 30) goals.reading.entries.shift();
+  plant.xp += Math.floor(mins / 15);
+  checkLevelUp();
+  fulfillNeed("entertainment");
+  toast(`📚 +${mins} min leídos · Entretenimiento al 100%`);
+}
+
+function doPhone() {
+  if (!plant.alive) { toast("❌ Reinicia primero"); return; }
+  if (dailyActions.phoneDone) { toast("⚠️ Ya registraste el móvil hoy"); return; }
+  const h = parseFloat(document.getElementById("phoneInput")?.value);
+  if (isNaN(h) || h < 0) { toast("Horas inválidas"); return; }
+  const today = todayStr();
+  const ex = phoneUsage.find(p => p.date === today);
+  if (ex) ex.hours = h; else phoneUsage.push({ date: today, hours: h });
+  if (phoneUsage.length > 14) phoneUsage.shift();
+  dailyActions.phoneDone = true;
+  if (h > 5) {
+    killPlant(`adicción al móvil — ${h}h de pantalla (máximo permitido: 5h)`);
+    return;
+  } else if (h > 2) {
+    const damage = (h - 2) * 12;
+    if (needsState.calmness)     needsState.calmness.value     = Math.max(0, needsState.calmness.value - damage);
+    if (needsState.intelligence) needsState.intelligence.value = Math.max(0, needsState.intelligence.value - damage * 0.6);
+    toast(`📱 ${h}h de móvil · Daño a Tranquilidad e Inteligencia`);
+  } else {
+    toast(`📱 ${h}h de móvil · Sin penalización`);
+  }
+  checkDeath();
+  save();
+  renderAll();
+  renderPhoneChart();
+}
+
+function renamePlant() {
+  const n = prompt("Nombre de tu planta:", plant.name);
+  if (n && n.trim()) { plant.name = n.trim().slice(0, 20); save(); renderAll(); }
+}
+
+function fullResetGame() {
+  if (decayInterval) clearInterval(decayInterval);
+  defaultState();
+  save();
+  renderAll();
+  renderPhoneChart();
+  startDecay();
+  toast("✨ Nueva planta iniciada. ¡Cuídala bien!");
+}
+
+// ══════════════════════════════════════════════
+// RENDER HELPERS
+// ══════════════════════════════════════════════
+function needValue(id) {
+  if (id === "hydration") { updateHydrationLevel(); return hydration.level; }
+  if (id === "flexibility") { updateFlexibilityLevel(); return flexibility.level; }
+  if (id === "energy") { updateEnergyLevel(); return energy.level; }
+  return needsState[id]?.value ?? 100;
+}
+
+function needClass(v) {
+  if (v >= 50) return "ok";
+  if (v >= 25) return "warn";
+  return "critical";
+}
+
+function plantEmoji() {
+  if (!plant.alive)      return "🥀";
+  if (plant.level >= 6)  return "🌳";
+  if (plant.level >= 4)  return "🌿";
+  return "🌱";
+}
+
+function plantTagline() {
+  if (!plant.alive)      return "Ha muerto";
+  if (plant.level >= 6)  return "Árbol majestuoso";
+  if (plant.level >= 4)  return "Planta en plena forma";
+  if (plant.level >= 2)  return "Brote en crecimiento";
+  return "Semilla en crecimiento";
+}
+
+function getLevelName() {
+  const h = goals.german.hours;
+  if (h >= 600) return "B2";
+  if (h >= 400) return "B1";
+  if (h >= 200) return "A2";
+  return "A1";
+}
+
+function buildStreakDisplay(count) {
+  if (count === 0) return "🔥 0 días de racha";
+  if (count <= 7) return "🔥".repeat(count) + ` ${count} día${count !== 1 ? 's' : ''}`;
+  return "🔥".repeat(7) + ` ×${count} días`;
+}
+
+// Get pending obligatory tasks for today
+function getPendientes() {
+  const pending = [];
+  if (!dailyActions.orderDone) {
+    pending.push({ icon:"🍃", name:"Test de orden", page:"orden", msg:"No has hecho el test de orden hoy" });
+  }
+  if (!dailyActions.phoneDone) {
+    pending.push({ icon:"📱", name:"Horas de móvil", page:"movil", msg:"No has registrado las horas de móvil hoy" });
+  }
+  return pending;
+}
+
+// ══════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════
+function renderAll() {
+  applyDecay();
+  updateHydrationLevel();
+  updateFlexibilityLevel();
+  updateEnergyLevel();
+  resetDailyActions();
+  updateSurvivalStreak();
+
+  renderNav();
+  renderHome();
+  renderHabits();
+}
+
+function renderNav() {
+  document.getElementById("navPlantName").textContent = plant.name;
+  document.getElementById("navLevelText").textContent = `Nv.${plant.level}`;
+  document.getElementById("navXpText").textContent    = `${plant.xp}/${plant.xpNext}`;
+  document.getElementById("navXpFill").style.width    = `${(plant.xp / plant.xpNext) * 100}%`;
+}
+
+function renderHome() {
+  const alive = plant.alive;
+  document.getElementById("homeAliveContent").style.display = alive ? "" : "none";
+  document.getElementById("deathCardHome").style.display    = alive ? "none" : "";
+  if (!alive) document.getElementById("deathReasonText").textContent = `Motivo: ${plant.deathReason || "desconocido"}`;
+
+  document.getElementById("homePlantEmoji").textContent   = plantEmoji();
+  document.getElementById("homePlantName").textContent    = plant.name;
+  document.getElementById("homePlantTagline").textContent = plantTagline();
+  document.getElementById("homeStreakBadge").textContent  = buildStreakDisplay(streak.current);
+  document.getElementById("homeLevel").textContent        = `Nivel ${plant.level}`;
+  document.getElementById("homeTitle").textContent        = `${plant.name} ${plantEmoji()}`;
+  document.getElementById("homeSubtitle").textContent     = `Nivel ${plant.level} · ${alive ? "Cuida tu planta con buenos hábitos" : "Tu planta ha muerto"}`;
+
+  const grid = document.getElementById("homeNeedsGrid");
+  grid.innerHTML = "";
+  NEEDS_CONFIG.forEach(n => {
+    const v = Math.round(needValue(n.id));
+    const cls = needClass(v);
+    grid.innerHTML += `<div class="need-item ${cls}" onclick="navigateTo('${n.page}')">
+      <div class="need-icon">${n.icon}</div>
+      <div class="need-name">${n.name}</div>
+      <div class="need-pct">${v}%</div>
+      <div class="need-bar-bg"><div class="need-bar-fill" style="width:${v}%"></div></div>
+      <div class="need-habit">→ ${n.habit}</div>
+    </div>`;
+  });
+
+  // Pendientes obligatorios
+  const pendientes = getPendientes();
+  const pc = document.getElementById("pendientesCard");
+  const pl = document.getElementById("pendientesList");
+  if (alive && pendientes.length > 0) {
+    pc.style.display = "";
+    pl.innerHTML = pendientes.map(p => `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:1.3rem">${p.icon}</span>
+        <div style="flex:1">
+          <div style="font-size:0.85rem;font-weight:500;color:var(--text)">${p.name}</div>
+          <div style="font-size:0.72rem;color:var(--red)">${p.msg} · la planta morirá a medianoche</div>
+        </div>
+        <button class="btn" style="padding:6px 14px;font-size:0.75rem" onclick="navigateTo('${p.page}')">Ir →</button>
+      </div>`).join("");
+  } else {
+    pc.style.display = "none";
+  }
+
+  const gl = document.getElementById("homeGoalsList");
+  const gdata = [
+    { icon:"📖", name:"Alemán B2",     sub:`${Math.round(goals.german.hours)}/${goals.german.target}h · ${getLevelName()}`,                           pct:(goals.german.hours/goals.german.target)*100 },
+    { icon:"🧘", name:"Spagatt",       sub: goals.spagatt.cmToGround<=0 ? "¡Completado!" : `${goals.spagatt.cmToGround.toFixed(1)}cm al suelo`,       pct:Math.max(0,((32-goals.spagatt.cmToGround)/32)*100) },
+    { icon:"🏃", name:"Correr 20km",   sub:`Máx: ${goals.running.maxKm}km · ${goals.running.pace}min/km`,                                              pct:(goals.running.maxKm/goals.running.target)*100 },
+    { icon:"📚", name:"Lectura diaria",sub:`${goals.reading.entries.length} sesiones registradas`,                                                      pct:Math.min(100,(goals.reading.entries.length/30)*100) }
+  ];
+  gl.innerHTML = gdata.map(g => `<div class="goal-row">
+    <div class="goal-icon">${g.icon}</div>
+    <div class="goal-info">
+      <div class="goal-name">${g.name}</div>
+      <div class="goal-sub">${g.sub}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,g.pct).toFixed(1)}%;background:var(--green-lt)"></div></div>
+    </div>
+    <div class="goal-pct">${Math.min(100,g.pct).toFixed(0)}%</div>
+  </div>`).join("");
+}
+
+function renderHabits() {
+  // AGUA
+  const wl = needValue("hydration");
+  const wt = document.getElementById("waterFill");      if(wt) wt.style.height = wl + "%";
+  const wp = document.getElementById("waterPctText");   if(wp) wp.textContent = Math.round(wl) + "%";
+  const ah = document.getElementById("aguaHoy");        if(ah) ah.textContent = hydration.loggedToday.toFixed(1);
+  const ap = document.getElementById("aguaPct");        if(ap) ap.textContent = Math.round((hydration.loggedToday / hydration.target) * 100) + "%";
+  const am = document.getElementById("aguaAlertMsg");
+  if (am) {
+    if (wl < 25)      { am.className = "alert alert-danger"; am.textContent = "⚠️ Nivel crítico. ¡Bebe agua ahora!"; }
+    else if (wl < 50) { am.className = "alert alert-warn";   am.textContent = "⚠️ Hidratación baja. Bebe agua pronto."; }
+    else              { am.className = "alert alert-info";   am.textContent = "✅ Hidratación en buen nivel. Sigue bebiendo."; }
+  }
+  const glassEl = document.getElementById("waterGlasses");
+  if (glassEl) {
+    const total  = 6;
+    const filled = Math.round((hydration.loggedToday / hydration.target) * total);
+    glassEl.innerHTML = Array.from({length:total}, (_,i) =>
+      `<div class="glass ${i < filled ? "filled" : ""}" onclick="addWater(0.25)" title="+0.25L">💧</div>`
+    ).join("");
+  }
+
+  // DEPORTE
+  const dn = Math.round(needValue("strength"));
+  const di = document.getElementById("deporteNeed");        if(di) di.textContent = dn + "%";
+  const dm = document.getElementById("deporteMaxKm");       if(dm) dm.textContent = goals.running.maxKm;
+  const dr = document.getElementById("deporteRitmo");       if(dr) dr.textContent = goals.running.pace;
+  const dpb = document.getElementById("deporteProgressBar"); if(dpb) dpb.style.width = ((goals.running.maxKm/goals.running.target)*100).toFixed(1) + "%";
+  const dpt = document.getElementById("deporteProgressText");if(dpt) dpt.textContent = `${goals.running.maxKm}/${goals.running.target} km objetivo final`;
+  const dgb = document.getElementById("deporteGoalBar");    if(dgb) dgb.style.width = ((goals.running.maxKm/goals.running.target)*100).toFixed(1) + "%";
+  const dgp = document.getElementById("deporteGoalPct");    if(dgp) dgp.textContent = ((goals.running.maxKm/goals.running.target)*100).toFixed(0) + "%";
+  const dgs = document.getElementById("deporteGoalSub");    if(dgs) dgs.textContent = `Máximo alcanzado: ${goals.running.maxKm}km de ${goals.running.target}km`;
+
+  // ALEMÁN
+  const an = Math.round(needValue("intelligence"));
+  const ai  = document.getElementById("alemanNeed");         if(ai)  ai.textContent  = an + "%";
+  const ah2 = document.getElementById("alemanHoras");        if(ah2) ah2.textContent = Math.round(goals.german.hours);
+  const anv = document.getElementById("alemanNivel");        if(anv) anv.textContent = getLevelName();
+  const apb = document.getElementById("alemanProgressBar"); if(apb) apb.style.width = ((goals.german.hours/goals.german.target)*100).toFixed(1) + "%";
+  const apt = document.getElementById("alemanProgressText");if(apt) apt.textContent = `${Math.round(goals.german.hours)}/${goals.german.target}h hacia B2`;
+  renderAlemanRoadmap();
+
+  // PASOS — NEW energy system
+  const energyVal = Math.round(needValue("energy"));
+  const ep = document.getElementById("pasosNeed"); if(ep) ep.textContent = energyVal + "%";
+  const totalSteps = energy.stepsToday;
+  const ps = document.getElementById("pasosHoy");
+  if (ps) ps.textContent = totalSteps.toLocaleString();
+  const pb = document.getElementById("pasosBar");
+  if (pb) {
+    pb.style.width = Math.min(100, (totalSteps / 10000) * 100) + "%";
+    if (totalSteps < 7000 && energy.doneToday) pb.style.background = "var(--red)";
+    else if (totalSteps < 10000) pb.style.background = "#d4a017";
+    else pb.style.background = "var(--green-lt)";
+  }
+  const ptxt = document.getElementById("pasosProgressText");
+  if (ptxt) {
+    if (!energy.doneToday) ptxt.textContent = `0 / 10.000 pasos · Aún no has registrado`;
+    else if (totalSteps < 7000) ptxt.textContent = `${totalSteps.toLocaleString()} / 10.000 pasos ⚠️ Mínimo: 7.000`;
+    else if (totalSteps < 10000) ptxt.textContent = `${totalSteps.toLocaleString()} / 10.000 pasos ✓ Zona segura`;
+    else ptxt.textContent = `${totalSteps.toLocaleString()} / 10.000 pasos 🎉 ¡Meta!`;
+  }
+
+  // ORDEN
+  const on2 = Math.round(needValue("calmness"));
+  const oi  = document.getElementById("ordenNeed");  if(oi)  oi.textContent  = on2 + "%";
+  const om  = document.getElementById("ordenMedia"); if(om)  om.textContent  = goals.order.avg.toFixed(1);
+  const ot  = document.getElementById("ordenTests"); if(ot)  ot.textContent  = goals.order.scores.length;
+  renderOrderPage();
+
+  // ESTIRAMIENTOS
+  const fn  = Math.round(needValue("flexibility"));
+  const fi  = document.getElementById("estirNeed");    if(fi)  fi.textContent  = fn + "%";
+  const fc  = document.getElementById("estirCm");      if(fc)  fc.textContent  = goals.spagatt.cmToGround.toFixed(1);
+  const fpct = Math.max(0, ((32 - goals.spagatt.cmToGround) / 32) * 100);
+  const fp  = document.getElementById("estirProg");    if(fp)  fp.textContent  = fpct.toFixed(0) + "%";
+  const fcb = document.getElementById("estirCmBig");   if(fcb) fcb.textContent = goals.spagatt.cmToGround > 0 ? `${goals.spagatt.cmToGround.toFixed(1)} cm` : "¡Spagatt!";
+  const fgb = document.getElementById("estirGoalBar"); if(fgb) fgb.style.width = fpct.toFixed(1) + "%";
+
+  // LECTURA
+  const ln  = Math.round(needValue("entertainment"));
+  const li  = document.getElementById("lecturaNeed");     if(li)  li.textContent  = ln + "%";
+  const lm  = getReadingAvg();
+  const lma = document.getElementById("lecturaMedia");    if(lma) lma.textContent = Math.round(lm);
+  const ls  = document.getElementById("lecturaSesiones"); if(ls)  ls.textContent  = goals.reading.entries.length;
+  renderReadingHist();
+
+  // MÓVIL
+  renderMovilStats();
+}
+
+function getReadingAvg() {
+  if (!goals.reading.entries.length) return 0;
+  const recent = goals.reading.entries.slice(-7);
+  return recent.reduce((s, e) => s + e.minutes, 0) / recent.length;
+}
+
+function renderAlemanRoadmap() {
+  const rm = document.getElementById("alemanRoadmap");
+  if (!rm) return;
+  const levels = [{name:"A1",hours:0},{name:"A2",hours:200},{name:"B1",hours:400},{name:"B2",hours:660}];
+  const h = goals.german.hours;
+  rm.innerHTML = levels.map((lv, i) => {
+    const next    = levels[i+1];
+    const done    = h >= (next?.hours || lv.hours);
+    const current = !done && (i === 0 || h >= lv.hours);
+    const pct     = next ? Math.min(100, ((h - lv.hours) / (next.hours - lv.hours)) * 100) : 100;
+    return `<div class="goal-row">
+      <div class="goal-icon" style="font-size:1.1rem">${done ? "✅" : current ? "🎯" : "⬜"}</div>
+      <div class="goal-info">
+        <div class="goal-name">${lv.name}${next ? " → " + next.name : ""}</div>
+        <div class="goal-sub">${done ? "Completado" : current ? `${Math.round(h - lv.hours)}/${next.hours - lv.hours}h` : `Desde ${lv.hours}h`}</div>
+        ${next ? `<div class="progress-bar"><div class="progress-fill" style="width:${current ? pct : done ? 100 : 0}%;background:var(--green-lt)"></div></div>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderOrderPage() {
+  const qc = document.getElementById("orderQuestionsContainer");
+  if (qc && qc.children.length === 0) {
+    qc.innerHTML = ORDER_QUESTIONS.map((q, i) => `
+      <div class="order-question">
+        <button class="order-toggle" id="oq${i}" onclick="this.classList.toggle('on')"></button>
+        <span class="order-q-text">${q}</span>
+      </div>`).join("");
+  }
+  const doneAlert = document.getElementById("ordenDoneAlert");
+  if (doneAlert) {
+    doneAlert.innerHTML = dailyActions.orderDone
+      ? `<div class="alert alert-info">✅ Ya completaste el test de orden hoy. Puntuación: ${goals.order.scores.slice(-1)[0]?.score?.toFixed(1) || "?"}/10</div>`
+      : `<div class="alert alert-danger">🚨 Pendiente: completa el test antes de medianoche o tu planta morirá.</div>`;
+  }
+  const hist = document.getElementById("ordenHistContent");
+  if (hist) {
+    if (goals.order.scores.length) {
+      hist.innerHTML = goals.order.scores.slice().reverse().map(s => `
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.82rem">
+          <span style="color:var(--text3)">${s.date}</span>
+          <span style="font-weight:500;color:${s.score>=7?"var(--green-md)":s.score>=5?"var(--amber)":"var(--red)"}">${s.score.toFixed(1)}/10</span>
+        </div>`).join("");
+    } else {
+      hist.innerHTML = `<p style="font-size:0.82rem;color:var(--text3)">Aún no has hecho ningún test.</p>`;
+    }
+  }
+}
+
+function renderReadingHist() {
+  const hist = document.getElementById("lecturaHistContent");
+  if (!hist) return;
+  if (!goals.reading.entries.length) {
+    hist.innerHTML = `<p style="font-size:0.82rem;color:var(--text3)">Aún no has registrado ninguna sesión.</p>`;
+    return;
+  }
+  hist.innerHTML = goals.reading.entries.slice().reverse().slice(0, 10).map(e => `
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.82rem">
+      <span style="color:var(--text3)">${e.date}</span>
+      <span style="font-weight:500;color:var(--green-md)">${e.minutes} min</span>
+    </div>`).join("");
+}
+
+function renderMovilStats() {
+  const last7 = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const entry = phoneUsage.find(p => p.date === d.toDateString());
+    last7.push(entry?.hours || 0);
+  }
+  const today = last7[6];
+  const avg   = last7.reduce((a, b) => a + b, 0) / 7;
+  const max   = Math.max(...last7);
+  const mh = document.getElementById("movilHoy");   if(mh) mh.textContent = today.toFixed(1);
+  const mm = document.getElementById("movilMedia");  if(mm) mm.textContent = avg.toFixed(1);
+  const mx = document.getElementById("movilMax");    if(mx) mx.textContent = max.toFixed(1);
+  const ma = document.getElementById("movilAlert");
+  if (ma) {
+    if (today > 5)      { ma.style.display=""; ma.className="alert alert-danger"; ma.textContent="⚠️ Uso muy elevado (>5h). Daño severo en tu planta."; }
+    else if (today > 3) { ma.style.display=""; ma.className="alert alert-warn";   ma.textContent="📱 Uso moderado-alto (>3h). Considera reducir."; }
+    else                { ma.style.display="none"; }
+  }
+  const doneAlert = document.getElementById("movilDoneAlert");
+  if (doneAlert) {
+    doneAlert.innerHTML = dailyActions.phoneDone
+      ? `<div class="alert alert-info">✅ Ya registraste el uso de hoy (${today.toFixed(1)}h).</div>`
+      : `<div class="alert alert-danger">🚨 Pendiente: registra las horas antes de medianoche o tu planta morirá.</div>`;
+  }
+}
+
+function renderPhoneChart() {
+  const canvas = document.getElementById("phoneChart");
+  if (!canvas) return;
+  const labels = [], data = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    labels.push(d.toLocaleDateString("es-ES", {weekday:"short", day:"numeric"}));
+    const entry = phoneUsage.find(p => p.date === d.toDateString());
+    data.push(entry?.hours || 0);
+  }
+  if (phoneChartInst) phoneChartInst.destroy();
+  phoneChartInst = new Chart(canvas.getContext("2d"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Horas de móvil",
+        data,
+        backgroundColor: data.map(v => v>5 ? "rgba(139,46,26,0.7)" : v>3 ? "rgba(184,115,51,0.7)" : "rgba(74,124,47,0.7)"),
+        borderColor:      data.map(v => v>5 ? "#8b2e1a" : v>3 ? "#b87333" : "#4a7c2f"),
+        borderWidth: 1.5, borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display:false }, tooltip: { callbacks: { label: ctx => `${ctx.raw.toFixed(1)}h` }}},
+      scales: {
+        y: { beginAtZero:true, grid:{ color:"rgba(0,0,0,0.05)" }, ticks:{font:{size:10}} },
+        x: { grid:{ display:false }, ticks:{font:{size:10}} }
+      }
+    }
+  });
+  const lg = document.getElementById("phoneChartLegend");
+  if (lg) {
+    const avg = data.reduce((a, b) => a + b, 0) / 7;
+    lg.textContent = `Media semanal: ${avg.toFixed(1)}h/día · Verde <2h · Naranja 2-5h · Rojo >5h`;
+  }
+}
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+function navigateTo(pageId) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+  const page = document.getElementById("page-" + pageId);
+  if (page) page.classList.add("active");
+  const link = document.querySelector(`.nav-link[data-page="${pageId}"]`);
+  if (link) link.classList.add("active");
+  window.scrollTo(0, 0);
+  closeNav();
+  if (pageId === "movil")  { setTimeout(renderPhoneChart, 100); }
+  if (pageId === "orden")  { renderOrderPage(); }
+  renderHabits();
+}
+
+function closeNav() {
+  document.getElementById("mainNav").classList.remove("open");
+  document.getElementById("navOverlay").classList.remove("show");
+}
+
+document.getElementById("burgerBtn").addEventListener("click", () => {
+  document.getElementById("mainNav").classList.toggle("open");
+  document.getElementById("navOverlay").classList.toggle("show");
+});
+document.getElementById("navOverlay").addEventListener("click", closeNav);
+document.querySelectorAll(".nav-link").forEach(link => {
+  link.addEventListener("click", () => navigateTo(link.dataset.page));
+});
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+function toast(msg) {
+  const box = document.getElementById("toastBox");
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  box.appendChild(t);
+  setTimeout(() => t.remove(), 3100);
+}
+
+// ══════════════════════════════════════════════
+// DECAY INTERVAL
+// ══════════════════════════════════════════════
+function startDecay() {
+  if (decayInterval) clearInterval(decayInterval);
+  decayInterval = setInterval(() => {
+    if (plant.alive) {
+      applyDecay();
+      updateHydrationLevel();
+      updateFlexibilityLevel();
+      updateEnergyLevel();
+      renderAll();
+    }
+  }, 60000);
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+load();
+applyDecay();
+updateHydrationLevel();
+updateFlexibilityLevel();
+updateEnergyLevel();
+renderAll();
+renderPhoneChart();
+startDecay();
+</script>
+</body>
+</html>
