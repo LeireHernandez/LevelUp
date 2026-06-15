@@ -16,7 +16,7 @@
   --nav-w:240px;--radius:18px;--radius-sm:10px;--shadow:0 2px 16px rgba(0,0,0,0.06);
 }
 
-/* ===== SCROLL INDEPENDIENTE SIN BARRAS ===== */
+/* SCROLL INDEPENDIENTE SIN BARRAS*/
 * {
   margin: 0;
   padding: 0;
@@ -37,7 +37,7 @@ body {
   overflow: hidden;
 }
 
-/* NAV - scroll independiente SIN barra visible */
+/* NAV */
 nav {
   width:var(--nav-w);
   height: 100vh;
@@ -176,7 +176,7 @@ nav::-webkit-scrollbar {
   transition:width 0.4s ease;
 }
 
-/* MAIN - scroll independiente SIN barra visible */
+/* MAIN */
 main {
   flex: 1;
   height: 100vh;
@@ -224,7 +224,7 @@ main::-webkit-scrollbar {
   gap:8px;
 }
 
-/* Plant Hero */
+/* Planta */
 .plant-hero {
   display:flex;
   align-items:center;
@@ -522,7 +522,7 @@ textarea {
   margin-top:3px;
 }
 
-/* Water Tank */
+/* Tanque de agua */
 .water-tank {
   position:relative;
   width:76px;
@@ -583,7 +583,7 @@ textarea {
 
 .glass:hover { transform:scale(1.1); }
 
-/* Order Test */
+/* Test del orden */
 .order-question {
   display:flex;
   align-items:center;
@@ -697,7 +697,7 @@ textarea {
 
 .need-table tr:last-child td { border-bottom:none; }
 
-/* Sport Categories */
+/* Categorias de sport */
 .sport-cat-list {
   display:flex;
   flex-wrap:wrap;
@@ -731,7 +731,7 @@ textarea {
   font-weight:500;
 }
 
-/* Emoji Picker */
+/* Elegir Emoji */
 .emoji-picker-row {
   display:flex;
   flex-wrap:wrap;
@@ -878,7 +878,7 @@ textarea {
 .alert-blue { background:var(--blue-lt); border:1px solid rgba(42,94,160,0.3); color:var(--blue); }
 .alert-purple { background:var(--purple-lt); border:1px solid rgba(107,63,160,0.3); color:var(--purple); }
 
-/* Page Header */
+/* Encabezado */
 .page-header {
   margin-bottom:1.4rem;
 }
@@ -1334,7 +1334,7 @@ textarea {
   z-index:99;
 }
 
-/* Responsive */
+/* Efectos y cosas */
 @media(max-width:700px){
   nav {
     position: fixed;
@@ -1411,7 +1411,7 @@ textarea {
 <button class="burger" id="burgerBtn" aria-label="Menú"><span></span><span></span><span></span></button>
 <div class="nav-overlay" id="navOverlay"></div>
 
-<!-- ══ MODAL: GESTIÓN DE HÁBITO ══ -->
+<!-- MODAL: GESTIÓN DE HÁBITO -->
 <div class="modal-overlay" id="habitModal">
   <div class="modal">
     <h3 id="habitModalTitle">Nuevo hábito</h3>
@@ -1437,9 +1437,9 @@ textarea {
             <option value="strength">💪 Fuerza</option>
             <option value="intelligence">🧠 Inteligencia</option>
             <option value="entertainment">📖 Entretenimiento</option>
-            <option value="vitality">😴 Vitalidad</option>
+            <option value="vitality">😴 Energía</option>
             <option value="hydration">💧 Hidratación</option>
-            <option value="energy">⚡ Energía</option>
+            <option value="energy">⚡ Salud</option>
             <option value="flexibility">🧘 Elasticidad</option>
             <option value="custom">✨ Nueva necesidad</option>
           </select>
@@ -1465,12 +1465,47 @@ textarea {
         <label>Nombre de tu unidad</label>
         <input type="text" id="hCustomUnit" placeholder="Ej: vasos, repeticiones..." maxlength="20">
       </div>
-      <div class="form-row">
-        <div class="form-group"><label>Días sin hacer → planta muere</label><input type="number" id="hDays" min="0.25" max="30" step="0.25" placeholder="Ej: 3"></div>
-        <div class="form-group"><label>Frecuencia</label>
-          <select id="hFreq"><option value="daily">📅 Diario</option><option value="weekly">📆 Semanal</option></select>
-        </div>
-      </div>
+<div class="form-row">
+  <div class="form-group"><label>Cantidad de días sin hacer que hace que muera la planta</label><input type="number" id="hDays" min="0.25" max="30" step="0.25" placeholder="Ej: 3"></div>
+  <div class="form-group"><label>Frecuencia</label>
+    <select id="hFreq"><option value="daily">📅 Diario</option><option value="weekly">📆 Semanal</option></select>
+  </div>
+</div>
+<div class="form-group" style="margin-bottom:10px">
+  <label>¿Cómo afecta al completar el hábito?</label>
+  <select id="hEffectType" onchange="toggleEffectFields()">
+    <option value="fill100">✅ Sube la necesidad al 100%</option>
+    <option value="fillCustom">📈 Sube la necesidad un % concreto</option>
+    <option value="damage">📉 Baja la necesidad un % concreto</option>
+    <option value="none">➖ Solo registra, no afecta a la necesidad</option>
+  </select>
+</div>
+<div id="hEffectCustomGroup" style="display:none" class="form-row">
+  <div class="form-group">
+    <label>Porcentaje que sube al completar</label>
+    <input type="number" id="hEffectValue" min="1" max="100" step="1" placeholder="Ej: 50">
+  </div>
+  <div class="form-group">
+    <label>¿Se acumula sobre el nivel actual?</label>
+    <select id="hEffectAccumulate">
+      <option value="yes">Sí (suma al % actual)</option>
+      <option value="no">No (fija el % exacto)</option>
+    </select>
+  </div>
+</div>
+<div id="hEffectDamageGroup" style="display:none" class="form-row">
+  <div class="form-group">
+    <label>Porcentaje que baja al registrar</label>
+    <input type="number" id="hEffectDamage" min="1" max="100" step="1" placeholder="Ej: 20">
+  </div>
+  <div class="form-group">
+    <label>¿Matar a la planta si llega a 0%?</label>
+    <select id="hEffectDamageKill">
+      <option value="yes">Sí ☠️</option>
+      <option value="no">No</option>
+    </select>
+  </div>
+</div>
       <div class="form-row">
         <div class="form-group"><label>Obligatorio (muere si no lo haces)</label>
           <select id="hObligatory"><option value="no">No</option><option value="yes">Sí ⚠️</option></select>
@@ -1478,14 +1513,14 @@ textarea {
         <div class="form-group"><label>Recordatorio</label><input type="time" id="hReminder"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Mostrar en nav lateral</label>
-          <select id="hShowNav"><option value="no">No</option><option value="yes">Sí (acceso rápido)</option></select>
+        <div class="form-group"><label>Mostrar en navegador lateral</label>
+          <select id="hShowNav"><option value="no">No</option><option value="yes">Sí</option></select>
         </div>
-        <div class="form-group"><label>Sección del nav</label>
+        <div class="form-group"><label>Sección del navegador</label>
           <select id="hNavSection"><option value="core">Hábitos core</option><option value="tracking">Seguimiento</option></select>
         </div>
       </div>
-      <div class="form-group-full"><label>Descripción / notas</label><textarea id="hDesc" placeholder="Qué quieres lograr con este hábito..." rows="2"></textarea></div>
+      <div class="form-group-full"><label>Descripción / notas</label><textarea id="hDesc" placeholder="Con este hábito quiero lograr..." rows="2"></textarea></div>
     </div>
     <div class="modal-tab-content" id="htab-features">
       <p style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem">Activa las funciones para este hábito.</p>
@@ -1500,7 +1535,7 @@ textarea {
       <div class="form-row">
         <div class="form-group"><label>Progreso actual</label><input type="number" id="hGoalProgress" step="0.1" min="0" value="0"></div>
         <div class="form-group"><label>Color</label>
-          <select id="hGoalColor"><option value="green">🟢 Verde</option><option value="blue">🔵 Azul</option><option value="purple">🟣 Morado</option><option value="amber">🟡 Ámbar</option><option value="red">🔴 Rojo</option></select>
+          <select id="hGoalColor"><option value="green">🟢 Verde</option><option value="blue">🔵 Azul</option><option value="purple">🟣 Morado</option><option value="amber">🟡 Amarillo</option><option value="red">🔴 Rojo</option></select>
         </div>
       </div>
       <div class="form-row">
@@ -1519,7 +1554,7 @@ textarea {
   </div>
 </div>
 
-<!-- ══ MODAL: REGISTRAR HÁBITO ══ -->
+<!-- MODAL: REGISTRAR HÁBITO -->
 <div class="modal-overlay" id="logHabitModal">
   <div class="modal" style="max-width:400px">
     <h3 id="logHabitTitle">Registrar</h3>
@@ -1531,10 +1566,10 @@ textarea {
   </div>
 </div>
 
-<!-- ══ MODAL: EDITAR CATEGORÍAS DEPORTE ══ -->
+<!-- MODAL: EDITAR CATEGORÍAS DEPORTE -->
 <div class="modal-overlay" id="sportCatModal">
   <div class="modal" style="max-width:440px">
-    <h3>🏅 Mis categorías deportivas</h3>
+    <h3>🏅 Categorías deportivas</h3>
     <div id="sportCatListEdit"></div>
     <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0">
     <p style="font-size:0.78rem;font-weight:500;color:var(--text2);margin-bottom:0.8rem">Nueva categoría</p>
@@ -1542,7 +1577,7 @@ textarea {
       <div class="form-group"><label>Nombre</label><input type="text" id="newSportName" placeholder="Ej: Yoga..." maxlength="20"></div>
       <div class="form-group"><label>Emoji</label><input type="text" id="newSportEmoji" placeholder="🏅" maxlength="2" style="font-size:1.3rem;text-align:center"></div>
     </div>
-    <div class="form-group-full"><label>Emojis rápidos</label><div class="emoji-picker-row" id="sportEmojiPicker"></div></div>
+    <div class="form-group-full"><label>Emojis</label><div class="emoji-picker-row" id="sportEmojiPicker"></div></div>
     <div class="form-row">
       <div class="form-group"><label>¿Registrar km?</label>
         <select id="newSportHasKm"><option value="no">No</option><option value="yes">Sí</option></select>
@@ -1556,7 +1591,7 @@ textarea {
   </div>
 </div>
 
-<!-- ══ MODAL: LIBRO ══ -->
+<!-- MODAL: LIBRO -->
 <div class="modal-overlay" id="bookModal">
   <div class="modal">
     <h3>📚 Añadir libro</h3>
@@ -1568,10 +1603,10 @@ textarea {
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Valoración</label>
+      <div class="form-group"><label>Puntuación</label>
         <select id="bookRating"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3" selected>⭐⭐⭐</option><option value="2">⭐⭐</option><option value="1">⭐</option></select>
       </div>
-      <div class="form-group"><label>Fecha finalización</label><input type="date" id="bookDate"></div>
+      <div class="form-group"><label>Fecha de finalización</label><input type="date" id="bookDate"></div>
     </div>
     <div class="form-group-full"><label>Reseña (opcional)</label><textarea id="bookReview" placeholder="¿Qué te ha parecido?" rows="2"></textarea></div>
     <div class="modal-footer">
@@ -1581,11 +1616,11 @@ textarea {
   </div>
 </div>
 
-<!-- ══ MODAL: TAREA ══ -->
+<!-- MODAL: TAREA -->
 <div class="modal-overlay" id="taskModal">
   <div class="modal">
     <h3 id="taskModalTitle">Nueva tarea</h3>
-    <div class="form-group-full"><label>Tarea *</label><input type="text" id="taskName" placeholder="Ej: Llamar al médico" maxlength="80"></div>
+    <div class="form-group-full"><label>Tarea *</label><input type="text" id="taskName" placeholder="Ej: Ir al súper" maxlength="80"></div>
     <div class="form-row">
       <div class="form-group"><label>Hora (opcional)</label><input type="time" id="taskTime"></div>
       <div class="form-group"><label>Prioridad</label>
@@ -1607,7 +1642,7 @@ textarea {
   </div>
 </div>
 
-<!-- ══ MODAL: EDITAR PARÁMETROS CORE ══ -->
+<!-- MODAL: EDITAR PARÁMETROS CORE -->
 <div class="modal-overlay" id="editCoreModal">
   <div class="modal">
     <h3>⚙️ Ajustar parámetros</h3>
@@ -1619,11 +1654,11 @@ textarea {
   </div>
 </div>
 
-<!-- ══ MODAL: PROTECTOR ══ -->
+<!-- MODAL: PROTECTOR -->
 <div class="modal-overlay" id="protectorModal">
   <div class="modal">
     <h3>🛡️ Activar protector de racha</h3>
-    <div class="alert alert-warn">⚠️ Pausa <strong>todas las muertes</strong> (incluida la planta) durante 24h. Coste: <strong>-20% XP</strong> y <strong>-3 días racha</strong>.</div>
+    <div class="alert alert-warn">⚠️ Pausa <strong>todas las muertes</strong> durante 24h. Coste: <strong>-20% XP</strong> y <strong>-3 días racha</strong>.</div>
     <div class="form-group-full"><label>Motivo *</label>
       <select id="protectorReason"><option value="">-- Selecciona --</option><option value="Vacaciones">🏖️ Vacaciones</option><option value="Enfermedad">🤒 Enfermedad</option><option value="Evento familiar">👨‍👩‍👧 Evento familiar</option><option value="Viaje de trabajo">✈️ Viaje de trabajo</option><option value="Emergencia">🚨 Emergencia</option><option value="Otro">📝 Otro</option></select>
     </div>
@@ -1635,7 +1670,7 @@ textarea {
   </div>
 </div>
 
-<!-- ══ MODAL: META A LARGO PLAZO ══ -->
+<!-- MODAL: META A LARGO PLAZO -->
 <div class="modal-overlay" id="goalModal">
   <div class="modal">
     <h3 id="goalModalTitle">Nueva meta a largo plazo</h3>
@@ -1650,7 +1685,7 @@ textarea {
     <div class="form-row">
       <div class="form-group"><label>Progreso actual</label><input type="number" id="gmProgress" step="0.1" min="0" value="0"></div>
       <div class="form-group"><label>Color</label>
-        <select id="gmColor"><option value="green">🟢 Verde</option><option value="blue">🔵 Azul</option><option value="purple">🟣 Morado</option><option value="amber">🟡 Ámbar</option><option value="red">🔴 Rojo</option></select>
+        <select id="gmColor"><option value="green">🟢 Verde</option><option value="blue">🔵 Azul</option><option value="purple">🟣 Morado</option><option value="amber">🟡 Amarillo</option><option value="red">🔴 Rojo</option></select>
       </div>
     </div>
     <div class="form-row">
@@ -1659,7 +1694,7 @@ textarea {
         <select id="gmCountdown"><option value="no">No</option><option value="yes">Sí</option></select>
       </div>
     </div>
-    <div class="form-group-full"><label>Descripción</label><textarea id="gmDesc" placeholder="¿Por qué quieres lograr esto?" rows="2"></textarea></div>
+    <div class="form-group-full"><label>Descripción</label><textarea id="gmDesc" placeholder="Quiero lograr esto porque..." rows="2"></textarea></div>
     <input type="hidden" id="gmEditId">
     <div class="modal-footer">
       <button class="btn btn-secondary btn-sm" onclick="closeGoalModal()">Cancelar</button>
@@ -1669,11 +1704,11 @@ textarea {
   </div>
 </div>
 
-<!-- ══ MODAL: OBJETIVO MENSUAL ══ -->
+<!-- MODAL: OBJETIVO MENSUAL -->
 <div class="modal-overlay" id="monthlyObjModal">
   <div class="modal" style="max-width:440px">
     <h3 id="mobjModalTitle">Nuevo objetivo mensual</h3>
-    <div class="form-group-full"><label>Objetivo *</label><input type="text" id="mobjName" placeholder="Ej: Ir al gimnasio 3 veces por semana" maxlength="80"></div>
+    <div class="form-group-full"><label>Objetivo *</label><input type="text" id="mobjName" placeholder="Ej: Estudiar alemán 3 veces por semana" maxlength="80"></div>
     <div class="form-row">
       <div class="form-group"><label>Categoría</label>
         <select id="mobjCat"><option>Salud</option><option>Deporte</option><option>Estudio</option><option>Personal</option><option>Trabajo</option><option>Social</option><option>Otro</option></select>
@@ -1694,23 +1729,43 @@ textarea {
   </div>
 </div>
 
-<!-- ══ MODAL: EDITAR PREGUNTAS ORDEN ══ -->
+<!-- MODAL: EDITAR PREGUNTAS ORDEN -->
 <div class="modal-overlay" id="orderQuestModal">
   <div class="modal">
-    <h3>📋 Editar preguntas de orden</h3>
+    <h3>📋 Editar preguntas del test de orden</h3>
     <p style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem">Personaliza las preguntas del test diario.</p>
     <div id="orderQuestEditList"></div>
     <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0">
-    <div class="form-group-full"><label>Nueva pregunta</label><input type="text" id="newOrderQ" placeholder="Ej: ¿Has organizado tu escritorio?" maxlength="80"></div>
+    <div class="form-group-full"><label>Nueva pregunta</label><input type="text" id="newOrderQ" placeholder="Ej: ¿Has pasado el polvo?" maxlength="80"></div>
     <button class="btn btn-sm" onclick="addOrderQuestion()">+ Añadir pregunta</button>
     <div class="modal-footer"><button class="btn btn-secondary btn-sm" onclick="closeOrderQuestModal()">Cerrar</button></div>
   </div>
 </div>
 
-<!-- ══════ NAV ══════ -->
+<!-- MODAL: EDITAR NECESIDAD -->
+<div class="modal-overlay" id="needEditModal">
+  <div class="modal" style="max-width:440px">
+    <h3 id="needEditTitle">Editar necesidad</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="nedName" placeholder="Ej: Creatividad" maxlength="20"></div>
+      <div class="form-group"><label>Icono</label><input type="text" id="nedIcon" placeholder="🎨" maxlength="2" style="font-size:1.3rem;text-align:center"></div>
+    </div>
+    <div class="form-group-full"><label>Hábito asociado (solo para necesidades nuevas)</label>
+      <select id="nedHabit"><option value="">-- Ninguno --</option></select>
+    </div>
+    <input type="hidden" id="nedEditId">
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" onclick="closeNeedEditModal()">Cancelar</button>
+      <button class="btn btn-danger btn-sm" id="nedDeleteBtn" style="display:none" onclick="deleteNeedFromModal()">🗑️ Eliminar</button>
+      <button class="btn btn-sm" onclick="saveNeedEdit()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAVEGADOR -->
 <nav id="mainNav">
   <div class="nav-logo"><h1>🌿 LevelUp</h1><p>Crecimiento personal</p></div>
-  <div class="nav-plant-name">Tu planta<span id="navPlantName">Mi planta</span></div>
+  <div class="nav-plant-name">Tu planta<span id="navPlantName">Mi nueva planta</span></div>
   <div class="nav-links" id="navLinks">
     <!-- rendered by JS -->
   </div>
@@ -1723,11 +1778,11 @@ textarea {
   </div>
 </nav>
 
-<!-- ══════ MAIN ══════ -->
+<!-- MAIN -->
 <main>
   <div id="toastBox"></div>
 
-  <!-- ═══ INICIO ═══ -->
+  <!-- INICIO -->
   <div class="page active" id="page-home">
     <div class="page-header">
       <h2 id="homeTitle">Hola 🌱</h2>
@@ -1736,7 +1791,7 @@ textarea {
     <div id="deathCardHome" class="death-card" style="display:none">
       <h2>🍂 Tu planta ha muerto</h2>
       <p id="deathReasonText"></p>
-      <button class="btn btn-danger" style="margin-top:1rem" onclick="fullResetGame()">🔄 Nueva planta</button>
+      <button class="btn" style="background:rgba(139,46,26,0.12);color:var(--red);font-size:0.73rem" onclick="if(confirm('¿Reiniciar todo el progreso?'))fullResetGame()">Reiniciar planta</button>
     </div>
     <div id="homeAliveContent">
       <div class="card">
@@ -1746,15 +1801,25 @@ textarea {
             <div class="alive-ring"></div>
           </div>
           <div class="plant-meta">
-            <h2 id="homePlantName">Mi planta</h2>
-            <div class="tagline" id="homePlantTagline">Semilla en crecimiento</div>
-            <div class="streak-badge" id="homeStreakBadge">🔥 0 días</div>
+            <h2 id="homePlantName">Mi nueva planta</h2>
+            <div class="tagline" id="homePlantTagline">Semilla creciendo</div>
             <div class="plant-status-row">
               <span class="status-chip" id="homeLevel">Nivel 1</span>
               <span class="status-chip">Viva ✓</span>
+              <span class="status-chip" id="homeStreakBadge2" style="background:linear-gradient(135deg,#ff6b35,#f7c59f);color:white;border:none">🔥 0 días</span>
               <span class="status-chip" id="homeProtectorChip" style="display:none;background:var(--purple-lt);color:var(--purple)">🛡️ Protegida</span>
-              <button class="btn-secondary btn btn-xs" onclick="renamePlant()">Renombrar</button>
             </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:6px;background:var(--green-pale);border:1px solid var(--green-lt);border-radius:20px;padding:5px 12px;font-size:0.72rem;color:var(--green-dk)">
+                <span id="homeXpLabel">✨ Nv.1</span>
+                <div style="width:90px;height:5px;background:rgba(0,0,0,0.1);border-radius:5px;overflow:hidden">
+                  <div id="homeXpBarFill" style="height:100%;background:var(--green-md);border-radius:5px;transition:width 0.4s"></div>
+                </div>
+                <span id="homeXpText2" style="font-size:0.65rem;color:var(--green-md)">0/100</span>
+              </div>
+              <button class="btn-secondary btn btn-xs" onclick="renamePlant()">✏️ Renombrar</button>
+            </div>
+        </div>
           </div>
         </div>
         <h3 style="font-size:0.72rem;color:var(--text3);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.08em">Necesidades · Toca para ir al hábito</h3>
@@ -1783,7 +1848,7 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ AGENDA ═══ -->
+  <!-- AGENDA -->
   <div class="page" id="page-agenda">
     <div class="page-header"><h2>📅 Agenda del día</h2><p id="agendaDateLabel"></p></div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem">
@@ -1809,7 +1874,7 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ AGUA ═══ -->
+  <!-- AGUA -->
   <div class="page" id="page-agua">
     <div class="page-header">
       <h2>💧 Hidratación</h2>
@@ -1824,7 +1889,7 @@ textarea {
           </div>
           <p style="text-align:center;font-size:0.68rem;color:var(--text3);margin-top:7px">Nivel de hidratación</p>
           <div class="water-glasses" id="waterGlasses"></div>
-          <p style="text-align:center;font-size:0.63rem;color:var(--text3);margin-top:5px">Clic = +0.25L</p>
+          <p style="text-align:center;font-size:0.63rem;color:var(--text3);margin-top:5px">Clic = +0.3L</p>
         </div>
         <div style="flex:2;min-width:190px">
           <div class="stats-row">
@@ -1834,7 +1899,7 @@ textarea {
           </div>
           <div class="alert alert-info" id="aguaAlertMsg">Bebe agua para mantener tu planta viva.</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
-            <input type="number" id="waterInput" step="0.1" min="0.1" max="2" placeholder="Litros" value="0.25" style="flex:1;min-width:120px">
+            <input type="number" id="waterInput" step="0.1" min="0.1" max="2" placeholder="Litros" value="0.3" style="flex:1;min-width:120px">
             <button class="btn" onclick="addWater(parseFloat(document.getElementById('waterInput').value))">💧 Beber</button>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1847,11 +1912,11 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ DEPORTE ═══ -->
+  <!-- DEPORTE -->
   <div class="page" id="page-deporte">
     <div class="page-header">
       <h2>💪 Deporte</h2>
-      <p>Al menos <strong>una sesión</strong> cada semana · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openSportCatModal()">🏅 Categorías</button> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('deporte')">⚙️ Ajustar</button></p>
+      <p>Realiza <strong>una sesión</strong> para mantener tu planta fuerte · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openSportCatModal()">🏅 Categorías</button> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('deporte')">⚙️ Ajustar</button></p>
     </div>
     <div class="card" id="sportWeeklyStatusCard">
       <div class="card-title">📋 Esta semana</div>
@@ -1867,7 +1932,7 @@ textarea {
       <div class="form-group-full">
         <label>Categoría deportiva</label>
         <div class="sport-cat-list" id="sportCatSelector"></div>
-        <p style="font-size:0.68rem;color:var(--text3);margin-top:4px">¿No encuentras tu deporte? <button class="btn btn-secondary btn-xs" onclick="openSportCatModal()">Crear categoría</button></p>
+        <p style="font-size:0.68rem;color:var(--text3);margin-top:4px">Crea tu propia categoría   <button class="btn btn-secondary btn-xs" onclick="openSportCatModal()">Crear categoría</button></p>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Duración (minutos)</label><input type="number" id="sportMins" min="5" max="360" step="5" placeholder="Ej: 45"></div>
@@ -1888,18 +1953,18 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ SUEÑO ═══ -->
+  <!-- SUEÑO -->
   <div class="page" id="page-sueno">
-    <div class="page-header"><h2>😴 Sueño</h2><p>El descanso es vital · Obligatorio registrar cada día · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('sueno')">⚙️ Ajustar</button></p></div>
+    <div class="page-header"><h2>😴 Sueño</h2><p>El descanso mantiene a tu planta con energía · Es obligatorio registrarlo cada día · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('sueno')">⚙️ Ajustar</button></p></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="suenoHoy">—</div><div class="stat-lbl">Horas anoche</div></div>
       <div class="stat-card"><div class="stat-val" id="suenoMedia">—</div><div class="stat-lbl">Media semanal</div></div>
-      <div class="stat-card"><div class="stat-val" id="suenoNeed">100%</div><div class="stat-lbl">Vitalidad</div></div>
+      <div class="stat-card"><div class="stat-val" id="suenoNeed">100%</div><div class="stat-lbl">Energía</div></div>
     </div>
     <div id="suenoDoneAlert" style="margin-bottom:1rem"></div>
     <div class="card">
       <div class="card-title">🌙 Registrar descanso</div>
-      <div class="alert alert-danger">🚨 <strong>Obligatorio:</strong> Si no registras antes de medianoche, tu planta muere.</div>
+      <div class="alert alert-danger">🚨 <strong>Obligatorio:</strong> Si no lo registras antes de medianoche, tu planta muere.</div>
       <div style="text-align:center;margin:1.2rem 0">
         <div style="font-size:3rem" id="suenoMoonEmoji">🌙</div>
         <div style="font-size:2.2rem;font-weight:500;color:var(--green-dk);margin-top:6px" id="suenoHorasDisplay">— h</div>
@@ -1929,9 +1994,9 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ ALEMÁN ═══ -->
+  <!-- ALEMÁN -->
   <div class="page" id="page-aleman">
-    <div class="page-header"><h2>🧠 Alemán</h2><p>Estudiar alemán mantiene la inteligencia · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('aleman')">⚙️ Ajustar</button></p></div>
+    <div class="page-header"><h2>🧠 Alemán</h2><p>Estudiar alemán mantiene la inteligencia de tu planta · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('aleman')">⚙️ Ajustar</button></p></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="alemanHoras">0</div><div class="stat-lbl">Horas totales</div></div>
       <div class="stat-card"><div class="stat-val" id="alemanNivel">A1</div><div class="stat-lbl">Nivel estimado</div></div>
@@ -1952,13 +2017,13 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ PASOS ═══ -->
+  <!-- PASOS -->
   <div class="page" id="page-pasos">
-    <div class="page-header"><h2>⚡ Pasos diarios</h2><p>Caminar carga la energía · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('pasos')">⚙️ Ajustar</button></p></div>
+    <div class="page-header"><h2>⚡ Pasos diarios</h2><p>Caminar mantiene sana a tu planta · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('pasos')">⚙️ Ajustar</button></p></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="pasosHoy">0</div><div class="stat-lbl">Pasos hoy</div></div>
       <div class="stat-card"><div class="stat-val" id="pasosObjetivo">10k</div><div class="stat-lbl">Objetivo</div></div>
-      <div class="stat-card"><div class="stat-val" id="pasosNeed">100%</div><div class="stat-lbl">Energía actual</div></div>
+      <div class="stat-card"><div class="stat-val" id="pasosNeed">100%</div><div class="stat-lbl">Salud actual</div></div>
     </div>
     <div class="card">
       <div class="card-title">👣 Registrar pasos</div>
@@ -1974,7 +2039,7 @@ textarea {
 
   <!-- ═══ ORDEN ═══ -->
   <div class="page" id="page-orden">
-    <div class="page-header"><h2>🍃 Test de Orden</h2><p>El orden mantiene la tranquilidad · <strong style="color:var(--red)">Obligatorio cada día</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openOrderQuestModal()">✏️ Editar preguntas</button></p></div>
+    <div class="page-header"><h2>🍃 Test del Orden</h2><p>El orden mantiene la tranquilidad de tu planta· <strong style="color:var(--red)">Obligatorio hacerlo cada día</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openOrderQuestModal()">✏️ Editar preguntas</button></p></div>
     <div id="ordenDoneAlert" style="margin-bottom:1rem"></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="ordenMedia">0.0</div><div class="stat-lbl">Media semanal</div></div>
@@ -1999,7 +2064,7 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ ESTIRAMIENTOS ═══ -->
+  <!-- ESTIRAMIENTOS -->
   <div class="page" id="page-estiramientos">
     <div class="page-header"><h2>🧘 Estiramientos</h2><p>La flexibilidad de tu planta depende de tus estiramientos</p></div>
     <div class="stats-row">
@@ -2017,9 +2082,9 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ LECTURA ═══ -->
+  <!-- LECTURA -->
   <div class="page" id="page-lectura">
-    <div class="page-header"><h2>📖 Lectura</h2><p>Leer nutre la mente · <button class="btn btn-blue btn-xs" style="vertical-align:middle" onclick="openBookModal()">📚 Añadir libro</button></p></div>
+    <div class="page-header"><h2>📖 Lectura</h2><p>Leer mantiene a tu planta entretenida · <button class="btn btn-blue btn-xs" style="vertical-align:middle" onclick="openBookModal()">📚 Añadir libro</button></p></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="lecturaMedia">0</div><div class="stat-lbl">Min/día (media)</div></div>
       <div class="stat-card"><div class="stat-val" id="lecturaSesiones">0</div><div class="stat-lbl">Sesiones</div></div>
@@ -2054,9 +2119,9 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ MÓVIL ═══ -->
+  <!-- MÓVIL -->
   <div class="page" id="page-movil">
-    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p>El exceso de pantalla daña tu planta · <strong style="color:var(--red)">Obligatorio registrar</strong></p></div>
+    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p>El exceso de pantalla daña tu planta · <strong style="color:var(--red)">Obligatorio registrar las horas cada día</strong></p></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="movilHoy">0</div><div class="stat-lbl">Horas hoy</div></div>
       <div class="stat-card"><div class="stat-val" id="movilMedia">0</div><div class="stat-lbl">Media semanal</div></div>
@@ -2065,7 +2130,7 @@ textarea {
     <div id="movilAlert" class="alert" style="display:none;margin-bottom:1rem"></div>
     <div class="card">
       <div class="card-title">📲 Registrar uso de hoy</div>
-      <div class="alert alert-danger">🚨 <strong>Obligatorio.</strong> Más de 5h = muerte.</div>
+      <div class="alert alert-danger">🚨 <strong>Obligatorio.</strong> Más de 5h con el móvil mata a tu planta.</div>
       <div id="movilDoneAlert" style="margin-bottom:0.8rem"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input type="number" id="phoneInput" step="0.5" min="0" max="24" placeholder="Horas de móvil hoy" value="0" style="flex:1;min-width:130px">
@@ -2078,7 +2143,7 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ HÁBITOS CUSTOM ═══ -->
+  <!-- HÁBITOS PERSONALIZADOS -->
   <div class="page" id="page-habitos-custom">
     <div class="page-header"><h2>✨ Mis hábitos</h2><p>Gestiona todos tus hábitos personalizados</p></div>
     <div style="margin-bottom:1.2rem">
@@ -2090,12 +2155,12 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ PÁGINA DE HÁBITO CUSTOM ═══ -->
+  <!-- PÁGINA DE HÁBITO PERSONALIZADOS -->
   <div class="page" id="page-custom-habit-detail">
     <div id="customHabitDetailContent"></div>
   </div>
 
-  <!-- ═══ METAS ═══ -->
+  <!-- METAS -->
   <div class="page" id="page-metas">
     <div class="page-header"><h2>🏆 Metas</h2><p>Tus objetivos a largo plazo y mensuales</p></div>
     <div class="card">
@@ -2109,7 +2174,7 @@ textarea {
     </div>
   </div>
 
-  <!-- ═══ EDITAR ═══ -->
+  <!-- EDITAR -->
   <div class="page" id="page-editar">
     <div class="page-header"><h2>✏️ Editar app</h2><p>Personaliza completamente tu LevelUp</p></div>
 
@@ -2135,13 +2200,13 @@ textarea {
     </div>
 
     <div class="edit-section">
-      <div class="edit-section-title">🍃 Test de Orden — Preguntas</div>
+      <div class="edit-section-title">🍃 Test de Orden</div>
       <button class="btn btn-secondary btn-sm" onclick="openOrderQuestModal()" style="margin-bottom:1rem">✏️ Editar preguntas</button>
       <div id="editOrderQuestPreview"></div>
     </div>
 
     <div class="edit-section">
-      <div class="edit-section-title">🏅 Categorías deportivas</div>
+      <div class="edit-section-title">🏅 Categorías de deporte</div>
       <button class="btn btn-secondary btn-sm" onclick="openSportCatModal()" style="margin-bottom:1rem">🏅 Gestionar categorías</button>
       <div id="editSportCatPreview"></div>
     </div>
@@ -2149,6 +2214,7 @@ textarea {
     <div class="edit-section">
       <div class="edit-section-title">🏆 Metas a largo plazo</div>
       <button class="btn btn-sm" onclick="openGoalModal()" style="margin-bottom:1rem">+ Nueva meta</button>
+      <div id="editBuiltinGoalsList" style="margin-bottom:1rem"></div>
       <div id="editGoalsList"></div>
     </div>
 
@@ -2159,65 +2225,72 @@ textarea {
     </div>
 
     <div class="edit-section">
-      <div class="edit-section-title">⚠️ Zona peligrosa</div>
-      <button class="btn btn-danger btn-sm" onclick="if(confirm('¿Reiniciar todo?'))fullResetGame()">🔄 Reiniciar toda la app</button>
+      <div class="edit-section-title">🌿 Necesidades de la planta</div>
+      <p style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem">Edita los nombres e iconos de las necesidades o crea nuevas necesidades personalizadas vinculadas a los hábitos.</p>
+      <div id="editNeedsList"></div>
+      <button class="btn btn-secondary btn-sm" style="margin-top:0.8rem" onclick="openNeedEditModal()">+ Nueva necesidad</button>
+    </div>
+
+    <div class="edit-section">
+      <div class="edit-section-title">⚠️ ¡DANGER ZONE!</div>
+      <button class="btn btn-danger btn-sm" onclick="fullResetGameHard()">🔄 Reiniciar toda la app </button>
     </div>
   </div>
 
-  <!-- ═══ INFO ═══ -->
+  <!-- INFO -->
   <div class="page" id="page-info">
-    <div class="page-header"><h2>❓ Cómo funciona LevelUp</h2></div>
+    <div class="page-header"><h2>❓ ¿Cómo funciona LevelUp?</h2></div>
     <div class="card">
       <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.6rem;font-weight:500">🌱 La idea</h3>
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">LevelUp es un tracker de hábitos gamificado donde tu progreso se refleja en una planta virtual. Cada hábito alimenta una <strong>necesidad</strong> de la planta. Si descuidas las necesidades, la planta muere y empiezas de cero.</p>
+      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">LevelUp es un tracker de hábitos donde tu progreso se refleja en una planta virtual. Cada hábito alimenta una <strong>necesidad</strong> de la planta. Si descuidas las necesidades, la planta muere y empiezas de cero, perdiendo todo lo conseguido.</p>
     </div>
     <div class="card">
-      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.8rem;font-weight:500">💧 Necesidades y hábitos</h3>
+      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.8rem;font-weight:500">💧 Necesidades y hábitos default</h3>
       <table class="need-table">
         <thead><tr><th>Necesidad</th><th>Hábito</th><th>Se agota en</th><th>¿Mata?</th></tr></thead>
         <tbody>
           <tr><td>💧 Hidratación</td><td>Beber agua</td><td>Reset medianoche</td><td>Sí (a 0%)</td></tr>
           <tr><td>💪 Fuerza</td><td>Deporte (≥1 sesión/semana)</td><td>7 días</td><td>Sí</td></tr>
-          <tr><td>😴 Vitalidad</td><td>Sueño ≥7h</td><td>Reset medianoche</td><td>Sí (obligatorio)</td></tr>
+          <tr><td>😴 Energía</td><td>Sueño ≥7h</td><td>Reset medianoche</td><td>Sí (obligatorio)</td></tr>
           <tr><td>🧠 Inteligencia</td><td>Estudiar alemán</td><td>3 días</td><td>Sí</td></tr>
-          <tr><td>⚡ Energía</td><td>Pasos diarios</td><td>Reset medianoche</td><td>Si &lt; mínimo</td></tr>
-          <tr><td>🍃 Tranquilidad</td><td>Test de orden</td><td>Reset medianoche</td><td>Sí (obligatorio)</td></tr>
+          <tr><td>⚡ Salud</td><td>Pasos diarios</td><td>Reset medianoche</td><td>Si &lt; mínimo</td></tr>
+          <tr><td>🍃 Tranquilidad</td><td>Test del orden</td><td>Reset medianoche</td><td>Sí (obligatorio)</td></tr>
           <tr><td>🧘 Elasticidad</td><td>Estiramientos</td><td>Reset medianoche</td><td>Sí (a 0%)</td></tr>
           <tr><td>📖 Entretenimiento</td><td>Leer</td><td>2 días</td><td>Sí</td></tr>
-          <tr><td>📱 Móvil</td><td>Registrar pantalla</td><td>—</td><td>Sí (&gt;5h o sin registrar)</td></tr>
+          <tr><td>📱 Móvil</td><td>Registrar horas de pantalla</td><td>—</td><td>Sí (&gt;5h o sin registrar)</td></tr>
         </tbody>
        </table>
     </div>
     <div class="card">
       <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🛡️ Protector de racha</h3>
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">El protector pausa <strong>absolutamente todas las muertes</strong> durante 24 horas, incluyendo el decay de necesidades y los obligatorios diarios. Cuesta -20% XP y -3 días de racha. Ideal para viajes, enfermedad o días complicados.</p>
+      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">El protector pausa <strong>absolutamente todas las muertes</strong> durante 24 horas, incluyendo el decay de necesidades y los obligatorios diarios. Cuesta -20% XP y -3 días de racha. Solo se puede utilizar por causa justificada: viajes, enfermedad o días complicados.</p>
     </div>
     <div class="card">
-      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">✏️ Personalización total</h3>
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Desde la página <strong>Editar</strong> puedes:<br>
+      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">✏️ Personalización</h3>
+      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Desde la página <strong>Editar</strong> puedes, entre otras cosas:<br>
       • <strong>Desactivar</strong> cualquier hábito del sistema (su necesidad desaparece de la planta)<br>
-      • <strong>Ajustar parámetros</strong> de cada hábito (objetivos, límites, días de muerte)<br>
+      • <strong>Ajustar parámetros</strong> de cada hábito (objetivos, límites, días de muerte...)<br>
       • <strong>Crear hábitos personalizados</strong> con su propia necesidad, estadísticas, gráficos, meta y cuenta atrás<br>
       • <strong>Mostrar tus hábitos en el menú lateral</strong> para acceso rápido (igual que los hábitos del sistema)<br>
       • <strong>Editar las preguntas</strong> del test de orden<br>
       • <strong>Gestionar categorías deportivas</strong> con km, obligatoriedad y emoji personalizado<br>
-      • <strong>Editar o eliminar metas</strong> a largo plazo y objetivos mensuales con cuenta atrás</p>
+      • <strong>Editar o eliminar metas</strong> a largo plazo y objetivos mensuales con cuenta atrás<br>
+      • <strong>Editar, añadir o eliminar necesidades</strong> de tu planta</p>
     </div>
     <div class="card">
       <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🏆 XP y niveles</h3>
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Cada acción da XP: agua +3, pasos (por 500), deporte +12, alemán +8, orden +8, estiramientos +8, hábitos custom +6, lectura (por 15min). Al subir de nivel, el umbral de XP sube un 20%. A partir del nivel 2 la planta tiene mejor aspecto visual.</p>
+      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Cada acción da XP: agua +3, por 500 pasos +1, deporte +12, alemán +8, orden +8, estiramientos +8, hábitos custom +6, por 15min de lectura +1. Al subir de nivel, el umbral de XP sube un 20%. A partir del nivel 2 la planta cambia de aspecto.</p>
     </div>
     <div class="card">
-      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">📅 Objetivos mensuales y metas</h3>
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Añade objetivos mensuales con fecha límite y cuenta atrás. Márcalos como completados con un clic. Las metas a largo plazo muestran barra de progreso, porcentaje completado y días restantes si tienes fecha límite activa.</p>
+      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">📅 Objetivos mensuales, metas y agenda</h3>
+      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Añade objetivos mensuales con fecha límite y cuenta atrás. Márcalos como completados con un clic. Las metas a largo plazo muestran barra de progreso, porcentaje completado y días restantes si tienes fecha límite activa. Tienes la opción de organizar tu día con la Agenda de LevelUp, donde puedes agregar tus quéhaceres, fijar una hora, el nivel de prioridad que tiene y muchas otras opciones más para facilitarte el cumplimiento de tus metas.</p>
     </div>
   </div>
 </main>
 
 <script>
-// ══════════════════════════════════════════════
+
 // CONSTANTS
-// ══════════════════════════════════════════════
 const DEFAULT_ORDER_QUESTIONS = [
   "¿El suelo está libre de objetos?",
   "¿La mesa/escritorio está despejada?",
@@ -2239,9 +2312,8 @@ const FEATURES_DEF = [
   { id:"pb", icon:"🏅", name:"Récord", desc:"Marca personal" },
 ];
 
-// ══════════════════════════════════════════════
+
 // STATE
-// ══════════════════════════════════════════════
 let plant={}, needsState={}, hydration={}, flexibility={}, energy={}, sleep={};
 let goals={}, phoneUsage=[], dailyActions={}, streak={};
 let customHabits=[], customNeedStates={}, habitLogs={}, habitStreaks={};
@@ -2254,6 +2326,7 @@ let decayInterval=null;
 let agendaFilter='all', booksFilter='all', mobjMonthFilter='all';
 let selectedSportCat=null, logHabitId=null;
 let disabledCoreHabits=[];
+let disabledBuiltinGoals=[];
 
 let sportCats = [
   {id:"sc_run",name:"Running",emoji:"🏃",hasKm:true,required:false},
@@ -2268,9 +2341,8 @@ let coreParams = {
   aleman:{diasMaxSinHacer:3,horasObjetivo:660}
 };
 
-// ══════════════════════════════════════════════
+
 // HELPERS
-// ══════════════════════════════════════════════
 function todayStr(){ return new Date().toDateString(); }
 function getTodayKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function formatDate(d){ if(!d)return"";return new Date(d).toLocaleDateString('es-ES',{day:'numeric',month:'short'}); }
@@ -2295,37 +2367,64 @@ function countdownBadge(dateStr,done){
   return`<span class="countdown-badge">📅 ${days}d</span>`;
 }
 
-// ══════════════════════════════════════════════
-// FUNCIÓN CLAVE: Obtener nivel actual de necesidad CUSTOM basado en la hora
-// ══════════════════════════════════════════════
+
+// Obtener nivel actual de necesidad CUSTOM basado en la hora
 function getCurrentCustomNeedLevel(habit){
-  if(!plant.alive || isProtectorActive()) return customNeedStates[habit.id] ?? 100;
-  
-  const now = new Date();
-  const hoursElapsed = now.getHours() + now.getMinutes() / 60; // 0 a 24
-  
-  // Calcular tasa de desgaste por hora: 100% / (díasParaMorir * 24)
-  const ratePerHour = 100 / (habit.daysToKill * 24);
-  
-  // El nivel actual = 100% - (horas transcurridas * tasa)
-  let level = 100 - (hoursElapsed * ratePerHour);
-  
-  // Limitar entre 0 y 100
-  level = Math.min(100, Math.max(0, level));
-  
-  // Guardar el valor calculado para uso posterior
-  customNeedStates[habit.id] = level;
-  
+  const needId = getHabitNeedId(habit);
+
+  // Si apunta a una necesidad del sistema, devolver ese nivel directamente
+  const systemLevels = {
+    hydration: ()=>hydration.level,
+    strength:  ()=>needsState.strength?.value ?? 100,
+    intelligence: ()=>needsState.intelligence?.value ?? 100,
+    entertainment: ()=>needsState.entertainment?.value ?? 100,
+    vitality:  ()=>sleep.level,
+    calmness:  ()=>getCurrentCalmnessLevel(),
+    energy:    ()=>energy.level,
+    flexibility: ()=>flexibility.level,
+  };
+  if(systemLevels[needId]) return systemLevels[needId]();
+
+  // Necesidad custom compartida: calcular decay desde el último log de cualquier hábito que comparta este needId
+  if(!plant.alive || isProtectorActive()){
+    return customNeedStates[needId] ?? 100;
+  }
+
+  const eff = habit.effect || { type: "fill100" };
+  if(eff.type === "damage" || eff.type === "none"){
+    return customNeedStates[needId] ?? 100;
+  }
+
+  const now = Date.now();
+
+  // Recopilar logs de todos los hábitos que comparten este needId
+  const siblingLogs = customHabits
+    .filter(h => getHabitNeedId(h) === needId)
+    .flatMap(h => (habitLogs[h.id] || []).filter(l => !l._init))
+    .sort((a, b) => a.ts - b.ts);
+
+  const lastLog = siblingLogs.length ? siblingLogs[siblingLogs.length - 1] : null;
+
+  // startTs es el habito más antiguo entre los createdAt de los siblings
+  const siblings = customHabits.filter(h => getHabitNeedId(h) === needId);
+  const oldestCreatedAt = Math.min(...siblings.map(h => h.createdAt || now));
+  const startTs = lastLog ? lastLog.ts : oldestCreatedAt;
+
+  const maxLevel = eff.type === "fillCustom" && !eff.accumulate ? (eff.value || 50) : 100;
+  const hoursPassed = (now - startTs) / 3600000;
+  const ratePerHour = maxLevel / (habit.daysToKill * 24);
+  const level = Math.min(maxLevel, Math.max(0, maxLevel - hoursPassed * ratePerHour));
+
+  customNeedStates[needId] = level;
   return level;
 }
 
-// ══════════════════════════════════════════════
+
 // DEFAULT STATE
-// ══════════════════════════════════════════════
 function defaultState(){
   const now=Date.now();
   plant={name:"Mi planta",level:1,xp:0,xpNext:100,alive:true,deathReason:null,createdAt:now};
-  needsState={strength:{value:100,lastFulfilled:now},intelligence:{value:100,lastFulfilled:now},calmness:{value:100,lastFulfilled:now},entertainment:{value:100,lastFulfilled:now},vitality:{value:100,lastFulfilled:now}};
+  needsState={strength:{value:100,lastFulfilled:now},intelligence:{value:100,lastFulfilled:now},calmness:{value:100,extraCalmness:0,lastResetDate:getTodayKey()},entertainment:{value:100,lastFulfilled:now},vitality:{value:100,lastFulfilled:now}};
   hydration={level:100,extraHydration:0,loggedToday:0,target:1.2,lastResetDate:getTodayKey()};
   flexibility={level:100,extraFlexibility:0,doneToday:false,lastResetDate:getTodayKey()};
   energy={level:100,extraEnergy:0,stepsToday:0,doneToday:false,lastResetDate:getTodayKey()};
@@ -2334,11 +2433,27 @@ function defaultState(){
   phoneUsage=[];
   dailyActions={orderDone:false,phoneDone:false,suenoDone:false,date:todayStr()};
   streak={current:0,lastAliveDay:null};
-  customHabits=[]; customNeedStates={}; habitLogs={}; habitStreaks={};
+
+// Solo resetear estados de necesidades y no los hábitos en sí
+customNeedStates={};
+
+// Reiniciar logs y rachas pero conservar hábitos
+habitLogs={};
+habitStreaks={};
+
+// Reinicializar customNeedStates con 100% para cada hábito existente
+customHabits.forEach(h=>{
+  customNeedStates[h.id]=100;
+  habitLogs[h.id]=[];
+  habitStreaks[h.id]={current:0,last:null};
+  h.createdAt=Date.now();
+  if(h.goal)h.goal.progress=0;
+});
   protector={active:false,expiresAt:null,reason:""};
   agendaTasks=[]; books=[]; longGoals=[]; monthlyObjs=[];
   orderQuestions=[...DEFAULT_ORDER_QUESTIONS];
   disabledCoreHabits=[];
+  disabledBuiltinGoals=[];
   sportCats=[
     {id:"sc_run",name:"Running",emoji:"🏃",hasKm:true,required:false},
     {id:"sc_gym",name:"Gym",emoji:"🏋️",hasKm:false,required:false},
@@ -2349,9 +2464,9 @@ function defaultState(){
   lastDecayTs=now;
 }
 
-// ══════════════════════════════════════════════
+
+
 // LEVEL CALCULATIONS (solo para los del sistema)
-// ══════════════════════════════════════════════
 function getCurrentHydrationLevel(){
   if(!plant.alive||isProtectorActive())return isProtectorActive()?hydration.level:0;
   const todayKey=getTodayKey();
@@ -2359,6 +2474,18 @@ function getCurrentHydrationLevel(){
   const now=new Date(),h=now.getHours()+now.getMinutes()/60;
   return Math.min(100,Math.max(0,Math.max(0,100-(h*100/24))+hydration.extraHydration));
 }
+
+function getCurrentCalmnessLevel(){
+  if(!plant.alive||isProtectorActive()) return isProtectorActive()?needsState.calmness.value:0;
+  const todayKey=getTodayKey();
+  if(!needsState.calmness.lastResetDate||needsState.calmness.lastResetDate!==todayKey){
+    needsState.calmness.lastResetDate=todayKey;
+    needsState.calmness.extraCalmness=0;
+  }
+  const now=new Date(),h=now.getHours()+now.getMinutes()/60;
+  return Math.min(100,Math.max(0,Math.max(0,100-(h*100/24))+( needsState.calmness.extraCalmness||0)));
+}
+
 function getCurrentFlexibilityLevel(){
   if(!plant.alive||isProtectorActive())return isProtectorActive()?flexibility.level:0;
   const todayKey=getTodayKey();
@@ -2366,6 +2493,7 @@ function getCurrentFlexibilityLevel(){
   const now=new Date(),h=now.getHours()+now.getMinutes()/60;
   return Math.min(100,Math.max(0,Math.max(0,100-(h*100/24))+flexibility.extraFlexibility));
 }
+
 function getCurrentEnergyLevel(){
   if(!plant.alive||isProtectorActive())return isProtectorActive()?energy.level:0;
   const todayKey=getTodayKey();
@@ -2373,6 +2501,7 @@ function getCurrentEnergyLevel(){
   const now=new Date(),h=now.getHours()+now.getMinutes()/60;
   return Math.min(100,Math.max(0,Math.max(0,100-(h*100/24))+energy.extraEnergy));
 }
+
 function getCurrentSleepLevel(){
   if(!plant.alive||isProtectorActive())return isProtectorActive()?sleep.level:0;
   const todayKey=getTodayKey();
@@ -2380,21 +2509,23 @@ function getCurrentSleepLevel(){
   if(!sleep.doneToday){const now=new Date(),h=now.getHours()+now.getMinutes()/60;return Math.max(0,100-(h*100/24));}
   return sleep.level;
 }
+
 function updateAllLevels(){
   hydration.level=getCurrentHydrationLevel();
   flexibility.level=getCurrentFlexibilityLevel();
   energy.level=getCurrentEnergyLevel();
   sleep.level=getCurrentSleepLevel();
-  
+  needsState.calmness.value = getCurrentCalmnessLevel();
+  if(needsState.vitality) needsState.vitality.value = sleep.level;
+
   // Actualizar niveles de necesidades CUSTOM basadas en la hora actual
   customHabits.forEach(habit => {
     getCurrentCustomNeedLevel(habit);
   });
 }
 
-// ══════════════════════════════════════════════
-// SPORT WEEKLY
-// ══════════════════════════════════════════════
+
+// SPORT
 function getWeekKey(){
   const d=new Date(),day=d.getDay()||7;
   d.setDate(d.getDate()-day+1);
@@ -2417,18 +2548,14 @@ function isSportWeekDone(){
   return true;
 }
 
-// ══════════════════════════════════════════════
-// PROTECTOR — pauses ALL deaths
-// ══════════════════════════════════════════════
+// PROTECTOR
 function isProtectorActive(){
   if(!protector.active)return false;
   if(Date.now()>protector.expiresAt){protector.active=false;save();return false;}
   return true;
 }
 
-// ══════════════════════════════════════════════
-// DAILY RESET
-// ══════════════════════════════════════════════
+// RESETEO DIARIO
 function checkDailyObligatory(){
   if(!plant.alive)return;
   const today=todayStr();
@@ -2450,12 +2577,13 @@ function checkDailyObligatory(){
 
 function isDisabledCore(id){ return disabledCoreHabits.includes(id); }
 
-// ══════════════════════════════════════════════
-// SAVE / LOAD
-// ══════════════════════════════════════════════
+
+
+
+// SAVE Y LOAD
 function save(){
   updateAllLevels();
-  const s={plant,needsState,hydration,flexibility,energy,sleep,goals,phoneUsage,dailyActions,streak,customHabits,customNeedStates,habitLogs,habitStreaks,protector,agendaTasks,books,longGoals,monthlyObjs,orderQuestions,coreParams,lastDecayTs,sportCats,disabledCoreHabits};
+  const s={plant,needsState,hydration,flexibility,energy,sleep,goals,phoneUsage,dailyActions,streak,customHabits,customNeedStates,habitLogs,habitStreaks,protector,agendaTasks,books,longGoals,monthlyObjs,orderQuestions,coreParams,lastDecayTs,sportCats,disabledCoreHabits,disabledBuiltinGoals};
   try{localStorage.setItem("levelup_v7",JSON.stringify(s));}catch(e){console.warn(e);}
 }
 function load(){
@@ -2463,7 +2591,30 @@ function load(){
     const raw=localStorage.getItem("levelup_v7");
     if(!raw){defaultState();return;}
     const s=JSON.parse(raw);
-    plant=s.plant||{};needsState=s.needsState||{};hydration=s.hydration||{};flexibility=s.flexibility||{};energy=s.energy||{};sleep=s.sleep||{};goals=s.goals||{};phoneUsage=s.phoneUsage||[];dailyActions=s.dailyActions||{};streak=s.streak||{current:0,lastAliveDay:null};customHabits=s.customHabits||[];customNeedStates=s.customNeedStates||{};habitLogs=s.habitLogs||{};habitStreaks=s.habitStreaks||{};protector=s.protector||{active:false,expiresAt:null,reason:""};agendaTasks=s.agendaTasks||[];books=s.books||[];longGoals=s.longGoals||[];monthlyObjs=s.monthlyObjs||[];orderQuestions=s.orderQuestions||[...DEFAULT_ORDER_QUESTIONS];coreParams=s.coreParams||{};sportCats=s.sportCats||[];disabledCoreHabits=s.disabledCoreHabits||[];lastDecayTs=s.lastDecayTs||Date.now();
+    plant=s.plant||{};
+    needsState=s.needsState||{};
+    hydration=s.hydration||{};
+    flexibility=s.flexibility||{};
+    energy=s.energy||{};
+    sleep=s.sleep||{};
+    goals=s.goals||{};
+    phoneUsage=s.phoneUsage||[];
+    dailyActions=s.dailyActions||{};
+    streak=s.streak||{current:0,lastAliveDay:null};
+    customHabits=s.customHabits||[];
+    customNeedStates=s.customNeedStates||{};
+    habitLogs=s.habitLogs||{};
+    habitStreaks=s.habitStreaks||{};
+    protector=s.protector||{active:false,expiresAt:null,reason:""};
+    agendaTasks=s.agendaTasks||[];books=s.books||[];
+    longGoals=s.longGoals||[];
+    monthlyObjs=s.monthlyObjs||[];
+    orderQuestions=s.orderQuestions||[...DEFAULT_ORDER_QUESTIONS];
+    coreParams=s.coreParams||{};
+    sportCats=s.sportCats||[];
+    disabledCoreHabits=s.disabledCoreHabits||[];
+    disabledBuiltinGoals=s.disabledBuiltinGoals||[];
+    lastDecayTs=s.lastDecayTs||Date.now();
     if(!hydration.lastResetDate)hydration.lastResetDate=getTodayKey();
     if(hydration.extraHydration===undefined)hydration.extraHydration=0;
     if(!flexibility.lastResetDate)flexibility.lastResetDate=getTodayKey();
@@ -2477,6 +2628,8 @@ function load(){
     if(!goals.order)goals.order={scores:[],avg:0};
     if(!goals.sport)goals.sport={sessions:[]};
     if(!needsState.vitality)needsState.vitality={value:100,lastFulfilled:Date.now()};
+    if(needsState.calmness&&needsState.calmness.extraCalmness===undefined) needsState.calmness.extraCalmness=0;
+    if(needsState.calmness&&!needsState.calmness.lastResetDate) needsState.calmness.lastResetDate=getTodayKey();
     if(!coreParams.agua)coreParams.agua={target:1.2};
     if(!coreParams.pasos)coreParams.pasos={objetivo:10000,minimo:7000};
     if(!coreParams.sueno)coreParams.sueno={minFatal:5,minOptimo:7};
@@ -2484,14 +2637,14 @@ function load(){
     if(!coreParams.aleman)coreParams.aleman={diasMaxSinHacer:3,horasObjetivo:660};
     if(!sportCats.length)sportCats=[{id:"sc_run",name:"Running",emoji:"🏃",hasKm:true,required:false}];
     delete needsState.energy;delete needsState.flexibility;delete needsState.hydration;
+    loadNeedsOverrides();
     checkDailyObligatory();
     updateAllLevels();
   }catch(e){console.warn(e);defaultState();}
 }
 
-// ══════════════════════════════════════════════
-// DECAY — SOLO para necesidades del sistema (las custom ya se calculan por hora)
-// ══════════════════════════════════════════════
+
+// DECAY — Para las necesidades del sistema 
 function applyDecay(){
   if(!plant.alive)return;
   if(isProtectorActive())return;
@@ -2500,8 +2653,8 @@ function applyDecay(){
   if(hoursPassed<0.016)return;
   
   // Decaimiento de necesidades del sistema (no custom, porque custom ya se calcula por hora)
-  const DECAY_PER_HOUR = { strength:100/(coreParams.deporte.diasMaxSinHacer*24), intelligence:100/(coreParams.aleman.diasMaxSinHacer*24), calmness:100/24, entertainment:100/48 };
-  
+  const DECAY_PER_HOUR = { strength:100/(coreParams.deporte.diasMaxSinHacer*24), intelligence:100/(coreParams.aleman.diasMaxSinHacer*24), entertainment:100/48 };
+
   Object.keys(DECAY_PER_HOUR).forEach(id=>{
     if(needsState[id]&&!isDisabledCore(id))
       needsState[id].value=Math.max(0,needsState[id].value-DECAY_PER_HOUR[id]*hoursPassed);
@@ -2538,9 +2691,7 @@ function killPlant(reason){
   save();renderAll();
 }
 
-// ══════════════════════════════════════════════
-// STREAK
-// ══════════════════════════════════════════════
+// RACHA
 function updateSurvivalStreak(){
   if(!plant.alive)return;
   const today=todayStr();
@@ -2550,56 +2701,91 @@ function updateSurvivalStreak(){
   streak.lastAliveDay=today;save();
 }
 
-// ══════════════════════════════════════════════
+
 // NEED VALUES
-// ══════════════════════════════════════════════
 function needValue(id){
-  if(id==="hydration")return hydration.level;
-  if(id==="flexibility")return flexibility.level;
-  if(id==="energy")return energy.level;
-  if(id==="vitality")return sleep.level;
-  
-  // Para necesidades custom, calcular en tiempo real basado en la hora actual
+  if(id==="hydration")   return hydration.level;
+  if(id==="flexibility") return flexibility.level;
+  if(id==="energy")      return energy.level;
+  if(id==="vitality")    return sleep.level;
+  if(id==="calmness")    return getCurrentCalmnessLevel();
+
+
   const habit = customHabits.find(h => h.id === id);
-  if(habit){
-    return getCurrentCustomNeedLevel(habit);
-  }
-  
-  return needsState[id]?.value??100;
+  if(habit) return getCurrentCustomNeedLevel(habit);
+
+  return needsState[id]?.value ?? 100;
 }
+
+// Obtiene el "needId" al que apunta un hábito custom
+function getHabitNeedId(habit){
+  // Si apunta a una necesidad del sistema, devuelve su id
+  const systemMap = {
+    hydration:"hydration", strength:"strength", intelligence:"intelligence",
+    entertainment:"entertainment", vitality:"vitality", calmness:"calmness",
+    energy:"energy", flexibility:"flexibility"
+  };
+  if(systemMap[habit.affects]) return systemMap[habit.affects];
+  // Si crea necesidad nueva, su id es el propio id del hábito
+  // si otro hábito ya tiene el mismo customNeedName, comparten id
+  if(habit.affects === "custom"){
+    // Buscar si hay otro hábito que sea el "primario" de esta necesidad
+    const primary = customHabits.find(h =>
+      h.affects === "custom" &&
+      h.customNeedName &&
+      h.customNeedName === habit.customNeedName
+    );
+    return primary ? "cneed_" + primary.customNeedName.toLowerCase().replace(/\s+/g,"_") : "cneed_" + habit.id;
+  }
+  return habit.id;
+}
+
 function needClass(v){return v>=50?"ok":v>=25?"warn":"critical";}
 
-// Obtener SOLO necesidades (no hábitos) para la página principal
+// Obtener necesidades para la página principal
 function getAllNeeds(){
-  const coreNeeds=[
-    {id:"hydration",name:"Hidratación",icon:"💧",page:"agua",coreKey:"agua"},
-    {id:"strength",name:"Fuerza",icon:"💪",page:"deporte",coreKey:"deporte"},
-    {id:"vitality",name:"Vitalidad",icon:"😴",page:"sueno",coreKey:"sueno"},
-    {id:"intelligence",name:"Inteligencia",icon:"🧠",page:"aleman",coreKey:"aleman"},
-    {id:"energy",name:"Energía",icon:"⚡",page:"pasos",coreKey:"pasos"},
-    {id:"calmness",name:"Tranquilidad",icon:"🍃",page:"orden",coreKey:"orden"},
-    {id:"flexibility",name:"Elasticidad",icon:"🧘",page:"estiramientos",coreKey:"estiramientos"},
-    {id:"entertainment",name:"Entretenimiento",icon:"📖",page:"lectura",coreKey:"lectura"}
+  const baseCore=[
+    {id:"hydration",page:"agua",coreKey:"agua"},
+    {id:"strength",page:"deporte",coreKey:"deporte"},
+    {id:"vitality",page:"sueno",coreKey:"sueno"},
+    {id:"intelligence",page:"aleman",coreKey:"aleman"},
+    {id:"energy",page:"pasos",coreKey:"pasos"},
+    {id:"calmness",page:"orden",coreKey:"orden"},
+    {id:"flexibility",page:"estiramientos",coreKey:"estiramientos"},
+    {id:"entertainment",page:"lectura",coreKey:"lectura"},
   ];
-  const activeCore=coreNeeds.filter(n=>!isDisabledCore(n.coreKey));
-  
-  // Necesidades personalizadas (cuando se crea una NUEVA necesidad, no el hábito en sí)
-  const customNeeds = customHabits
-    .filter(h => h.affects === "custom" && h.customNeedName) // Solo cuando crea una necesidad nueva
-    .map(h => ({
-      id: h.id,
-      name: h.customNeedName,
-      icon: h.icon,
-      page: "custom-habit-detail",
-      customId: h.id
-    }));
-  
+
+  const activeCore = baseCore
+    .filter(n => !isDisabledCore(n.coreKey))
+    .map(n => { const lbl=getNeedLabel(n.id); return {...n, name:lbl.name, icon:lbl.icon}; });
+
+  // agrupar necesidades custom por needId para no duplicar
+  const seenNeedIds = new Set();
+  const customNeeds = [];
+  for(const h of customHabits){
+    const needId = getHabitNeedId(h);
+
+    // Si apunta a una necesidad del sistema, ya está arriba
+    if(activeCore.find(n => n.id === needId)) continue;
+    if(seenNeedIds.has(needId)) continue;
+    seenNeedIds.add(needId);
+    if(h.affects === "custom" && h.customNeedName){
+      customNeeds.push({
+        id: h.id, // se usa para llamar a needValue getCurrentCustomNeedLevel
+        name: needOverrides[needId]?.name || h.customNeedName,
+        icon: needOverrides[needId]?.icon || h.icon,
+        page: "custom-habit-detail",
+        customId: h.id
+      });
+    }
+  }
+
   return [...activeCore, ...customNeeds];
 }
 
-// ══════════════════════════════════════════════
+
+
 // ACTIONS — WATER
-// ══════════════════════════════════════════════
 function addWater(liters){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
   if(isNaN(liters)||liters<=0){toast("Cantidad inválida");return;}
@@ -2611,12 +2797,12 @@ function addWater(liters){
   save();renderAll();
 }
 
-// ══════════════════════════════════════════════
+
 // ACTIONS — SPORT
-// ══════════════════════════════════════════════
 function doSport(){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
   if(!selectedSportCat){toast("Selecciona una categoría deportiva");return;}
+  document.querySelectorAll(".sport-cat-chip").forEach(c=>c.classList.remove("selected"));
   const cat=sportCats.find(c=>c.id===selectedSportCat);
   if(!cat){toast("Categoría no válida");return;}
   const mins=parseInt(document.getElementById("sportMins")?.value)||0;
@@ -2637,9 +2823,9 @@ function doSport(){
   save();renderAll();
 }
 
-// ══════════════════════════════════════════════
+
+
 // ACTIONS — OTHERS
-// ══════════════════════════════════════════════
 function doAleman(){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
   const h=parseFloat(document.getElementById("germanHoursInput")?.value);
@@ -2702,7 +2888,12 @@ function submitOrderTest(){
   dailyActions.orderDone=true;
   const sd=document.getElementById("orderScoreDisplay");
   if(sd){sd.style.display="block";document.getElementById("orderScoreBig").textContent=`${note}/10`;}
-  if(needsState.calmness){needsState.calmness.value=100;needsState.calmness.lastFulfilled=Date.now();}
+  if(needsState.calmness){
+    const now=new Date(),h=now.getHours()+now.getMinutes()/60;
+    const base=Math.max(0,100-(h*100/24));
+    needsState.calmness.extraCalmness=Math.min(100,100-base);
+    needsState.calmness.value=100;
+  }
   plant.xp+=8;checkLevelUp();
   toast(`🧹 Orden: ${note}/10`);save();renderAll();
 }
@@ -2749,14 +2940,14 @@ function doPhone(){
   if(phoneUsage.length>14)phoneUsage.shift();
   dailyActions.phoneDone=true;
   if(!isProtectorActive()&&h>5){killPlant(`adicción al móvil — ${h}h de pantalla`);return;}
-  if(h>2){const dmg=(h-2)*12;if(needsState.calmness)needsState.calmness.value=Math.max(0,needsState.calmness.value-dmg);if(needsState.intelligence)needsState.intelligence.value=Math.max(0,needsState.intelligence.value-dmg*0.6);toast(`📱 ${h}h · Daño a Tranquilidad`);}
+  if(h>2){const dmg=(h-2)*12;if(needsState.calmness){needsState.calmness.value=Math.max(0,needsState.calmness.value-dmg);needsState.calmness.extraCalmness=Math.max(0,(needsState.calmness.extraCalmness||0)-dmg);}}
   else toast(`📱 ${h}h · Sin penalización`);
   checkDeath();save();renderAll();renderPhoneChart();
 }
 
-// ══════════════════════════════════════════════
+
+
 // CUSTOM HABITS — LOG
-// ══════════════════════════════════════════════
 function openLogModal(habitId){
   const h=customHabits.find(x=>x.id===habitId);if(!h)return;
   logHabitId=habitId;
@@ -2785,18 +2976,127 @@ function confirmLogHabit(){
   if(!habitLogs[h.id])habitLogs[h.id]=[];
   habitLogs[h.id].push({date:getTodayKey(),val,note,ts:Date.now()});
   if(habitLogs[h.id].length>90)habitLogs[h.id].shift();
+
+ // Aplicar efecto sobre la necesidad compartida
+  const eff = h.effect || { type: "fill100" };
+  const needId = getHabitNeedId(h);
+
+  const systemApply = {
+    hydration: (eff) => {
+      if(eff.type==="fill100"){ hydration.extraHydration=100; }
+      else if(eff.type==="fillCustom"){
+        const add=(eff.value||50);
+        hydration.extraHydration=eff.accumulate
+          ? Math.min(100, hydration.extraHydration+add)
+          : Math.min(100, add);
+      }
+      else if(eff.type==="damage"){
+        hydration.extraHydration=Math.max(-100, hydration.extraHydration-(eff.damage||10));
+      }
+      updateAllLevels();
+    },
+    strength: (eff) => {
+      if(!needsState.strength)return;
+      if(eff.type==="fill100") needsState.strength.value=100;
+      else if(eff.type==="fillCustom") needsState.strength.value=eff.accumulate?Math.min(100,needsState.strength.value+(eff.value||50)):Math.min(100,eff.value||50);
+      else if(eff.type==="damage") needsState.strength.value=Math.max(0,needsState.strength.value-(eff.damage||10));
+    },
+    intelligence: (eff) => {
+      if(!needsState.intelligence)return;
+      if(eff.type==="fill100") needsState.intelligence.value=100;
+      else if(eff.type==="fillCustom") needsState.intelligence.value=eff.accumulate?Math.min(100,needsState.intelligence.value+(eff.value||50)):Math.min(100,eff.value||50);
+      else if(eff.type==="damage") needsState.intelligence.value=Math.max(0,needsState.intelligence.value-(eff.damage||10));
+    },
+    entertainment: (eff) => {
+      if(!needsState.entertainment)return;
+      if(eff.type==="fill100") needsState.entertainment.value=100;
+      else if(eff.type==="fillCustom") needsState.entertainment.value=eff.accumulate?Math.min(100,needsState.entertainment.value+(eff.value||50)):Math.min(100,eff.value||50);
+      else if(eff.type==="damage") needsState.entertainment.value=Math.max(0,needsState.entertainment.value-(eff.damage||10));
+    },
+    vitality: (eff) => { /* el sueño no se modifica directamente */ },
+    calmness: (eff) => {
+      if(eff.type==="fill100"){ needsState.calmness.extraCalmness=100; needsState.calmness.value=100; }
+      else if(eff.type==="fillCustom"){
+        needsState.calmness.extraCalmness=eff.accumulate
+          ? Math.min(100,(needsState.calmness.extraCalmness||0)+(eff.value||50))
+          : Math.min(100,eff.value||50);
+      }
+      else if(eff.type==="damage"){
+        needsState.calmness.extraCalmness=Math.max(-100,(needsState.calmness.extraCalmness||0)-(eff.damage||10));
+        needsState.calmness.value=Math.max(0,getCurrentCalmnessLevel());
+      }
+    },
+    energy: (eff) => {
+      if(eff.type==="fill100"){ energy.extraEnergy=100; }
+      else if(eff.type==="fillCustom"){
+        energy.extraEnergy=eff.accumulate?Math.min(100,energy.extraEnergy+(eff.value||50)):Math.min(100,eff.value||50);
+      }
+      else if(eff.type==="damage"){
+        energy.extraEnergy=Math.max(-100,energy.extraEnergy-(eff.damage||10));
+      }
+      updateAllLevels();
+    },
+    flexibility: (eff) => {
+      if(eff.type==="fill100"){ flexibility.extraFlexibility=100; }
+      else if(eff.type==="fillCustom"){
+        flexibility.extraFlexibility=eff.accumulate?Math.min(100,flexibility.extraFlexibility+(eff.value||50)):Math.min(100,eff.value||50);
+      }
+      else if(eff.type==="damage"){
+        flexibility.extraFlexibility=Math.max(-100,flexibility.extraFlexibility-(eff.damage||10));
+      }
+      updateAllLevels();
+    },
+  };
+
+  if(systemApply[needId]){
+    systemApply[needId](eff);
+
+    // Comprobar muerte por daño en necesidades del sistema
+    if(eff.type==="damage" && !isProtectorActive()){
+      checkDeath();
+    }
+  } else {
+
+    // Necesidad custom compartida
+    const currentLevel = customNeedStates[needId] ?? 100;
+    if(eff.type==="fill100"){
+      customNeedStates[needId]=100;
+      habitLogs[h.id][habitLogs[h.id].length-1].ts=Date.now();
+    } else if(eff.type==="fillCustom"){
+      customNeedStates[needId]=eff.accumulate
+        ? Math.min(100,currentLevel+(eff.value||50))
+        : Math.min(100,eff.value||50);
+      habitLogs[h.id][habitLogs[h.id].length-1].ts=Date.now();
+    } else if(eff.type==="damage"){
+      customNeedStates[needId]=Math.max(0,currentLevel-(eff.damage||10));
+      if(eff.damageKill && customNeedStates[needId]<=0){
+        killPlant(`${h.name} — daño acumulado`);
+        closeLogModal();save();renderAll();return;
+      }
+    }
+  }
+
+  updateAllLevels();
+  // Para los efectos fill, también resetear el timestamp de decay
+  if(eff.type === "fill100" || eff.type === "fillCustom"){
+
+    // Al registrar, actualizamos createdAt del log para que el decay parta de ahora
+    habitLogs[h.id][habitLogs[h.id].length-1].ts = Date.now();
+  }
+
   if(h.features&&h.features.includes("goal")&&h.goal&&h.unit!=="done"){
     h.goal.progress=(h.goal.progress||0)+val;
   }
   updateHabitStreak(h.id);
-  
-  // AL REGISTRAR: la necesidad vuelve a 100% en el momento actual
-  customNeedStates[h.id] = 100;
-  
   if(h.obligatory)dailyActions["custom_"+h.id]=true;
   if(h.features&&h.features.includes("pb")&&h.unit!=="done"){if(!h.pb||val>h.pb)h.pb=val;}
   plant.xp+=6;checkLevelUp();
-  toast(`${h.icon} ${h.name} registrado · Necesidad al 100%`);
+
+  const effectMsg = eff.type==="fill100"?"→ Necesidad al 100%":
+                    eff.type==="fillCustom"?`→ Necesidad ${eff.accumulate?"+"+eff.value:eff.value}%`:
+                    eff.type==="damage"?`→ Necesidad -${eff.damage}%`:
+                    "→ Registrado";
+  toast(`${h.icon} ${h.name} registrado · ${effectMsg}`);
   closeLogModal();save();renderAll();renderCustomHabitsCharts();
 }
 
@@ -2816,9 +3116,9 @@ function updateHabitStreak(id){
   s.last=today;
 }
 
-// ══════════════════════════════════════════════
+
+
 // HABIT MODAL
-// ══════════════════════════════════════════════
 const HABIT_EMOJIS=["🎵","🎨","🧩","🌿","💊","🥗","🧘","💰","🐕","🚗","✈️","🌅","☕","🛁","🔬","🎭","🧶","🏠","📸","✍️","🎸","🎹","💻","🔭","🧪","🌎","🤝","🏋️","🚴","🏃","🧗","🤸","🎯","🏊","💆","🌊","🦋","🌸"];
 let selectedHabitEmoji="⭐";
 let activeHabitFeatures=new Set(["streak","stats"]);
@@ -2857,6 +3157,16 @@ function openHabitModal(editId){
       }
       activeHabitFeatures=new Set(h.features||["streak","stats"]);
     }
+
+    // Cargar efecto al editar
+    const eff = h.effect || {};
+    document.getElementById("hEffectType").value = eff.type || "fill100";
+    document.getElementById("hEffectValue").value = eff.value || 50;
+    document.getElementById("hEffectAccumulate").value = eff.accumulate ? "yes" : "no";
+    document.getElementById("hEffectDamage").value = eff.damage || 20;
+    document.getElementById("hEffectDamageKill").value = eff.damageKill ? "yes" : "no";
+    toggleEffectFields();
+
   } else {
     ["hName","hDays","hDesc","hCustomNeedName","hCustomUnit","hGoalTarget","hGoalUnit","hGoalDesc","hGoalDeadline","hReminder"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
     document.getElementById("hIcon").value="⭐";
@@ -2871,6 +3181,12 @@ function openHabitModal(editId){
     document.getElementById("hNavSection").value="core";
     selectedHabitEmoji="⭐";
     activeHabitFeatures=new Set(["streak","stats"]);
+    document.getElementById("hEffectType").value = "fill100";
+    document.getElementById("hEffectValue").value = 50;
+    document.getElementById("hEffectAccumulate").value = "yes";
+    document.getElementById("hEffectDamage").value = 20;
+    document.getElementById("hEffectDamageKill").value = "yes";
+    toggleEffectFields();
   }
   toggleCustomNeedField();toggleCustomUnitField();
   renderEmojiPicker("hEmojiPicker",HABIT_EMOJIS,null,selectedHabitEmoji);
@@ -2891,12 +3207,22 @@ function toggleCustomNeedField(){
   const v=document.getElementById("hAffects")?.value;
   const g=document.getElementById("hCustomNeedGroup");if(g)g.style.display=v==="custom"?"block":"none";
 }
+
+function toggleEffectFields(){
+  const v = document.getElementById("hEffectType")?.value;
+  const cg = document.getElementById("hEffectCustomGroup");
+  const dg = document.getElementById("hEffectDamageGroup");
+  if(cg) cg.style.display = v === "fillCustom" ? "grid" : "none";
+  if(dg) dg.style.display = v === "damage" ? "grid" : "none";
+}
+
 function toggleCustomUnitField(){
   const v=document.getElementById("hUnit")?.value;
   const g=document.getElementById("hCustomUnitGroup");if(g)g.style.display=v==="custom"?"block":"none";
 }
 document.getElementById("hAffects").addEventListener("change",toggleCustomNeedField);
 document.getElementById("hUnit").addEventListener("change",toggleCustomUnitField);
+document.getElementById("hEffectType").addEventListener("change", toggleEffectFields);
 
 function renderEmojiPicker(containerId,emojis,_,selected){
   const container=document.getElementById(containerId);if(!container)return;
@@ -2943,6 +3269,12 @@ function saveHabit(){
   const customUnit=document.getElementById("hCustomUnit").value.trim();
   const showNav=document.getElementById("hShowNav").value==="yes";
   const navSection=document.getElementById("hNavSection").value;
+  const effectType=document.getElementById("hEffectType").value;
+  const effectValue=parseInt(document.getElementById("hEffectValue")?.value)||50;
+  const effectAccumulate=document.getElementById("hEffectAccumulate")?.value==="yes";
+  const effectDamage=parseInt(document.getElementById("hEffectDamage")?.value)||20;
+  const effectDamageKill=document.getElementById("hEffectDamageKill")?.value==="yes";
+  const effect={ type: effectType, value: effectValue, accumulate: effectAccumulate, damage: effectDamage, damageKill: effectDamageKill };
   const editId=document.getElementById("hEditId").value;
   if(!name){toast("Escribe un nombre");return;}
   if(affects==="custom"&&!customNeedName){toast("Escribe el nombre de tu necesidad");return;}
@@ -2952,14 +3284,16 @@ function saveHabit(){
   const features=Array.from(activeHabitFeatures);
   if(editId){
     const idx=customHabits.findIndex(x=>x.id===editId);
-    if(idx>=0)customHabits[idx]={...customHabits[idx],name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customUnit,features,goal,showNav,navSection};
+    if(idx>=0)customHabits[idx]={...customHabits[idx],name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customUnit,features,goal,showNav,navSection,effect};
+
   } else {
     const id="ch_"+Date.now();
-    customHabits.push({id,name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customUnit,features,goal,showNav,navSection});
-    // Inicializar al 100% en el momento de la creación
+    customHabits.push({id,name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customUnit,features,goal,showNav,navSection,effect,createdAt:Date.now()});
     customNeedStates[id]=100;
     if(!habitLogs[id])habitLogs[id]=[];
     habitStreaks[id]={current:0,last:null};
+    // Guardamos el timestamp de creación en el propio hábito, no como log
+    customHabits[customHabits.length-1].createdAt = Date.now();
   }
   closeHabitModal();save();renderAll();renderNav();
   toast(`✅ "${name}" guardado`);
@@ -2979,9 +3313,7 @@ function deleteCustomHabit(id){
   save();renderAll();renderNav();toast("🗑️ Hábito eliminado");
 }
 
-// ══════════════════════════════════════════════
-// SPORT CATEGORIES
-// ══════════════════════════════════════════════
+// CATEGORÍAS DE DEPORTE
 function openSportCatModal(){
   renderSportCatListEdit();
   renderEmojiPicker("sportEmojiPicker",EMOJI_SET,null,"🏅");
@@ -3023,9 +3355,9 @@ function renderSportCatListEdit(){
     </div>`).join("")||"<p style='font-size:0.82rem;color:var(--text3)'>Añade una categoría.</p>";
 }
 
-// ══════════════════════════════════════════════
-// CORE HABIT EDITOR
-// ══════════════════════════════════════════════
+
+
+// EDITAR HABITOS DEL SISTEMA
 function openEditCore(which){
   const modal=document.getElementById("editCoreModal");
   const content=document.getElementById("editCoreContent");
@@ -3063,9 +3395,8 @@ function toggleCoreHabit(key){
   save();renderAll();renderNav();
 }
 
-// ══════════════════════════════════════════════
-// ORDER QUESTIONS EDITOR
-// ══════════════════════════════════════════════
+
+// EDITAR PREGUNTAS DEL ORDEN
 function openOrderQuestModal(){
   renderOrderQuestEditList();
   document.getElementById("orderQuestModal").classList.add("open");
@@ -3099,9 +3430,9 @@ function editOrderQuestion(i){
   if(newQ&&newQ.trim()){orderQuestions[i]=newQ.trim();save();renderOrderQuestEditList();}
 }
 
-// ══════════════════════════════════════════════
+
+
 // LONG GOALS
-// ══════════════════════════════════════════════
 function openGoalModal(editId){
   document.getElementById("goalModal").classList.add("open");
   document.getElementById("gmEditId").value=editId||"";
@@ -3156,9 +3487,9 @@ function saveGoal(){
   closeGoalModal();save();renderAll();toast(`🎯 "${name}" guardado`);
 }
 
-// ══════════════════════════════════════════════
+
+
 // MONTHLY OBJECTIVES
-// ══════════════════════════════════════════════
 function openMonthlyObjModal(editId){
   document.getElementById("monthlyObjModal").classList.add("open");
   document.getElementById("mobjEditId").value=editId||"";
@@ -3213,9 +3544,8 @@ function toggleMonthlyObj(id){
   if(o){o.done=!o.done;save();renderAll();toast(o.done?"✅ ¡Objetivo completado!":"↩️ Marcado como pendiente");}
 }
 
-// ══════════════════════════════════════════════
+
 // PROTECTOR
-// ══════════════════════════════════════════════
 function openProtectorModal(){
   if(isProtectorActive()){toast("🛡️ Protector ya activo");return;}
   document.getElementById("protectorModal").classList.add("open");
@@ -3232,9 +3562,9 @@ function activateProtector(){
   closeProtectorModal();save();renderAll();toast(`🛡️ Protector activado 24h · Todas las muertes pausadas`);
 }
 
-// ══════════════════════════════════════════════
+
+
 // BOOKS
-// ══════════════════════════════════════════════
 function openBookModal(){document.getElementById("bookModal").classList.add("open");document.getElementById("bookDate").value=getTodayKey();}
 function closeBookModal(){document.getElementById("bookModal").classList.remove("open");}
 function saveBook(){
@@ -3247,9 +3577,9 @@ function saveBook(){
 function deleteBook(id){if(!confirm("¿Eliminar este libro?"))return;books=books.filter(b=>b.id!==id);save();renderAll();}
 function filterBooks(genre,btn){booksFilter=genre;document.querySelectorAll("#booksFilterRow .btn").forEach(b=>b.classList.remove("active-filter"));if(btn)btn.classList.add("active-filter");renderBooksSection();}
 
-// ══════════════════════════════════════════════
+
+
 // AGENDA
-// ══════════════════════════════════════════════
 function openTaskModal(editId){
   document.getElementById("taskModal").classList.add("open");
   document.getElementById("taskEditId").value=editId||"";
@@ -3277,9 +3607,10 @@ function toggleTask(id){const t=agendaTasks.find(x=>x.id===id);if(t){t.done=!t.d
 function deleteTask(id){agendaTasks=agendaTasks.filter(x=>x.id!==id);save();renderAgenda();}
 function filterAgenda(filter,btn){agendaFilter=filter;document.querySelectorAll("#agendaFilterBtns .btn").forEach(b=>b.classList.remove("active-filter"));if(btn)btn.classList.add("active-filter");renderAgenda();}
 
-// ══════════════════════════════════════════════
+
+
+
 // RESET / RENAME
-// ══════════════════════════════════════════════
 function renamePlant(){
   const n=prompt("Nombre de tu planta:",plant.name);
   if(n&&n.trim()){plant.name=n.trim().slice(0,20);save();renderAll();}
@@ -3288,13 +3619,29 @@ function fullResetGame(){
   if(decayInterval)clearInterval(decayInterval);
   Object.keys(customChartInsts).forEach(k=>{if(customChartInsts[k])customChartInsts[k].destroy();});
   customChartInsts={};
-  defaultState();save();renderAll();renderNav();renderPhoneChart();renderSleepChart();startDecay();
+  defaultState();
+  save();renderAll();renderNav();renderPhoneChart();renderSleepChart();startDecay();
   toast("✨ Nueva planta iniciada");
 }
 
-// ══════════════════════════════════════════════
-// LEVEL / PLANT
-// ══════════════════════════════════════════════
+function fullResetGameHard(){
+  if(!confirm("¿Eliminar TODO incluyendo hábitos, metas y libros? Esta acción no se puede deshacer."))return;
+  if(decayInterval)clearInterval(decayInterval);
+  Object.keys(customChartInsts).forEach(k=>{if(customChartInsts[k])customChartInsts[k].destroy();});
+  customChartInsts={};
+  // Borrar hábitos custom antes de defaultState
+  customHabits=[];
+  disabledBuiltinGoals=[];
+  defaultState();
+  localStorage.removeItem("levelup_need_overrides");
+  needOverrides={};
+  save();renderAll();renderNav();renderPhoneChart();renderSleepChart();startDecay();
+  toast("🗑️ App reiniciada completamente");
+}
+
+
+
+// LEVEL
 function checkLevelUp(){
   while(plant.xp>=plant.xpNext){plant.xp-=plant.xpNext;plant.level++;plant.xpNext=Math.floor(plant.xpNext*1.2);toast(`🎋 ¡Nivel ${plant.level}!`);}
 }
@@ -3312,9 +3659,10 @@ function getPendientes(){
   return pending;
 }
 
-// ══════════════════════════════════════════════
-// NAV RENDERING — dynamic with custom habits
-// ══════════════════════════════════════════════
+
+
+
+// NAV RENDERING
 function renderNav(){
   document.getElementById("navPlantName").textContent=plant.name||"Mi planta";
   document.getElementById("navLevelText").textContent=`Nv.${plant.level}`;
@@ -3377,9 +3725,8 @@ function navLinkHtml(page,icon,label,customId){
   return `<div class="nav-link" data-page="${page}"${customId?` data-custom-id="${customId}"`:""}><span class="icon">${icon}</span> ${label}</div>`;
 }
 
-// ══════════════════════════════════════════════
+
 // RENDER ALL
-// ══════════════════════════════════════════════
 function renderAll(){
   updateAllLevels();  // Esto actualiza los niveles de necesidades custom según la hora actual
   checkDailyObligatory();
@@ -3402,7 +3749,8 @@ function renderHome(){
   document.getElementById("homePlantEmoji").textContent=plantEmoji();
   document.getElementById("homePlantName").textContent=plant.name;
   document.getElementById("homePlantTagline").textContent=plantTagline();
-  document.getElementById("homeStreakBadge").textContent=`🔥 ${streak.current} día${streak.current!==1?"s":""}`;
+  const sb2 = document.getElementById("homeStreakBadge2");
+  if(sb2) sb2.textContent = `🔥 ${streak.current} día${streak.current!==1?"s":""}`;
   document.getElementById("homeLevel").textContent=`Nivel ${plant.level}`;
   document.getElementById("homeTitle").textContent=`${plant.name} ${plantEmoji()}`;
   document.getElementById("homeSubtitle").textContent=`Nivel ${plant.level} · ${alive?"Cuida tu planta":"Ha muerto"}`;
@@ -3456,20 +3804,30 @@ function renderHome(){
   const ml=document.getElementById("homeMonthlyObjs");
   if(!thisMonthObjs.length){ml.innerHTML=`<p style="font-size:0.84rem;color:var(--text3)">Sin objetivos este mes. <button class="btn btn-xs" onclick="openMonthlyObjModal()">Añadir</button></p>`;}
   else ml.innerHTML=thisMonthObjs.map(o=>renderMonthlyObjItem(o)).join("");
+
+  // XP bar en home
+  const hxl = document.getElementById("homeXpLabel");
+  const hxf = document.getElementById("homeXpBarFill");
+  const hxt = document.getElementById("homeXpText2");
+  if(hxl) hxl.textContent = `✨ Nv.${plant.level}`;
+  if(hxf) hxf.style.width = `${(plant.xp/plant.xpNext)*100}%`;
+  if(hxt) hxt.textContent = `${plant.xp}/${plant.xpNext} XP`;
 }
 
 function buildAllGoalsData(){
   const built=[];
-  // Built-in goals
-  built.push({id:"__german",icon:"📖",name:"Alemán B2",sub:`${Math.round(goals.german.hours)}/${goals.german.target||660}h`,pct:(goals.german.hours/(goals.german.target||660))*100,color:"green"});
-  built.push({id:"__spagatt",icon:"🧘",name:"Spagatt",sub:goals.spagatt.cmToGround<=0?"¡Completado!":goals.spagatt.cmToGround.toFixed(1)+"cm al suelo",pct:Math.max(0,((32-goals.spagatt.cmToGround)/32)*100),color:"green"});
-  built.push({id:"__books",icon:"📚",name:"Biblioteca",sub:`${books.length} libros`,pct:Math.min(100,(books.length/20)*100),color:"blue"});
-  // User-created long goals
+  const builtin=[
+    {id:"__german",icon:"📖",name:"Alemán B2",sub:`${Math.round(goals.german.hours)}/${goals.german.target||660}h`,pct:(goals.german.hours/(goals.german.target||660))*100,color:"green"},
+    {id:"__spagatt",icon:"🧘",name:"Spagatt",sub:goals.spagatt.cmToGround<=0?"¡Completado!":goals.spagatt.cmToGround.toFixed(1)+"cm al suelo",pct:Math.max(0,((32-goals.spagatt.cmToGround)/32)*100),color:"green"},
+    {id:"__books",icon:"📚",name:"Biblioteca",sub:`${books.length} libros`,pct:Math.min(100,(books.length/20)*100),color:"blue"},
+  ];
+  builtin.forEach(g=>{
+    if(!disabledBuiltinGoals.includes(g.id)) built.push(g);
+  });
   longGoals.forEach(g=>{
     const pct=g.target>0?(g.progress/g.target)*100:0;
     built.push({...g,pct,sub:g.target>0?`${g.progress}/${g.target} ${g.unit||""}`:(g.desc||g.name)});
   });
-  // Custom habit goals
   customHabits.filter(h=>h.goal&&h.goal.target).forEach(h=>{
     const prog=h.goal.progress||0;
     built.push({id:h.id,icon:h.icon,name:h.goal.desc||h.name,sub:`${prog.toFixed(1)}/${h.goal.target} ${h.goal.unit||""}`,pct:(prog/h.goal.target)*100,color:h.goal.color,deadline:h.goal.deadline,countdown:h.goal.countdown});
@@ -3479,9 +3837,15 @@ function buildAllGoalsData(){
 
 function renderGoalRow(g){
   const pct=Math.min(100,g.pct||0);
-  const days=g.deadline&&g.countdown?daysUntil(g.deadline):null;
   const deadlineHtml=g.deadline&&g.countdown?countdownBadge(g.deadline,pct>=100):"";
-  const isEditable=longGoals.find(x=>x.id===g.id);
+  const isBuiltin=g.id&&g.id.startsWith("__");
+  const isUserGoal=longGoals.find(x=>x.id===g.id);
+  let editBtn="";
+  if(isBuiltin){
+    editBtn=`<button class="btn-icon" onclick="toggleBuiltinGoal('${g.id}')" title="Ocultar meta">🗑️</button>`;
+  } else if(isUserGoal){
+    editBtn=`<button class="btn-icon" onclick="openGoalModal('${g.id}')" title="Editar">✏️</button>`;
+  }
   return `<div class="goal-row">
     <div class="goal-icon">${g.icon}</div>
     <div class="goal-info">
@@ -3491,7 +3855,7 @@ function renderGoalRow(g){
     </div>
     <div style="display:flex;align-items:center;gap:6px">
       <div class="goal-pct">${pct.toFixed(0)}%</div>
-      ${isEditable?`<button class="btn-icon" onclick="openGoalModal('${g.id}')" title="Editar">✏️</button>`:""}
+      ${editBtn}
     </div>
   </div>`;
 }
@@ -3508,9 +3872,9 @@ function renderMonthlyObjItem(o){
   </div>`;
 }
 
-// ══════════════════════════════════════════════
+
+
 // METAS PAGE
-// ══════════════════════════════════════════════
 function renderMetasPage(){
   const ml=document.getElementById("metasLargosList");
   if(ml){
@@ -3542,9 +3906,9 @@ function setMobjFilter(m,btn){
   renderMetasPage();
 }
 
-// ══════════════════════════════════════════════
+
+
 // EDIT PAGE
-// ══════════════════════════════════════════════
 function renderEditPage(){
   // Core habits
   const coreItems=[
@@ -3573,6 +3937,7 @@ function renderEditPage(){
         </div>
       </div>`;
     }).join("");
+    renderNeedsEditor();
   }
 
   // Custom habits
@@ -3637,20 +4002,55 @@ function renderEditPage(){
       </div>
     </div>`).join("");
   }
+
+  // Metas predefinidas para restaurarlas si están ocultas
+  const ebl=document.getElementById("editBuiltinGoalsList");
+  if(ebl){
+    const builtinDefs=[
+      {id:"__german",icon:"📖",name:"Alemán B2"},
+      {id:"__spagatt",icon:"🧘",name:"Spagatt"},
+      {id:"__books",icon:"📚",name:"Biblioteca"},
+    ];
+    const hidden=builtinDefs.filter(g=>disabledBuiltinGoals.includes(g.id));
+    if(!hidden.length){
+      ebl.innerHTML=`<p style="font-size:0.75rem;color:var(--text3);margin-bottom:0.5rem">Metas predefinidas: Alemán B2 · Spagatt · Biblioteca — visibles en inicio</p>`;
+    } else {
+      ebl.innerHTML=`<p style="font-size:0.75rem;color:var(--text3);margin-bottom:0.5rem">Metas predefinidas ocultas:</p>`+
+      hidden.map(g=>`<div class="edit-item-row">
+        <div class="edit-item-icon">${g.icon}</div>
+        <div class="edit-item-info"><div class="edit-item-name">${g.name}</div><div class="edit-item-sub">Ocultada</div></div>
+        <div class="edit-item-actions"><button class="btn btn-secondary btn-xs" onclick="toggleBuiltinGoal('${g.id}')">↩️ Restaurar</button></div>
+      </div>`).join("");
+    }
+  }
+
 }
 
 function deleteGoalDirect(id){
   if(!confirm("¿Eliminar esta meta?"))return;
   longGoals=longGoals.filter(g=>g.id!==id);save();renderAll();toast("🗑️ Meta eliminada");
 }
+
+function toggleBuiltinGoal(id){
+  if(disabledBuiltinGoals.includes(id)){
+    disabledBuiltinGoals=disabledBuiltinGoals.filter(x=>x!==id);
+    toast("↩️ Meta restaurada");
+  } else {
+    if(!confirm("¿Ocultar esta meta? Puedes restaurarla desde la sección de metas predefinidas en Editar."))return;
+    disabledBuiltinGoals.push(id);
+    toast("🗑️ Meta ocultada");
+  }
+  save();renderAll();
+}
+
 function deleteMonthlyObjDirect(id){
   if(!confirm("¿Eliminar este objetivo?"))return;
   monthlyObjs=monthlyObjs.filter(o=>o.id!==id);save();renderAll();toast("🗑️ Objetivo eliminado");
 }
 
-// ══════════════════════════════════════════════
+
+
 // SPORT PAGE
-// ══════════════════════════════════════════════
 function renderSportPage(){
   const weekSessions=getWeekSessions();
   const statusEl=document.getElementById("sportWeeklyStatus");
@@ -3703,9 +4103,10 @@ function selectSportCat(id){
   document.querySelectorAll(`.sport-cat-chip`).forEach(c=>{if(c.textContent.includes(catObj?.emoji||"")&&c.textContent.includes(catObj?.name||""))c.classList.add("selected");});
 }
 
-// ══════════════════════════════════════════════
+
+
+
 // HABITS PAGES
-// ══════════════════════════════════════════════
 function renderHabitsPages(){
   // AGUA
   const wl=hydration.level;
@@ -3844,9 +4245,8 @@ function renderSleepStats(){
   ss.innerHTML=`<div class="stats-row"><div class="stat-card"><div class="stat-val">${avg.toFixed(1)}h</div><div class="stat-lbl">Media</div></div><div class="stat-card"><div class="stat-val">${best}h</div><div class="stat-lbl">Mejor noche</div></div><div class="stat-card"><div class="stat-val">${worst}h</div><div class="stat-lbl">Peor noche</div></div><div class="stat-card"><div class="stat-val">${goodNights}</div><div class="stat-lbl">≥${coreParams.sueno.minOptimo}h</div></div></div>${sleep.lowSleepStreak>0?`<div class="alert alert-warn">⚠️ ${sleep.lowSleepStreak}/3 noches con poco sueño.</div>`:""}`;
 }
 
-// ══════════════════════════════════════════════
-// CUSTOM HABITS PAGE + DETAIL
-// ══════════════════════════════════════════════
+
+// CUSTOM HABITS PAGE
 function renderCustomHabitsPage(){
   const cl=document.getElementById("customHabitsList");
   if(cl){
@@ -3965,11 +4365,11 @@ function renderCustomHabitDetail(habitId){
   }
 }
 
-function renderCustomHabitsCharts(){} // No-op, charts rendered in detail page
+function renderCustomHabitsCharts(){}
 
-// ══════════════════════════════════════════════
+
+
 // AGENDA
-// ══════════════════════════════════════════════
 function renderAgenda(){
   const today=getTodayKey();
   const todayFull=new Date().toLocaleDateString("es-ES",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
@@ -4007,9 +4407,10 @@ function renderTaskItem(t){
   </div>`;
 }
 
-// ══════════════════════════════════════════════
+
+
+
 // CHARTS
-// ══════════════════════════════════════════════
 function renderPhoneChart(){
   const canvas=document.getElementById("phoneChart");if(!canvas)return;
   const labels=[],data=[];
@@ -4026,9 +4427,10 @@ function renderSleepChart(){
   const p=coreParams.sueno;
   suenoChartInst=new Chart(canvas.getContext("2d"),{type:"bar",data:{labels,datasets:[{label:"Horas",data,backgroundColor:data.map(v=>v===null?"rgba(0,0,0,0.05)":v<p.minFatal?"rgba(139,46,26,0.7)":v<p.minOptimo?"rgba(184,115,51,0.7)":"rgba(74,124,47,0.7)"),borderColor:data.map(v=>v===null?"transparent":v<p.minFatal?"#8b2e1a":v<p.minOptimo?"#b87333":"#4a7c2f"),borderWidth:1.5,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw===null?"Sin registrar":ctx.raw+"h"}}},scales:{y:{beginAtZero:true,max:12,grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{size:10},callback:v=>v+"h"}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
 }
-// ══════════════════════════════════════════════
-// NAVIGATION
-// ══════════════════════════════════════════════
+
+
+
+// NAVEGADOR
 function navigateTo(pageId) {
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".nav-link").forEach(l=>l.classList.remove("active"));
@@ -4045,7 +4447,7 @@ function navigateTo(pageId) {
     const st=document.getElementById("sportType");
     if(st){const rf=document.getElementById("runningExtraFields");if(rf)rf.style.display=st.value==="running"?"":"none";}
   }
-  renderHabitsPage();
+  renderHabitsPages();
 }
 
 function closeNav() {
@@ -4074,9 +4476,10 @@ document.querySelectorAll(".modal-overlay").forEach(overlay=>{
   overlay.addEventListener("click",(e)=>{if(e.target===overlay)overlay.classList.remove("open");});
 });
 
-// ══════════════════════════════════════════════
+
+
+
 // TOAST
-// ══════════════════════════════════════════════
 function toast(msg) {
   const box=document.getElementById("toastBox");
   const t=document.createElement("div");
@@ -4085,9 +4488,9 @@ function toast(msg) {
   setTimeout(()=>t.remove(),3100);
 }
 
-// ══════════════════════════════════════════════
+
+
 // DECAY INTERVAL
-// ══════════════════════════════════════════════
 function startDecay() {
   if(decayInterval)clearInterval(decayInterval);
   decayInterval=setInterval(()=>{
@@ -4095,9 +4498,112 @@ function startDecay() {
   },60000);
 }
 
-// ══════════════════════════════════════════════
+
+
+// NEEDS EDITOR
+if(typeof needOverrides==="undefined") var needOverrides={};
+
+const CORE_NEEDS_DEF = [
+  {id:"hydration",defaultIcon:"💧",defaultName:"Hidratación",coreKey:"agua"},
+  {id:"strength",defaultIcon:"💪",defaultName:"Fuerza",coreKey:"deporte"},
+  {id:"vitality",defaultIcon:"😴",defaultName:"Energía",coreKey:"sueno"},
+  {id:"intelligence",defaultIcon:"🧠",defaultName:"Inteligencia",coreKey:"aleman"},
+  {id:"energy",defaultIcon:"⚡",defaultName:"Salud",coreKey:"pasos"},
+  {id:"calmness",defaultIcon:"🍃",defaultName:"Tranquilidad",coreKey:"orden"},
+  {id:"flexibility",defaultIcon:"🧘",defaultName:"Elasticidad",coreKey:"estiramientos"},
+  {id:"entertainment",defaultIcon:"📖",defaultName:"Entretenimiento",coreKey:"lectura"},
+];
+
+function getNeedLabel(id){
+  if(needOverrides[id]) return {name:needOverrides[id].name,icon:needOverrides[id].icon};
+  const def=CORE_NEEDS_DEF.find(n=>n.id===id);
+  if(def) return {name:def.defaultName,icon:def.defaultIcon};
+  const ch=customHabits.find(h=>h.id===id);
+  if(ch) return {name:ch.customNeedName||ch.name,icon:ch.icon};
+  return {name:id,icon:"✨"};
+}
+
+function openNeedEditModal(needId){
+  const modal=document.getElementById("needEditModal");
+  document.getElementById("nedEditId").value=needId||"";
+  document.getElementById("needEditTitle").textContent=needId?"Editar necesidad":"Nueva necesidad";
+  document.getElementById("nedDeleteBtn").style.display=(needId&&!CORE_NEEDS_DEF.find(n=>n.id===needId))?"":"none";
+
+  const sel=document.getElementById("nedHabit");
+  sel.innerHTML=`<option value="">-- Ninguno --</option>`+customHabits.map(h=>`<option value="${h.id}">${h.icon} ${h.name}</option>`).join("");
+  if(needId){
+    const ov=needOverrides[needId];
+    const def=CORE_NEEDS_DEF.find(n=>n.id===needId);
+    document.getElementById("nedName").value=ov?.name||(def?.defaultName||"");
+    document.getElementById("nedIcon").value=ov?.icon||(def?.defaultIcon||"");
+    sel.value=ov?.habitId||"";
+    sel.disabled=!!def; // las core no pueden cambiar de hábito
+
+  } else {
+    document.getElementById("nedName").value="";
+    document.getElementById("nedIcon").value="✨";
+    sel.disabled=false;sel.value="";
+  }
+
+  modal.classList.add("open");
+}
+function closeNeedEditModal(){document.getElementById("needEditModal").classList.remove("open");}
+function saveNeedEdit(){
+  const name=document.getElementById("nedName").value.trim();
+  const icon=document.getElementById("nedIcon").value.trim()||"✨";
+  const needId=document.getElementById("nedEditId").value;
+  const habitId=document.getElementById("nedHabit").value;
+  if(!name){toast("Escribe un nombre");return;}
+  if(needId){
+    needOverrides[needId]={name,icon,habitId};
+  } else {
+    
+    
+    if(!habitId){toast("Selecciona un hábito para vincular");return;}
+    const h=customHabits.find(x=>x.id===habitId);
+    if(h){h.customNeedName=name;h.icon=icon;h.affects="custom";}
+    toast(`✅ Necesidad "${name}" vinculada a ${h?.name}`);
+  }
+  closeNeedEditModal();saveNeedsOverrides();renderAll();toast(`✅ Necesidad actualizada`);
+}
+function deleteNeedFromModal(){
+  const needId=document.getElementById("nedEditId").value;
+  if(!needId)return;
+  if(!confirm("¿Eliminar personalización de esta necesidad?"))return;
+  delete needOverrides[needId];closeNeedEditModal();saveNeedsOverrides();renderAll();toast("🗑️ Restaurada al valor por defecto");
+}
+function saveNeedsOverrides(){
+  try{localStorage.setItem("levelup_need_overrides",JSON.stringify(needOverrides));}catch(e){}
+}
+function loadNeedsOverrides(){
+  try{const r=localStorage.getItem("levelup_need_overrides");if(r)Object.assign(needOverrides,JSON.parse(r));}catch(e){}
+}
+function renderNeedsEditor(){
+  const el=document.getElementById("editNeedsList");if(!el)return;
+  const allNeeds=getAllNeeds();
+  el.innerHTML=allNeeds.map(n=>{
+    const lbl=getNeedLabel(n.id);
+    const isCore=!!CORE_NEEDS_DEF.find(x=>x.id===n.id);
+    const isOverridden=!!needOverrides[n.id];
+    return `<div class="edit-item-row">
+      <div class="edit-item-icon">${lbl.icon}</div>
+      <div class="edit-item-info">
+        <div class="edit-item-name">${lbl.name} ${isOverridden?"<span style='font-size:0.65rem;color:var(--blue)'>✏️ editada</span>":""}</div>
+        <div class="edit-item-sub">${isCore?"Sistema":"Personalizada"} · Hábito: ${n.page}</div>
+      </div>
+      <div class="edit-item-actions">
+        <button class="btn btn-secondary btn-xs" onclick="openNeedEditModal('${n.id}')">✏️ Editar</button>
+        ${isOverridden?`<button class="btn btn-danger btn-xs" onclick="deleteNeedDirect('${n.id}')">↩️ Reset</button>`:""}
+      </div>
+    </div>`;
+  }).join("");
+}
+function deleteNeedDirect(id){delete needOverrides[id];saveNeedsOverrides();renderAll();toast("↩️ Restaurada");}
+
+
+
+
 // INIT
-// ══════════════════════════════════════════════
 load();
 applyDecay();
 updateAllLevels();
