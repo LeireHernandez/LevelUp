@@ -927,13 +927,22 @@ textarea {
 .task-item {
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:8px;
   padding:10px 14px;
   border:1px solid var(--border);
   border-radius:var(--radius-sm);
   margin-bottom:8px;
   background:var(--card2);
   transition:all 0.15s;
+  flex-wrap:wrap;
+}
+
+.task-item > * {
+  flex-shrink:0;
+}
+.task-item .task-name-wrap {
+  flex:1;
+  min-width:120px;
 }
 
 .task-item.done-task {
@@ -1630,6 +1639,18 @@ textarea {
       </div>
     </div>
     <div class="form-row">
+  <div class="form-group"><label>Veces al día</label>
+    <select id="taskTimesPerDay" onchange="updateTaskTimesInputs()">
+      <option value="1">1 vez</option>
+      <option value="2">2 veces</option>
+      <option value="3">3 veces</option>
+      <option value="4">4 veces</option>
+    </select>
+  </div>
+  <div class="form-group"><label>Unidad (opcional, ej. minutos)</label><input type="text" id="taskUnitLabel" placeholder="Ej: minutos, vasos..."></div>
+</div>
+<div id="taskMultiTimesContainer" style="display:none;margin-bottom:10px"></div>
+    <div class="form-row">
       <div class="form-group"><label>Categoría</label>
         <select id="taskCategory"><option>Personal</option><option>Trabajo</option><option>Salud</option><option>Deporte</option><option>Estudio</option><option>Casa</option><option>Social</option><option>Otro</option></select>
       </div>
@@ -1679,6 +1700,10 @@ textarea {
     <div class="form-row">
       <div class="form-group"><label>Nombre *</label><input type="text" id="gmName" placeholder="Ej: Correr una maratón" maxlength="60"></div>
       <div class="form-group"><label>Emoji</label><input type="text" id="gmIcon" placeholder="🏅" maxlength="2" style="font-size:1.3rem;text-align:center" value="🎯"></div>
+      <div class="form-group-full" style="margin-bottom:10px">
+  <label>Emojis rápidos</label>
+  <div class="emoji-picker-row" id="gmEmojiPicker"></div>
+</div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Objetivo numérico</label><input type="number" id="gmTarget" step="1" min="0" placeholder="Opcional"></div>
@@ -1716,15 +1741,15 @@ textarea {
         <select id="mobjCat"><option>Salud</option><option>Deporte</option><option>Estudio</option><option>Personal</option><option>Trabajo</option><option>Social</option><option>Otro</option></select>
       </div>
       <div class="form-group"><label>Emoji</label><input type="text" id="mobjIcon" placeholder="🎯" maxlength="2" style="font-size:1.3rem;text-align:center" value="🎯"></div>
+      <div class="form-group-full" style="margin-bottom:10px">
+  <label>Emojis rápidos</label>
+  <div class="emoji-picker-row" id="mobjEmojiPicker"></div>
+</div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Mes</label><input type="month" id="mobjMonth"></div>
       <div class="form-group"><label>Fecha límite</label><input type="date" id="mobjDeadline"></div>
     </div>
-<div class="form-row" id="mobjTargetRow">
-  <div class="form-group"><label>Veces objetivo (si hay hábito vinculado)</label><input type="number" id="mobjTarget" min="1" step="1" placeholder="Ej: 5"></div>
-  <div class="form-group"><label>Progreso actual</label><input type="number" id="mobjProgress" min="0" step="1" value="0"></div>
-</div>
 <div class="form-group-full"><label>🔗 Vincular a hábito (opcional)</label>
   <select id="mobjLinkedHabit">
     <option value="">-- Sin vincular --</option>
@@ -1794,6 +1819,16 @@ textarea {
         <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="0"> Dom</label>
       </div>
     </div>
+    <div class="form-row" style="margin-top:0.6rem">
+  <div class="form-group"><label>Veces al día</label>
+    <select id="recTimesPerDay" onchange="updateRecTimesContainer(window._currentEditingRec||null)">
+      <option value="1">1 vez</option>
+      <option value="2">2 veces</option>
+      <option value="3">3 veces</option>
+      <option value="4">4 veces</option>
+    </select>
+  </div>
+</div>
     <div id="recTimesContainer" style="margin-top:0.8rem">
       <p style="font-size:0.78rem;color:var(--text3)">Selecciona días para configurar horas.</p>
     </div>
@@ -1808,7 +1843,6 @@ textarea {
     <input type="hidden" id="recEditId">
     <div class="modal-footer">
       <button class="btn btn-secondary btn-sm" onclick="closeRecurringModal()">Cancelar</button>
-      <button class="btn btn-danger btn-sm" id="recDeleteBtn" style="display:none" onclick="deleteRecurringFromModal()">🗑️ Eliminar</button>
       <button class="btn btn-sm" onclick="saveRecurring()">💾 Guardar</button>
     </div>
   </div>
@@ -2300,54 +2334,83 @@ textarea {
   </div>
 
   <!-- INFO -->
-  <div class="page" id="page-info">
-    <div class="page-header"><h2>❓ ¿Cómo funciona LevelUp?</h2></div>
-    <div class="card">
-      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.6rem;font-weight:500">🌱 La idea</h3>
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">LevelUp es un tracker de hábitos donde tu progreso se refleja en una planta virtual. Cada hábito alimenta una <strong>necesidad</strong> de la planta. Si descuidas las necesidades, la planta muere y empiezas de cero, perdiendo todo lo conseguido.</p>
-    </div>
-    <div class="card">
-      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.8rem;font-weight:500">💧 Necesidades y hábitos default</h3>
-      <table class="need-table">
-        <thead><tr><th>Necesidad</th><th>Hábito</th><th>Se agota en</th><th>¿Mata?</th></tr></thead>
-        <tbody>
-          <tr><td>💧 Hidratación</td><td>Beber agua</td><td>Reset medianoche</td><td>Sí (a 0%)</td></tr>
-          <tr><td>💪 Fuerza</td><td>Deporte (≥1 sesión/semana)</td><td>7 días</td><td>Sí</td></tr>
-          <tr><td>😴 Energía</td><td>Sueño ≥7h</td><td>Reset medianoche</td><td>Sí (obligatorio)</td></tr>
-          <tr><td>🧠 Inteligencia</td><td>Estudiar alemán</td><td>3 días</td><td>Sí</td></tr>
-          <tr><td>⚡ Salud</td><td>Pasos diarios</td><td>Reset medianoche</td><td>Si &lt; mínimo</td></tr>
-          <tr><td>🍃 Tranquilidad</td><td>Test del orden</td><td>Reset medianoche</td><td>Sí (obligatorio)</td></tr>
-          <tr><td>🧘 Elasticidad</td><td>Estiramientos</td><td>Reset medianoche</td><td>Sí (a 0%)</td></tr>
-          <tr><td>📖 Entretenimiento</td><td>Leer</td><td>2 días</td><td>Sí</td></tr>
-          <tr><td>📱 Móvil</td><td>Registrar horas de pantalla</td><td>—</td><td>Sí (&gt;5h o sin registrar)</td></tr>
-        </tbody>
-       </table>
-    </div>
-    <div class="card">
-      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🛡️ Protector de racha</h3>
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">El protector pausa <strong>absolutamente todas las muertes</strong> durante 24 horas, incluyendo el decay de necesidades y los obligatorios diarios. Cuesta -20% XP y -3 días de racha. Solo se puede utilizar por causa justificada: viajes, enfermedad o días complicados.</p>
-    </div>
-    <div class="card">
-      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">✏️ Personalización</h3>
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Desde la página <strong>Editar</strong> puedes, entre otras cosas:<br>
-      • <strong>Desactivar</strong> cualquier hábito del sistema (su necesidad desaparece de la planta)<br>
-      • <strong>Ajustar parámetros</strong> de cada hábito (objetivos, límites, días de muerte...)<br>
-      • <strong>Crear hábitos personalizados</strong> con su propia necesidad, estadísticas, gráficos, meta y cuenta atrás<br>
-      • <strong>Mostrar tus hábitos en el menú lateral</strong> para acceso rápido (igual que los hábitos del sistema)<br>
-      • <strong>Editar las preguntas</strong> del test de orden<br>
-      • <strong>Gestionar categorías deportivas</strong> con km, obligatoriedad y emoji personalizado<br>
-      • <strong>Editar o eliminar metas</strong> a largo plazo y objetivos mensuales con cuenta atrás<br>
-      • <strong>Editar, añadir o eliminar necesidades</strong> de tu planta</p>
-    </div>
-    <div class="card">
-      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🏆 XP y niveles</h3>
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Cada acción da XP: agua +3, por 500 pasos +1, deporte +12, alemán +8, orden +8, estiramientos +8, hábitos custom +6, por 15min de lectura +1. Al subir de nivel, el umbral de XP sube un 20%. A partir del nivel 2 la planta cambia de aspecto.</p>
-    </div>
-    <div class="card">
-      <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">📅 Objetivos mensuales, metas y agenda</h3>
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Añade objetivos mensuales con fecha límite y cuenta atrás. Márcalos como completados con un clic. Las metas a largo plazo muestran barra de progreso, porcentaje completado y días restantes si tienes fecha límite activa. Tienes la opción de organizar tu día con la Agenda de LevelUp, donde puedes agregar tus quéhaceres, fijar una hora, el nivel de prioridad que tiene y muchas otras opciones más para facilitarte el cumplimiento de tus metas.</p>
-    </div>
+<!-- INFO -->
+<div class="page" id="page-info">
+  <div class="page-header"><h2>❓ ¿Cómo funciona LevelUp?</h2></div>
+  <div class="card">
+    <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.6rem;font-weight:500">🌱 La idea</h3>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">LevelUp es un tracker de hábitos donde tu progreso se refleja en una planta virtual. Cada hábito alimenta una <strong>necesidad</strong> de la planta. Si descuidas las necesidades, la planta muere y empiezas de cero, perdiendo el progreso de hábitos, XP y racha (tus libros, metas, objetivos y agenda se conservan).</p>
   </div>
+  <div class="card">
+    <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.8rem;font-weight:500">💧 Necesidades y hábitos default</h3>
+    <table class="need-table">
+      <thead><tr><th>Necesidad</th><th>Hábito</th><th>Se agota en</th><th>¿Mata?</th></tr></thead>
+      <tbody>
+        <tr><td>💧 Hidratación</td><td>Beber agua</td><td>Reset medianoche</td><td>Sí (a 0%)</td></tr>
+        <tr><td>💪 Fuerza</td><td>Deporte (≥1 sesión/semana)</td><td>7 días (ajustable)</td><td>Sí</td></tr>
+        <tr><td>😴 Energía</td><td>Sueño ≥7h</td><td>Reset medianoche</td><td>Sí (obligatorio)</td></tr>
+        <tr><td>🧠 Inteligencia</td><td>Estudiar alemán</td><td>3 días (ajustable)</td><td>Sí</td></tr>
+        <tr><td>⚡ Salud</td><td>Pasos diarios</td><td>Reset medianoche</td><td>Si &lt; mínimo</td></tr>
+        <tr><td>🍃 Tranquilidad</td><td>Test del orden</td><td>Reset medianoche</td><td>Sí (obligatorio)</td></tr>
+        <tr><td>🧘 Elasticidad</td><td>Estiramientos</td><td>Reset medianoche</td><td>Sí (a 0%)</td></tr>
+        <tr><td>📖 Entretenimiento</td><td>Leer</td><td>2 días</td><td>Sí</td></tr>
+        <tr><td>📱 Móvil</td><td>Registrar horas de pantalla</td><td>—</td><td>Sí (&gt;5h o sin registrar)</td></tr>
+      </tbody>
+     </table>
+     <p style="font-size:0.78rem;color:var(--text3);margin-top:0.8rem">Todos los parámetros (objetivos, días de muerte, mínimos) se pueden ajustar desde cada página con el botón "⚙️ Ajustar" o desde Editar.</p>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🛡️ Protector de racha</h3>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">El protector pausa <strong>absolutamente todas las muertes</strong> durante 24 horas, incluyendo el decay de necesidades y los obligatorios diarios. Cuesta <strong>-50 XP</strong> y <strong>-3 días de racha</strong> (necesitas al menos 50 XP para activarlo). Solo se puede utilizar por causa justificada: viajes, enfermedad o días complicados.</p>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">📅 Agenda</h3>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Organiza tu día añadiendo tareas con hora, prioridad, categoría y notas.<br>
+    • <strong>Marcar completada (✓):</strong> +1 XP. Si la desmarcas, se resta ese XP.<br>
+    • <strong>Marcar como no realizada (✕):</strong> -1 XP. Si la desmarcas, se devuelve.<br>
+    • <strong>Tareas con varias repeticiones al día</strong> (ej. "leer 30 min" en 2 tandas, o "salir a andar" 2 veces): cada vez que pulses "+1" ganas 1 XP, y la tarea solo se marca como completada cuando llegues al total de veces. Puedes deshacer con "-1" si te equivocas, y poner una hora distinta para cada repetición.<br>
+    • <strong>Tareas recurrentes (🔁):</strong> defines los días de la semana en que se repiten (ej. lunes y jueves) y, opcionalmente, una hora distinta para cada día. Se generan automáticamente en tu agenda solo el día que les toca — no aparecen antes de tiempo en "Próximos días".<br>
+    • <strong>Pendientes de días anteriores:</strong> si dejas tareas sin marcar, aparecen en una sección separada en rojo arriba de la agenda para que no se pierdan.<br>
+    • <strong>Línea "▶ Ahora":</strong> marca en qué punto del día estás respecto a tus tareas planeadas, para ver de un vistazo si vas según lo previsto.<br>
+    • El resumen semanal solo cuenta tareas hasta el día de hoy (no cuenta tareas futuras como pendientes).</p>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">💧 Hidratación</h3>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra el agua que bebes con botones rápidos (+1 vaso, +500ml, +1L) o una cantidad personalizada. Si te equivocas, puedes restar agua con los botones "-1 vaso" / "-500ml".</p>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">😴 Sueño y 📱 Móvil</h3>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Ambos son <strong>obligatorios diarios</strong>. Si ya registraste el dato del día y te equivocaste, al volver a intentar registrar te preguntará si quieres editar el valor anterior (revirtiendo el XP y los efectos que aplicó la primera vez).</p>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🧠 Alemán</h3>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Puedes ajustar tu <strong>nivel de partida</strong> (A1/A2/B1) y las horas ya acumuladas desde "⚙️ Ajustar", útil si reinicias la planta pero no quieres perder tu progreso real de idioma.</p>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">✏️ Personalización</h3>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Desde la página <strong>Editar</strong> puedes, entre otras cosas:<br>
+    • <strong>Desactivar</strong> cualquier hábito del sistema (su necesidad desaparece de la planta)<br>
+    • <strong>Ajustar parámetros</strong> de cada hábito (objetivos, límites, días de muerte...) y ver los cambios reflejados al instante en cada página<br>
+    • <strong>Crear hábitos personalizados</strong> con su propia necesidad, estadísticas, gráficos, meta, cuenta atrás y efecto configurable (sube la necesidad al 100%, sube un % concreto, la baja, o solo registra)<br>
+    • <strong>Mostrar tus hábitos en el menú lateral</strong> para acceso rápido (igual que los hábitos del sistema)<br>
+    • <strong>Editar las preguntas</strong> del test de orden<br>
+    • <strong>Gestionar categorías deportivas</strong> con km, obligatoriedad semanal y emoji personalizado<br>
+    • <strong>Editar o eliminar metas</strong> a largo plazo y objetivos mensuales con cuenta atrás<br>
+    • <strong>Editar, añadir o eliminar necesidades</strong> de tu planta</p>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🏆 XP y niveles</h3>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Cada acción da XP: agua +3, por 500 pasos +1, deporte +12, alemán +8, orden +8, estiramientos +8, hábitos custom +6, por 15min de lectura +1, tareas de agenda +1/-1 por cada vez que las marques. Al subir de nivel, el umbral de XP sube un 20%. A partir del nivel 2 la planta cambia de aspecto.</p>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🏆 Metas a largo plazo</h3>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Crea metas con objetivo numérico (ej. "correr 500km"). Usa el botón <strong>"+"</strong> junto a cada meta para sumar progreso manualmente cuando quieras (te pregunta cuánto añadir). Muestran barra de progreso, porcentaje y cuenta atrás si tienen fecha límite.</p>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">📅 Objetivos mensuales</h3>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Añade objetivos con fecha límite y cuenta atrás. Puedes <strong>vincular un objetivo a cualquier hábito</strong> (incluido Deporte o cualquier hábito personalizado): cada vez que registres ese hábito, el progreso del objetivo sube +1 automáticamente, y se completa solo al llegar al número de veces marcado. También puedes marcarlos como completados manualmente con un clic si no están vinculados a ningún hábito.</p>
+  </div>
+</div>
 </main>
 
 <script>
@@ -2414,6 +2477,7 @@ function getGoalColorVar(c){ return {green:'var(--green-lt)',blue:'var(--blue)',
 function daysUntil(dateStr){
   if(!dateStr)return null;
   const today=new Date();today.setHours(0,0,0,0);
+  const todayStr=today.toISOString().split("T")[0];
   const target=new Date(dateStr+'T00:00:00');
   return Math.ceil((target-today)/(1000*60*60*24));
 }
@@ -3237,8 +3301,21 @@ function updateHabitStreak(id){
 
 // HABIT MODAL
 const HABIT_EMOJIS=["🎵","🎨","🧩","🌿","💊","🥗","🧘","💰","🐕","🚗","✈️","🌅","☕","🛁","🔬","🎭","🧶","🏠","📸","✍️","🎸","🎹","💻","🔭","🧪","🌎","🤝","🏋️","🚴","🏃","🧗","🤸","🎯","🏊","💆","🌊","🦋","🌸"];
+const GOAL_EMOJIS=["🎯","🏅","🏆","🏃","💪","📚","🧘","✈️","💰","🎓","🥇","🏔️","🚴","🏊","🎨","🎸","💻","🌱","❤️","🧠","⏰","📈","🍃","🎵","🏠"];
 let selectedHabitEmoji="⭐";
 let activeHabitFeatures=new Set(["streak","stats"]);
+
+function renderGenericEmojiPicker(containerId,emojis,targetInputId,selected){
+  const container=document.getElementById(containerId);if(!container)return;
+  container.innerHTML=emojis.map(e=>`<span class="emoji-opt${e===selected?" selected":""}">${e}</span>`).join("");
+  container.querySelectorAll(".emoji-opt").forEach((span,i)=>{
+    span.addEventListener("click",()=>{
+      const emoji=emojis[i];
+      document.getElementById(targetInputId).value=emoji;
+      renderGenericEmojiPicker(containerId,emojis,targetInputId,emoji);
+    });
+  });
+}
 
 function openHabitModal(editId){
   const modal=document.getElementById("habitModal");
@@ -3584,7 +3661,9 @@ function openGoalModal(editId){
     document.getElementById("gmColor").value="green";
     document.getElementById("gmCountdown").value="no";
   }
+  renderGenericEmojiPicker("gmEmojiPicker",GOAL_EMOJIS,"gmIcon",document.getElementById("gmIcon").value);
 }
+
 function closeGoalModal(){document.getElementById("goalModal").classList.remove("open");}
 function deleteGoalFromModal(){
   const id=document.getElementById("gmEditId").value;
@@ -3654,6 +3733,7 @@ function openMonthlyObjModal(editId){
     const mt=document.getElementById("mobjTarget");if(mt)mt.value="";
     const mp=document.getElementById("mobjProgress");if(mp)mp.value=0;
   }
+  renderGenericEmojiPicker("mobjEmojiPicker",GOAL_EMOJIS,"mobjIcon",document.getElementById("mobjIcon").value);
 }
 
 function closeMonthlyObjModal(){document.getElementById("monthlyObjModal").classList.remove("open");}
@@ -3741,23 +3821,82 @@ function openTaskModal(editId){
   document.getElementById("taskEditId").value=editId||"";
   document.getElementById("taskModalTitle").textContent=editId?"Editar tarea":"Nueva tarea";
   document.getElementById("taskDate").value=getTodayKey();
+  document.getElementById("taskTimesPerDay").value="1";
+  document.getElementById("taskUnitLabel").value="";
   if(editId){
     const t=agendaTasks.find(x=>x.id===editId);
-    if(t){document.getElementById("taskName").value=t.name;document.getElementById("taskTime").value=t.time||"";document.getElementById("taskPriority").value=t.priority;document.getElementById("taskCategory").value=t.category;document.getElementById("taskDate").value=t.date;document.getElementById("taskNotes").value=t.notes||"";}
+    if(t){
+      document.getElementById("taskName").value=t.name;
+      document.getElementById("taskTime").value=t.time||"";
+      document.getElementById("taskPriority").value=t.priority;
+      document.getElementById("taskCategory").value=t.category;
+      document.getElementById("taskDate").value=t.date;
+      document.getElementById("taskNotes").value=t.notes||"";
+      document.getElementById("taskTimesPerDay").value=t.timesPerDay||1;
+      document.getElementById("taskUnitLabel").value=t.unitLabel||"";
+      updateTaskTimesInputs();
+      if(t.multiTimes){
+        t.multiTimes.forEach((time,i)=>{
+          const el=document.getElementById("taskMultiTime_"+i);
+          if(el)el.value=time||"";
+        });
+      }
+    }
   } else {
     ["taskName","taskTime","taskNotes"].forEach(id=>{document.getElementById(id).value="";});
     document.getElementById("taskPriority").value="mid";document.getElementById("taskCategory").value="Personal";
+    updateTaskTimesInputs();
   }
 }
+
 function closeTaskModal(){document.getElementById("taskModal").classList.remove("open");}
+
 function saveTask(){
   const name=document.getElementById("taskName").value.trim();
   if(!name){toast("Escribe la tarea");return;}
   const editId=document.getElementById("taskEditId").value;
-  const task={id:editId||"t_"+Date.now(),name,time:document.getElementById("taskTime").value,priority:document.getElementById("taskPriority").value,category:document.getElementById("taskCategory").value,date:document.getElementById("taskDate").value,notes:document.getElementById("taskNotes").value.trim(),done:false};
-  if(editId){const idx=agendaTasks.findIndex(x=>x.id===editId);if(idx>=0){task.done=agendaTasks[idx].done;agendaTasks[idx]=task;}}
+  const timesPerDay=parseInt(document.getElementById("taskTimesPerDay")?.value)||1;
+  const unitLabel=document.getElementById("taskUnitLabel")?.value.trim()||"";
+  let multiTimes=[];
+  if(timesPerDay>1){
+    for(let i=0;i<timesPerDay;i++){
+      const el=document.getElementById("taskMultiTime_"+i);
+      multiTimes.push(el?.value||"");
+    }
+  }
+  const existingTask=editId?agendaTasks.find(x=>x.id===editId):null;
+  const task={
+    id:editId||"t_"+Date.now(),
+    name,
+    time:timesPerDay>1?(multiTimes[0]||""):document.getElementById("taskTime").value,
+    priority:document.getElementById("taskPriority").value,
+    category:document.getElementById("taskCategory").value,
+    date:document.getElementById("taskDate").value,
+    notes:document.getElementById("taskNotes").value.trim(),
+    done:existingTask?.done||false,
+    failed:existingTask?.failed||false,
+    timesPerDay,
+    timesCompleted:existingTask?.timesCompleted||0,
+    multiTimes,
+    unitLabel
+  };
+  if(editId){const idx=agendaTasks.findIndex(x=>x.id===editId);if(idx>=0)agendaTasks[idx]=task;}
   else agendaTasks.push(task);
   closeTaskModal();save();renderAgenda();toast("📅 Tarea guardada");
+}
+
+function incrementMultiTask(id){
+  const t=agendaTasks.find(x=>x.id===id);if(!t)return;
+  if(t.done){toast("✅ Ya completada todas las veces");return;}
+  t.timesCompleted=(t.timesCompleted||0)+1;
+  plant.xp+=1;checkLevelUp();
+  if(t.timesCompleted>=t.timesPerDay){
+    t.done=true;
+    toast(`✅ ¡Completada las ${t.timesPerDay} veces! · +1 XP`);
+  } else {
+    toast(`✅ ${t.timesCompleted}/${t.timesPerDay} · +1 XP`);
+  }
+  save();renderAgenda();renderNav();
 }
 
 function deleteTask(id){
@@ -4616,7 +4755,7 @@ function renderAgenda(){
   const dl=document.getElementById("agendaDateLabel");if(dl)dl.textContent=todayFull.charAt(0).toUpperCase()+todayFull.slice(1);
 let overdueTasks=agendaTasks.filter(t=>t.date<today&&!t.done&&!t.failed);
 let todayTasks=agendaTasks.filter(t=>t.date===today);
-let upcoming=agendaTasks.filter(t=>t.date>today).sort((a,b)=>a.date.localeCompare(b.date)||((a.time||"").localeCompare(b.time||"")));
+let upcoming=agendaTasks.filter(t=>t.date>today&&!t.recurringId).sort((a,b)=>a.date.localeCompare(b.date)||((a.time||"").localeCompare(b.time||"")));
   if(agendaFilter!=="all"){todayTasks=todayTasks.filter(t=>t.category===agendaFilter);upcoming=upcoming.filter(t=>t.category===agendaFilter);}
 todayTasks.sort((a,b)=>{if(a.done!==b.done)return a.done?1:-1;return(a.time||"99:99").localeCompare(b.time||"99:99");});
 
@@ -4635,18 +4774,21 @@ if(tl){
     let lineAdded=false;
     let html="";
     for(const t of todayTasks){
-      if(!lineAdded&&!t.done&&t.time&&t.time>nowStr){
+      // Solo insertar la línea antes de la PRIMERA tarea sin hacer cuya hora es futura
+      if(!lineAdded&&!t.done&&!t.failed&&t.time&&t.time>nowStr){
         html+=`<div style="display:flex;align-items:center;gap:8px;margin:6px 0"><div style="flex:1;height:2px;background:var(--green-lt);border-radius:2px"></div><span style="font-size:0.65rem;color:var(--green-md);font-weight:500;white-space:nowrap">▶ Ahora ${nowStr}</span><div style="flex:1;height:2px;background:var(--green-lt);border-radius:2px"></div></div>`;
         lineAdded=true;
       }
       html+=renderTaskItem(t);
     }
-    if(!lineAdded&&todayTasks.some(t=>!t.done)){
-      html=`<div style="display:flex;align-items:center;gap:8px;margin:6px 0"><div style="flex:1;height:2px;background:var(--green-lt);border-radius:2px"></div><span style="font-size:0.65rem;color:var(--green-md);font-weight:500;white-space:nowrap">▶ Ahora ${nowStr}</span><div style="flex:1;height:2px;background:var(--green-lt);border-radius:2px"></div></div>`+html;
+    // Si no se insertó (todas las pendientes ya vencieron, o no quedan pendientes), ponerla al final
+    if(!lineAdded){
+      html+=`<div style="display:flex;align-items:center;gap:8px;margin:6px 0"><div style="flex:1;height:2px;background:var(--green-lt);border-radius:2px"></div><span style="font-size:0.65rem;color:var(--green-md);font-weight:500;white-space:nowrap">▶ Ahora ${nowStr}</span><div style="flex:1;height:2px;background:var(--green-lt);border-radius:2px"></div></div>`;
     }
     tl.innerHTML=html;
   }
 }
+
   const ul=document.getElementById("agendaUpcomingList");
   if(ul){
     if(!upcoming.length){ul.innerHTML=`<p style="font-size:0.84rem;color:var(--text3)">Sin tareas próximas.</p>`;}
@@ -4664,26 +4806,44 @@ if(tl){
 
 function renderTaskItem(t){
   const prioColors={high:"var(--red)",mid:"var(--amber)",low:"var(--green-lt)"};
-  const stateStyle=t.done
-    ?"background:var(--green-mist);opacity:0.85"
-    :t.failed
-    ?"background:var(--red-lt);opacity:0.75"
-    :"";
-  const nameStyle=t.done
-    ?"text-decoration:line-through;color:var(--text3)"
-    :t.failed
-    ?"text-decoration:line-through;color:var(--red)"
-    :"";
+  const stateStyle=t.done?"background:var(--green-mist);opacity:0.85":t.failed?"background:var(--red-lt);opacity:0.75":"";
+  const nameStyle=t.done?"text-decoration:line-through;color:var(--text3)":t.failed?"text-decoration:line-through;color:var(--red)":"";
+  const isMultiTask=t.timesPerDay&&t.timesPerDay>1;
+  const progressLabel=isMultiTask?` <span style="font-size:0.68rem;color:var(--green-md);font-weight:500">(${t.timesCompleted||0}/${t.timesPerDay})</span>`:"";
   return `<div class="task-item" style="${stateStyle}">
     <div style="width:7px;height:7px;border-radius:50%;background:${prioColors[t.priority]||"var(--green-lt)"};flex-shrink:0"></div>
-    <div style="flex:1"><div class="task-name" style="${nameStyle}">${t.name}</div>${t.notes?`<div style="font-size:0.7rem;color:var(--text3);margin-top:2px">${t.notes}</div>`:""}</div>
+    <div class="task-name-wrap">
+      <div class="task-name" style="${nameStyle}">${t.name}${progressLabel}</div>
+      ${t.notes?`<div style="font-size:0.7rem;color:var(--text3);margin-top:2px">${t.notes}</div>`:""}
+    </div>
     <span class="task-category">${t.category}</span>
     ${t.time?`<span class="task-time">${t.time}</span>`:""}
-    <button onclick="markTaskDone('${t.id}')" title="Completada +1XP" style="background:${t.done?"var(--green-lt)":"transparent"};border:1.5px solid var(--green-lt);color:${t.done?"white":"var(--green-md)"};width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.8rem;flex-shrink:0;transition:all 0.15s">✓</button>
+    ${isMultiTask
+  ? `<div style="display:flex;gap:4px">
+      ${(t.timesCompleted||0)>0?`<button onclick="decrementMultiTask('${t.id}')" title="-1 vez (-1XP)" style="background:transparent;border:1.5px solid rgba(139,46,26,0.4);color:var(--red);width:24px;height:28px;border-radius:8px;cursor:pointer;font-size:0.75rem;flex-shrink:0">-1</button>`:""}
+      <button onclick="incrementMultiTask('${t.id}')" title="+1 vez (+1XP)" style="background:${t.done?"var(--green-lt)":"transparent"};border:1.5px solid var(--green-lt);color:${t.done?"white":"var(--green-md)"};width:32px;height:28px;border-radius:8px;cursor:pointer;font-size:0.8rem;flex-shrink:0">+1</button>
+    </div>`
+  : `<button onclick="markTaskDone('${t.id}')" title="Completada +1XP" style="background:${t.done?"var(--green-lt)":"transparent"};border:1.5px solid var(--green-lt);color:${t.done?"white":"var(--green-md)"};width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.8rem;flex-shrink:0">✓</button>`
+}
     <button onclick="markTaskFailed('${t.id}')" title="No realizada -1XP" style="background:${t.failed?"var(--red)":"transparent"};border:1.5px solid rgba(139,46,26,0.4);color:${t.failed?"white":"var(--red)"};width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.8rem;flex-shrink:0;transition:all 0.15s">✕</button>
-    ${t.recurringId?`<button class="task-delete-btn" onclick="openRecurringModal('${t.recurringId}')" title="Editar recurrente">🔁</button>`:`<button class="task-delete-btn" onclick="openTaskModal('${t.id}')">✏️</button>`}
-    <button class="task-delete-btn" onclick="deleteTask('${t.id}')">🗑️</button>
+${t.recurringId
+  ? `<button class="task-delete-btn" onclick="openRecurringModal('${t.recurringId}')" title="Editar recurrente">🔁</button>
+     <button class="task-delete-btn" onclick="if(confirm('¿Eliminar esta tarea recurrente y sus próximas apariciones?')){recurringTasks=recurringTasks.filter(x=>x.id!=='${t.recurringId}');const today=getTodayKey();agendaTasks=agendaTasks.filter(task=>!(task.recurringId==='${t.recurringId}'&&task.date>=today&&!task.done));save();renderAgenda();toast('🗑️ Tarea recurrente eliminada');}" title="Eliminar recurrente">🗑️</button>`
+  : `<button class="task-delete-btn" onclick="openTaskModal('${t.id}')">✏️</button>
+     <button class="task-delete-btn" onclick="deleteTask('${t.id}')">🗑️</button>`
+}
+
   </div>`;
+}
+
+function decrementMultiTask(id){
+  const t=agendaTasks.find(x=>x.id===id);if(!t)return;
+  if(!t.timesCompleted)return;
+  t.timesCompleted=Math.max(0,t.timesCompleted-1);
+  plant.xp=Math.max(0,plant.xp-1);
+  if(t.done&&t.timesCompleted<t.timesPerDay){t.done=false;}
+  toast(`↩️ ${t.timesCompleted}/${t.timesPerDay} · -1 XP`);
+  save();renderAgenda();renderNav();
 }
 
 function markTaskDone(id){
@@ -4917,26 +5077,29 @@ function deleteNeedDirect(id){delete needOverrides[id];saveNeedsOverrides();rend
 function openRecurringModal(editId){
   document.getElementById("recurringModal").classList.add("open");
   document.getElementById("recEditId").value=editId||"";
-  document.getElementById("recDeleteBtn").style.display=editId?"":"none";
   document.getElementById("recName").value="";
   document.getElementById("recCategory").value="Personal";
   document.getElementById("recPriority").value="mid";
   const checkboxes=document.querySelectorAll("#recDaysRow input[type=checkbox]");
-if(editId){
-  const r=recurringTasks.find(x=>x.id===editId);
-  if(r){
-    document.getElementById("recName").value=r.name;
-    document.getElementById("recCategory").value=r.category||"Personal";
-    document.getElementById("recPriority").value=r.priority||"mid";
-    checkboxes.forEach(cb=>{cb.checked=(r.days||[]).includes(parseInt(cb.value));});
-    updateRecTimesContainer(r); // ← AQUÍ, después de marcar checkboxes
-  }
-} else {
-  updateRecTimesContainer(null);
-}
+  checkboxes.forEach(cb=>cb.checked=false);
 
-  updateRecTimesContainer(editId?recurringTasks.find(x=>x.id===editId):null);
-  checkboxes.forEach(cb=>cb.addEventListener("change",()=>updateRecTimesContainer(editId?recurringTasks.find(x=>x.id===editId):null)));
+  let r=null;
+  if(editId){
+    r=recurringTasks.find(x=>x.id===editId);
+    if(r){
+      document.getElementById("recName").value=r.name;
+      document.getElementById("recCategory").value=r.category||"Personal";
+      document.getElementById("recPriority").value=r.priority||"mid";
+      document.getElementById("recTimesPerDay").value=r.timesPerDay||1;
+      checkboxes.forEach(cb=>{cb.checked=(r.days||[]).includes(parseInt(cb.value));});
+    }
+  } else {
+    document.getElementById("recTimesPerDay").value="1";
+  }
+  updateRecTimesContainer(r);
+  checkboxes.forEach(cb=>{
+    cb.onchange=()=>updateRecTimesContainer(r);
+  });
 }
 
 function closeRecurringModal(){document.getElementById("recurringModal").classList.remove("open");}
@@ -4972,12 +5135,12 @@ function saveRecurring(){
     }
   });
   if(!days.length){toast("Selecciona al menos un día");return;}
+  const timesPerDay=parseInt(document.getElementById("recTimesPerDay")?.value)||1;
   const editId=document.getElementById("recEditId").value;
-  const obj={id:editId||"rec_"+Date.now(),name,days,times,category:document.getElementById("recCategory").value,priority:document.getElementById("recPriority").value,active:true};
+  const obj={id:editId||"rec_"+Date.now(),name,days,times,timesPerDay,category:document.getElementById("recCategory").value,priority:document.getElementById("recPriority").value,active:true};
   if(editId){
     const idx=recurringTasks.findIndex(x=>x.id===editId);
     if(idx>=0){
-      // Borrar tareas futuras antiguas de esta recurrente para regenerarlas
       const today=getTodayKey();
       agendaTasks=agendaTasks.filter(t=>!(t.recurringId===editId&&t.date>=today&&!t.done));
       recurringTasks[idx]=obj;
@@ -4992,37 +5155,64 @@ function saveRecurring(){
 
 function deleteRecurringFromModal(){
   const editId=document.getElementById("recEditId").value;
-  if(!editId||!confirm("¿Eliminar esta tarea recurrente y sus próximas apariciones?"))return;
+  if(!editId){toast("⚠️ No hay tarea recurrente seleccionada");return;}
+  if(!confirm("¿Eliminar esta tarea recurrente y sus próximas apariciones?"))return;
   recurringTasks=recurringTasks.filter(x=>x.id!==editId);
   const today=getTodayKey();
   agendaTasks=agendaTasks.filter(t=>!(t.recurringId===editId&&t.date>=today&&!t.done));
-  closeRecurringModal();save();renderAgenda();toast("🗑️ Tarea recurrente eliminada");
+  closeRecurringModal();
+  save();renderAgenda();renderEditPage();
+  toast("🗑️ Tarea recurrente eliminada");
 }
 
 function generateRecurringForWeek(){
   if(!recurringTasks||!recurringTasks.length)return;
-  
-  // Limpiar tareas recurrentes pasadas (más de 7 días) que estén completadas o falladas
-  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-7);
-  const cutoffStr=cutoff.toISOString().split("T")[0];
+  const todayStr=getTodayKey();
   agendaTasks=agendaTasks.filter(t=>
-    !t.recurringId || t.date>=cutoffStr || (!t.done&&!t.failed)
+    !t.recurringId || t.date>=todayStr || t.done || t.failed
   );
-  
   const today=new Date();today.setHours(0,0,0,0);
   recurringTasks.filter(r=>r.active).forEach(r=>{
-    for(let i=0;i<14;i++){
+    for(let i=0;i<7;i++){
       const d=new Date(today);d.setDate(today.getDate()+i);
       const dayNum=d.getDay();
       if((r.days||[]).includes(dayNum)){
-        const dateStr=d.toISOString().split("T")[0];
+        const dateStr=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         const alreadyExists=agendaTasks.find(t=>t.recurringId===r.id&&t.date===dateStr);
         if(!alreadyExists){
-          agendaTasks.push({id:"rt_"+r.id+"_"+dateStr,name:r.name,time:r.times?.[dayNum]||"",priority:r.priority||"mid",category:r.category||"Personal",date:dateStr,notes:"🔁 Recurrente",done:false,failed:false,recurringId:r.id});
+          agendaTasks.push({
+            id:"rt_"+r.id+"_"+dateStr,
+            name:r.name,
+            time:r.times?.[dayNum]||"",
+            priority:r.priority||"mid",
+            category:r.category||"Personal",
+            date:dateStr,
+            notes:"🔁 Recurrente",
+            done:false,failed:false,
+            timesPerDay:r.timesPerDay||1,
+            timesCompleted:0,
+            recurringId:r.id
+          });
         }
       }
     }
   });
+}
+
+function updateTaskTimesInputs(){
+  const n=parseInt(document.getElementById("taskTimesPerDay")?.value)||1;
+  const container=document.getElementById("taskMultiTimesContainer");
+  if(!container)return;
+  if(n<=1){container.style.display="none";container.innerHTML="";return;}
+  container.style.display="block";
+  let html=`<p style="font-size:0.75rem;font-weight:500;color:var(--text2);margin-bottom:0.5rem">Hora para cada repetición (opcional):</p>`;
+  for(let i=0;i<n;i++){
+    html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <span style="font-size:0.8rem;color:var(--text2);width:60px">Rep. ${i+1}</span>
+      <input type="time" id="taskMultiTime_${i}" style="width:130px">
+    </div>`;
+  }
+  container.innerHTML=html;
 }
 
 // INIT
