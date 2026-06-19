@@ -4833,13 +4833,14 @@ function renderTaskItem(t){
   : `<button onclick="markTaskDone('${t.id}')" title="Completada +1XP" style="background:${t.done?"var(--green-lt)":"transparent"};border:1.5px solid var(--green-lt);color:${t.done?"white":"var(--green-md)"};width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.8rem;flex-shrink:0">✓</button>`
 }
     <button onclick="markTaskFailed('${t.id}')" title="No realizada -1XP" style="background:${t.failed?"var(--red)":"transparent"};border:1.5px solid rgba(139,46,26,0.4);color:${t.failed?"white":"var(--red)"};width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.8rem;flex-shrink:0;transition:all 0.15s">✕</button>
+    <div class="task-actions-right">
 ${t.recurringId
   ? `<button class="task-delete-btn" onclick="openRecurringModal('${t.recurringId}')" title="Editar recurrente">✏️</button>
      <button class="task-delete-btn" onclick="if(confirm('¿Eliminar esta tarea recurrente y sus próximas apariciones?')){recurringTasks=recurringTasks.filter(x=>x.id!=='${t.recurringId}');const today=getTodayKey();agendaTasks=agendaTasks.filter(task=>!(task.recurringId==='${t.recurringId}'&&task.date>=today&&!task.done));save();renderAgenda();toast('🗑️ Tarea recurrente eliminada');}" title="Eliminar recurrente">🗑️</button>`
   : `<button class="task-delete-btn" onclick="openTaskModal('${t.id}')">✏️</button>
      <button class="task-delete-btn" onclick="deleteTask('${t.id}')">🗑️</button>`
 }
-
+    </div>
   </div>`;
 }
 
