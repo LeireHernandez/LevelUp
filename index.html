@@ -1010,6 +1010,13 @@ textarea {
   color:var(--red);
 }
 
+.task-actions-right {
+  display:flex;
+  gap:4px;
+  margin-left:auto;
+  flex-shrink:0;
+}
+
 /* Modal */
 .modal-overlay {
   display:none;
@@ -1939,7 +1946,7 @@ textarea {
     <div class="page-header"><h2>📅 Agenda del día</h2><p id="agendaDateLabel"></p></div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem">
       <button class="btn btn-blue btn-sm" onclick="openTaskModal()">+ Nueva tarea</button>
-      <button class="btn btn-secondary btn-sm" onclick="openRecurringModal()">🔁 Recurrente</button>
+      <button class="btn btn-blue btn-sm" onclick="openRecurringModal()">+ Recurrente</button>
       <div style="display:flex;gap:6px;flex-wrap:wrap" id="agendaFilterBtns">
         <button class="btn btn-secondary btn-xs active-filter" onclick="filterAgenda('all',this)">Todas</button>
         <button class="btn btn-secondary btn-xs" onclick="filterAgenda('Trabajo',this)">Trabajo</button>
@@ -4827,7 +4834,7 @@ function renderTaskItem(t){
 }
     <button onclick="markTaskFailed('${t.id}')" title="No realizada -1XP" style="background:${t.failed?"var(--red)":"transparent"};border:1.5px solid rgba(139,46,26,0.4);color:${t.failed?"white":"var(--red)"};width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.8rem;flex-shrink:0;transition:all 0.15s">✕</button>
 ${t.recurringId
-  ? `<button class="task-delete-btn" onclick="openRecurringModal('${t.recurringId}')" title="Editar recurrente">🔁</button>
+  ? `<button class="task-delete-btn" onclick="openRecurringModal('${t.recurringId}')" title="Editar recurrente">✏️</button>
      <button class="task-delete-btn" onclick="if(confirm('¿Eliminar esta tarea recurrente y sus próximas apariciones?')){recurringTasks=recurringTasks.filter(x=>x.id!=='${t.recurringId}');const today=getTodayKey();agendaTasks=agendaTasks.filter(task=>!(task.recurringId==='${t.recurringId}'&&task.date>=today&&!task.done));save();renderAgenda();toast('🗑️ Tarea recurrente eliminada');}" title="Eliminar recurrente">🗑️</button>`
   : `<button class="task-delete-btn" onclick="openTaskModal('${t.id}')">✏️</button>
      <button class="task-delete-btn" onclick="deleteTask('${t.id}')">🗑️</button>`
