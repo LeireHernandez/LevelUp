@@ -4825,7 +4825,7 @@ function renderTaskItem(t){
       ${t.notes?`<div style="font-size:0.7rem;color:var(--text3);margin-top:2px">${t.notes}</div>`:""}
     </div>
     <span class="task-category">${t.category}</span>
-    ${t.time?`<span class="task-time">${t.time}</span>`:""}
+
     ${isMultiTask
   ? `<div style="display:flex;gap:4px">
       ${(t.timesCompleted||0)>0?`<button onclick="decrementMultiTask('${t.id}')" title="-1 vez (-1XP)" style="background:transparent;border:1.5px solid rgba(139,46,26,0.4);color:var(--red);width:24px;height:28px;border-radius:8px;cursor:pointer;font-size:0.75rem;flex-shrink:0">-1</button>`:""}
