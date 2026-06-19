@@ -4821,6 +4821,7 @@ function renderTaskItem(t){
     <div style="width:7px;height:7px;border-radius:50%;background:${prioColors[t.priority]||"var(--green-lt)"};flex-shrink:0"></div>
     <div class="task-name-wrap">
       <div class="task-name" style="${nameStyle}">${t.name}${progressLabel}</div>
+      ${t.time?`<div class="task-time" style="margin-top:2px">${t.time}</div>`:""}
       ${t.notes?`<div style="font-size:0.7rem;color:var(--text3);margin-top:2px">${t.notes}</div>`:""}
     </div>
     <span class="task-category">${t.category}</span>
