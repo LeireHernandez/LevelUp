@@ -1428,67 +1428,48 @@ textarea {
   color:white!important;
   border-color:var(--green-md)!important;
 }
-
-.meadow-wrap{
-  position:relative;
-  width:100%;
-  height:320px;
-  border-radius:var(--radius);
+.meadow-outer{
+  position:relative;width:100%;height:320px;border-radius:var(--radius);
   overflow:hidden;
   background:linear-gradient(180deg,#bfe3f5 0%,#d9f0e0 55%,#9fcf7a 56%,#7fb35a 100%);
   box-shadow:inset 0 -4px 18px rgba(0,0,0,0.08);
   margin-top:0.6rem;
 }
+.meadow-sky{position:absolute;inset:0;pointer-events:none;z-index:0;}
 .meadow-sun{
   position:absolute;top:18px;right:28px;width:46px;height:46px;border-radius:50%;
   background:radial-gradient(circle at 35% 35%,#fff6d8,#ffd76b 70%);
   box-shadow:0 0 22px 6px rgba(255,215,107,0.55);
 }
-.meadow-cloud{
-  position:absolute;background:rgba(255,255,255,0.85);border-radius:30px;
+.meadow-cloud{position:absolute;background:rgba(255,255,255,0.85);border-radius:30px;}
+.meadow-hill{position:absolute;bottom:-10%;left:-5%;width:120%;height:50%;background:#8dc25f;border-radius:50% 50% 0 0/30% 30% 0 0;opacity:0.55;}
+.meadow-scroll{
+  position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;z-index:1;
 }
-.meadow-hill{
-  position:absolute;bottom:-10%;left:-5%;width:120%;height:50%;
-  background:#8dc25f;border-radius:50% 50% 0 0/30% 30% 0 0;
-  opacity:0.55;
-}
-.meadow-flower{
-  position:absolute;font-size:0.85rem;opacity:0.9;
-}
+.meadow-canvas{position:relative;height:100%;}
+.meadow-flower{position:absolute;font-size:0.85rem;opacity:0.9;}
 .meadow-tree{
-  position:absolute;
-  line-height:1;
-  filter:drop-shadow(0 3px 3px rgba(0,0,0,0.2));
-  cursor:default;
-  transform-origin:bottom center;
-  animation:treeGrow 0.5s ease both;
-  transition:transform 0.2s;
+  position:absolute;line-height:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,0.2));
+  cursor:default;transform-origin:bottom center;animation:treeGrow 0.5s ease both;transition:transform 0.2s;
 }
 .meadow-tree:hover{transform:scale(1.15) translateY(-2px);}
 .meadow-tree-label{
-  position:absolute;
-  bottom:100%;
-  left:50%;
-  transform:translateX(-50%) translateY(4px);
-  background:rgba(45,80,22,0.92);
-  color:#d6f0b8;
-  font-size:0.62rem;
-  padding:3px 7px;
-  border-radius:6px;
-  white-space:nowrap;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity 0.15s,transform 0.15s;
+  position:absolute;bottom:100%;left:50%;transform:translateX(-50%) translateY(4px);
+  background:rgba(45,80,22,0.92);color:#d6f0b8;font-size:0.62rem;padding:3px 7px;border-radius:6px;
+  white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.15s,transform 0.15s;z-index:20;
 }
 .meadow-tree:hover .meadow-tree-label{opacity:1;transform:translateX(-50%) translateY(-2px);}
 @keyframes treeGrow{from{transform:scale(0) translateY(10px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
 .meadow-empty{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;color:rgba(45,80,22,0.7);
+  text-align:center;color:rgba(45,80,22,0.7);z-index:1;
 }
 .meadow-empty .sapling{font-size:2.4rem;animation:sway 3s ease-in-out infinite;margin-bottom:6px;}
 @keyframes sway{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(4deg);}}
-
+.meadow-scroll-hint{
+  position:absolute;right:10px;bottom:8px;font-size:0.62rem;color:rgba(45,80,22,0.7);
+  background:rgba(255,255,255,0.7);padding:2px 8px;border-radius:10px;z-index:2;
+}
 
 </style>
 </head>
@@ -2643,7 +2624,7 @@ function getCurrentCustomNeedLevel(habit){
 // DEFAULT STATE
 function defaultState(){
   const now=Date.now();
-  plant={name:"Mi planta",level:1,xp:0,xpNext:10,alive:true,deathReason:null,createdAt:now};
+  plant={name:"Mi planta",level:1,xp:0,xpNext:500,alive:true,deathReason:null,createdAt:now};
   needsState={strength:{value:100,lastFulfilled:now},intelligence:{value:100,lastFulfilled:now},calmness:{value:100,extraCalmness:0,lastResetDate:getTodayKey()},entertainment:{value:100,lastFulfilled:now},vitality:{value:100,lastFulfilled:now}};
   hydration={level:100,extraHydration:0,loggedToday:0,target:1.2,lastResetDate:getTodayKey()};
   flexibility={level:100,extraFlexibility:0,doneToday:false,lastResetDate:getTodayKey()};
@@ -4098,17 +4079,11 @@ function fullResetGameHard(){
   if(decayInterval)clearInterval(decayInterval);
   Object.keys(customChartInsts).forEach(k=>{if(customChartInsts[k])customChartInsts[k].destroy();});
   customChartInsts={};
-  // Borrar hábitos custom antes de defaultState
   customHabits=[];
   disabledBuiltinGoals=[];
   defaultState();
-  // Al inicio de la función, antes de todo:
-const savedRecurring=[...recurringTasks];
-const savedForest=[...forest];
-
-// Después de defaultState() y needOverrides={}:
-recurringTasks=savedRecurring;
-forest=savedForest;
+  recurringTasks=[];
+  forest=[];
   localStorage.removeItem("levelup_need_overrides");
   needOverrides={};
   save();renderAll();renderNav();renderPhoneChart();renderSleepChart();startDecay();
@@ -5415,6 +5390,9 @@ function plantTree(){
   navigateTo('bosque');
 }
 
+
+
+
 function hashStr(s){let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return h;}
 
 function renderForest(){
@@ -5428,15 +5406,18 @@ function renderForest(){
   const fc=document.getElementById("forestCount");
   if(fc)fc.textContent=forest.length?`(${forest.length} árbol${forest.length!==1?"es":""})`:"";
 
-  const treeEmojis=["🌳","🌲","🎄","🌴"];
-  const flowerEmojis=["🌼","🌸","🌷","🍀"];
+  const treeEmojis=["🌳"];
 
-  let html=`
-    <div class="meadow-wrap">
+  const STEP_X=86, MIN_CANVAS=640;
+  const canvasW=Math.max(MIN_CANVAS, forest.length*STEP_X+80);
+
+  let html=`<div class="meadow-outer">
+    <div class="meadow-sky">
       <div class="meadow-sun"></div>
       <div class="meadow-cloud" style="width:70px;height:24px;top:30px;left:14%"></div>
       <div class="meadow-cloud" style="width:50px;height:18px;top:54px;left:38%"></div>
-      <div class="meadow-hill"></div>`;
+      <div class="meadow-hill"></div>
+    </div>`;
 
   if(!forest.length){
     html+=`<div class="meadow-empty">
@@ -5445,30 +5426,28 @@ function renderForest(){
       <div style="font-size:0.72rem;margin-top:2px">Lleva tu planta al nivel 8 y plántala aquí</div>
     </div>`;
   } else {
-    for(let i=0;i<10;i++){
-      const h=hashStr("flower"+i);
-      const x=(h%90)+2;
-      const y=(h>>3)%40+4;
-      const f=flowerEmojis[h%flowerEmojis.length];
-      html+=`<span class="meadow-flower" style="left:${x}%;bottom:${y}%">${f}</span>`;
-    }
+    html+=`<div class="meadow-scroll"><div class="meadow-canvas" style="width:${canvasW}px">`;
+
     forest.forEach((t,i)=>{
       const h=hashStr(t.id);
-      const x=(h%88)+3;
-      const yBand=(h>>4)%55;
-      const size=0.85+(1-(yBand/55))*0.65;
-      const emoji=treeEmojis[h%treeEmojis.length];
-      const delay=(i%12)*0.04;
-      html+=`<div class="meadow-tree" style="left:${x}%;bottom:${yBand}%;font-size:${(2*size).toFixed(2)}rem;animation-delay:${delay}s;z-index:${100-yBand}">
-        ${emoji}
+      const band=h%3; // 0 cerca, 1 medio, 2 lejos
+      const yBase=[6,24,42][band]+((h>>4)%10);
+      const size=[1.5,1.15,0.9][band];
+      const x=40+i*STEP_X+((h%26)-13);
+      const delay=(i%14)*0.04;
+      html+=`<div class="meadow-tree" style="left:${x}px;bottom:${yBase}%;font-size:${size}rem;animation-delay:${delay}s;z-index:${10-band}">
+        ${treeEmojis[h%treeEmojis.length]}
         <span class="meadow-tree-label">${t.name} · Nv.${t.level}</span>
       </div>`;
     });
+    html+=`</div></div>`;
+    if(canvasW>MIN_CANVAS) html+=`<div class="meadow-scroll-hint">⇠ desliza para ver todo el bosque ⇢</div>`;
   }
 
   html+=`</div>`;
   el.innerHTML=html;
 }
+
 
 // INIT
 load();
