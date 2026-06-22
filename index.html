@@ -28,6 +28,7 @@ html, body {
   overflow: hidden;
 }
 
+
 body {
   font-family:'DM Sans',sans-serif;
   background:var(--bg);
@@ -148,6 +149,11 @@ nav::-webkit-scrollbar {
   padding:12px 20px;
   border-top:1px solid rgba(255,255,255,0.08);
   flex-shrink: 0;
+}
+
+.need-table-wrap { 
+  overflow-x: auto; 
+  -webkit-overflow-scrolling: touch; 
 }
 
 .level-pill {
@@ -1422,6 +1428,68 @@ textarea {
   color:white!important;
   border-color:var(--green-md)!important;
 }
+
+.meadow-wrap{
+  position:relative;
+  width:100%;
+  height:320px;
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:linear-gradient(180deg,#bfe3f5 0%,#d9f0e0 55%,#9fcf7a 56%,#7fb35a 100%);
+  box-shadow:inset 0 -4px 18px rgba(0,0,0,0.08);
+  margin-top:0.6rem;
+}
+.meadow-sun{
+  position:absolute;top:18px;right:28px;width:46px;height:46px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fff6d8,#ffd76b 70%);
+  box-shadow:0 0 22px 6px rgba(255,215,107,0.55);
+}
+.meadow-cloud{
+  position:absolute;background:rgba(255,255,255,0.85);border-radius:30px;
+}
+.meadow-hill{
+  position:absolute;bottom:-10%;left:-5%;width:120%;height:50%;
+  background:#8dc25f;border-radius:50% 50% 0 0/30% 30% 0 0;
+  opacity:0.55;
+}
+.meadow-flower{
+  position:absolute;font-size:0.85rem;opacity:0.9;
+}
+.meadow-tree{
+  position:absolute;
+  line-height:1;
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,0.2));
+  cursor:default;
+  transform-origin:bottom center;
+  animation:treeGrow 0.5s ease both;
+  transition:transform 0.2s;
+}
+.meadow-tree:hover{transform:scale(1.15) translateY(-2px);}
+.meadow-tree-label{
+  position:absolute;
+  bottom:100%;
+  left:50%;
+  transform:translateX(-50%) translateY(4px);
+  background:rgba(45,80,22,0.92);
+  color:#d6f0b8;
+  font-size:0.62rem;
+  padding:3px 7px;
+  border-radius:6px;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.15s,transform 0.15s;
+}
+.meadow-tree:hover .meadow-tree-label{opacity:1;transform:translateX(-50%) translateY(-2px);}
+@keyframes treeGrow{from{transform:scale(0) translateY(10px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+.meadow-empty{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;color:rgba(45,80,22,0.7);
+}
+.meadow-empty .sapling{font-size:2.4rem;animation:sway 3s ease-in-out infinite;margin-bottom:6px;}
+@keyframes sway{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(4deg);}}
+
+
 </style>
 </head>
 <body>
@@ -1688,7 +1756,7 @@ textarea {
 <div class="modal-overlay" id="protectorModal">
   <div class="modal">
     <h3>🛡️ Activar protector de racha</h3>
-    <div class="alert alert-warn">⚠️ Pausa <strong>todas las muertes</strong> durante 24h. Coste: <strong>-20 XP</strong> y <strong>-3 días racha</strong>.</div>
+    <div class="alert alert-warn">⚠️ Pausa <strong>todas las muertes</strong> durante 24h. Coste: <strong>-50 XP</strong> y <strong>-3 días racha</strong>.</div>
     <div class="form-group-full"><label>Motivo *</label>
       <select id="protectorReason"><option value="">-- Selecciona --</option><option value="Vacaciones">🏖️ Vacaciones</option><option value="Enfermedad">🤒 Enfermedad</option><option value="Evento familiar">👨‍👩‍👧 Evento familiar</option><option value="Viaje de trabajo">✈️ Viaje de trabajo</option><option value="Emergencia">🚨 Emergencia</option><option value="Otro">📝 Otro</option></select>
     </div>
@@ -1935,11 +2003,30 @@ textarea {
         <div class="card-title">📅 Objetivos del mes <button class="btn btn-xs" style="margin-left:auto" onclick="openMonthlyObjModal()">+ Añadir</button></div>
         <div id="homeMonthlyObjs"></div>
       </div>
-    </div>
+    
     <div style="text-align:center;margin-top:0.5rem">
       <button class="btn" style="background:rgba(139,46,26,0.12);color:var(--red);font-size:0.73rem" onclick="fullResetGame()">Reiniciar planta</button>
     </div>
+    <div id="plantTreeOverlay" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;text-align:center;background:var(--card);border-radius:var(--radius);padding:2rem;box-shadow:0 8px 40px rgba(0,0,0,0.25);max-width:320px;width:90%">
+  <div style="font-size:3rem;margin-bottom:0.8rem">🌳</div>
+  <h3 style="font-family:'Lora',serif;color:var(--green-dk);margin-bottom:0.5rem">¡Tu planta es un árbol!</h3>
+  <p style="font-size:0.82rem;color:var(--text2);margin-bottom:1.2rem">Ha alcanzado el nivel máximo. Plántala en tu bosque y empieza una nueva.</p>
+  <button class="btn" onclick="plantTree()" style="background:var(--green-dk);width:100%">🌳 Plantar en el bosque</button>
+  <br><button onclick="treeOverlayDismissed=true;document.getElementById('plantTreeOverlay').style.display='none'" style="margin-top:0.8rem;background:none;border:none;font-size:0.75rem;color:var(--text3);cursor:pointer">Recordármelo más tarde</button>
+</div>
+    </div>
   </div>
+
+
+  <!-- MI BOSQUE -->
+<div class="page" id="page-bosque">
+  <div class="page-header"><h2>🌳 Mi bosque</h2><p>Cada árbol es una planta que alcanzó el nivel máximo</p></div>
+  <div id="forestBurnAlert"></div>
+  <div class="card">
+    <div class="card-title">🌲 Árboles plantados <span id="forestCount" style="font-size:0.75rem;color:var(--text3);font-family:'DM Sans',sans-serif;font-weight:400"></span></div>
+    <div id="forestContent"></div>
+  </div>
+</div>
 
   <!-- AGENDA -->
   <div class="page" id="page-agenda">
@@ -2348,7 +2435,7 @@ textarea {
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.6rem;font-weight:500">🌱 La idea</h3>
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">LevelUp es un tracker de hábitos donde tu progreso se refleja en una planta virtual. Cada hábito alimenta una <strong>necesidad</strong> de la planta. Si descuidas las necesidades, la planta muere y empiezas de cero, perdiendo el progreso de hábitos, XP y racha (tus libros, metas, objetivos y agenda se conservan).</p>
   </div>
-  <div class="card">
+  <div class="need-table-wrap">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.8rem;font-weight:500">💧 Necesidades y hábitos default</h3>
     <table class="need-table">
       <thead><tr><th>Necesidad</th><th>Hábito</th><th>Se agota en</th><th>¿Mata?</th></tr></thead>
@@ -2556,7 +2643,7 @@ function getCurrentCustomNeedLevel(habit){
 // DEFAULT STATE
 function defaultState(){
   const now=Date.now();
-  plant={name:"Mi planta",level:1,xp:0,xpNext:1000,alive:true,deathReason:null,createdAt:now};
+  plant={name:"Mi planta",level:1,xp:0,xpNext:10,alive:true,deathReason:null,createdAt:now};
   needsState={strength:{value:100,lastFulfilled:now},intelligence:{value:100,lastFulfilled:now},calmness:{value:100,extraCalmness:0,lastResetDate:getTodayKey()},entertainment:{value:100,lastFulfilled:now},vitality:{value:100,lastFulfilled:now}};
   hydration={level:100,extraHydration:0,loggedToday:0,target:1.2,lastResetDate:getTodayKey()};
   flexibility={level:100,extraFlexibility:0,doneToday:false,lastResetDate:getTodayKey()};
@@ -2564,7 +2651,7 @@ function defaultState(){
   sleep={level:100,hoursToday:null,doneToday:false,lastResetDate:getTodayKey(),lowSleepStreak:0,history:[]};
   goals={german:{hours:0,target:660},spagatt:{cmToGround:32},order:{scores:[],avg:0},running:{maxKm:0,target:20},reading:{entries:[]},sport:{sessions:[]}};
   phoneUsage=[];
-  dailyActions={orderDone:false,phoneDone:false,suenoDone:false,date:todayStr()};
+  dailyActions={orderDone:false,phoneDone:false,suenoDone:false,aguaObjReached:false,pasosObjReached:false,date:todayStr()};
   streak={current:0,lastAliveDay:null};
 
 // Solo resetear estados de necesidades y no los hábitos en sí
@@ -2593,7 +2680,8 @@ customHabits.forEach(h=>{
     {id:"sc_swim",name:"Natación",emoji:"🏊",hasKm:false,required:false},
     {id:"sc_yoga",name:"Yoga",emoji:"🧘",hasKm:false,required:false}
   ];
-  coreParams={agua:{target:1.2},pasos:{objetivo:10000,minimo:7000},sueno:{minFatal:5,minOptimo:7},deporte:{diasMaxSinHacer:7},aleman:{diasMaxSinHacer:3,horasObjetivo:660,startHours:0}};
+coreParams={agua:{target:1.2},pasos:{objetivo:10000,minimo:7000},sueno:{minFatal:5,minOptimo:7},deporte:{diasMaxSinHacer:7},aleman:{diasMaxSinHacer:3,horasObjetivo:660,startHours:0},lectura:{diasMaxSinHacer:2}};
+
   lastDecayTs=now;
 }
 
@@ -2694,6 +2782,7 @@ function checkDailyObligatory(){
   const today=todayStr();
   if(dailyActions.date===today)return;
   if(!isProtectorActive()){
+    if(!isDisabledCore('agua')&&hydration.loggedToday<hydration.target){killPlant("deshidratación — no bebiste suficiente agua ayer");return;}
     if(!dailyActions.phoneDone){killPlant("no registraste las horas de móvil ayer");return;}
     if(!isDisabledCore('orden')&&!dailyActions.orderDone){killPlant("no hiciste el test de orden ayer");return;}
     if(!isDisabledCore('sueno')&&!dailyActions.suenoDone){killPlant("no registraste las horas de sueño ayer");return;}
@@ -2704,6 +2793,7 @@ function checkDailyObligatory(){
     }
   }
   dailyActions.orderDone=false;dailyActions.phoneDone=false;dailyActions.suenoDone=false;
+  dailyActions.aguaObjReached=false;dailyActions.pasosObjReached=false;
   customHabits.forEach(h=>{if(h.obligatory)dailyActions["custom_"+h.id]=false;});
   dailyActions.date=today;
 }
@@ -2716,7 +2806,7 @@ function isDisabledCore(id){ return disabledCoreHabits.includes(id); }
 // SAVE Y LOAD
 function save(){
   updateAllLevels();
-  const s={plant,needsState,hydration,flexibility,energy,sleep,goals,phoneUsage,dailyActions,streak,customHabits,customNeedStates,habitLogs,habitStreaks,protector,agendaTasks,books,longGoals,monthlyObjs,orderQuestions,coreParams,lastDecayTs,sportCats,disabledCoreHabits,disabledBuiltinGoals,recurringTasks};
+  const s={plant,needsState,hydration,flexibility,energy,sleep,goals,phoneUsage,dailyActions,streak,customHabits,customNeedStates,habitLogs,habitStreaks,protector,agendaTasks,books,longGoals,monthlyObjs,orderQuestions,coreParams,lastDecayTs,sportCats,disabledCoreHabits,disabledBuiltinGoals,recurringTasks,forest,lastAppTouch};
   try{localStorage.setItem("levelup_v7",JSON.stringify(s));}catch(e){console.warn(e);}
 }
 function load(){
@@ -2769,8 +2859,16 @@ function load(){
     if(!coreParams.deporte)coreParams.deporte={diasMaxSinHacer:7};
     if(!coreParams.aleman)coreParams.aleman={diasMaxSinHacer:3,horasObjetivo:660};
     if(!sportCats.length)sportCats=[{id:"sc_run",name:"Running",emoji:"🏃",hasKm:true,required:false}];
+    forest=s.forest||[];
+lastAppTouch=s.lastAppTouch||Date.now();
+if(!coreParams.lectura)coreParams.lectura={diasMaxSinHacer:2};
+if(dailyActions.aguaObjReached===undefined)dailyActions.aguaObjReached=false;
+if(dailyActions.pasosObjReached===undefined)dailyActions.pasosObjReached=false;
     delete needsState.energy;delete needsState.flexibility;delete needsState.hydration;
     loadNeedsOverrides();
+    const savedLastTouch=lastAppTouch;
+lastAppTouch=Date.now();
+checkForestBurn(savedLastTouch);
     checkDailyObligatory();
     updateAllLevels();
   }catch(e){console.warn(e);defaultState();}
@@ -2786,7 +2884,7 @@ function applyDecay(){
   if(hoursPassed<0.016)return;
   
   // Decaimiento de necesidades del sistema (no custom, porque custom ya se calcula por hora)
-  const DECAY_PER_HOUR = { strength:100/(coreParams.deporte.diasMaxSinHacer*24), intelligence:100/(coreParams.aleman.diasMaxSinHacer*24), entertainment:100/48 };
+  const DECAY_PER_HOUR = { strength:100/(coreParams.deporte.diasMaxSinHacer*24), intelligence:100/(coreParams.aleman.diasMaxSinHacer*24), entertainment:100/((coreParams.lectura?.diasMaxSinHacer||2)*24) };
 
   Object.keys(DECAY_PER_HOUR).forEach(id=>{
     if(needsState[id]&&!isDisabledCore(id))
@@ -2800,7 +2898,6 @@ function applyDecay(){
 function checkDeath(){
   if(!plant.alive||isProtectorActive())return;
   updateAllLevels();
-  if(!isDisabledCore('agua')&&hydration.level<=0){killPlant("deshidratación");return;}
   if(!isDisabledCore('estiramientos')&&flexibility.level<=0){killPlant("rigidez total");return;}
   if(!isDisabledCore('pasos')&&energy.level<=0){killPlant("sedentarismo — energía agotada");return;}
   for(const id of Object.keys(needsState)){
@@ -2926,6 +3023,10 @@ function addWater(liters){
   hydration.extraHydration=Math.min(100,hydration.extraHydration+pct);
   hydration.loggedToday=Math.min(hydration.target*2,hydration.loggedToday+liters);
   updateAllLevels();plant.xp+=3;checkLevelUp();
+  if(!dailyActions.aguaObjReached&&hydration.loggedToday>=hydration.target){
+  dailyActions.aguaObjReached=true;
+  triggerMonthlyObjUpdate('__agua');
+}
   toast(`💧 +${liters}L · ${Math.round(hydration.level)}%`);
   save();renderAll();
 }
@@ -2965,10 +3066,7 @@ function doSport(){
 
   const nowD=new Date();
 const thisMonthD=`${nowD.getFullYear()}-${String(nowD.getMonth()+1).padStart(2,'0')}`;
-monthlyObjs.filter(o=>o.linkedHabit==="__deporte"&&(!o.month||o.month===thisMonthD)&&!o.done).forEach(o=>{
-  o.progress=(o.progress||0)+1;
-  if(o.target&&o.progress>=o.target){o.done=true;toast(`🎯 ¡Objetivo "${o.name}" completado!`);}
-});
+triggerMonthlyObjUpdate('__deporte');
 
   toast(`${cat.emoji} Sesión de ${cat.name} registrada · Fuerza 100%`);
   // Actualizar objetivos mensuales vinculados a deporte
@@ -2987,6 +3085,7 @@ function doAleman(){
   document.getElementById("germanHoursInput").value="";
   if(needsState.intelligence){needsState.intelligence.value=100;needsState.intelligence.lastFulfilled=Date.now();}
   plant.xp+=8;checkLevelUp();
+  triggerMonthlyObjUpdate('__aleman');
   toast(`📖 +${h}h de alemán`);save();renderAll();
 }
 
@@ -3004,6 +3103,10 @@ function doPasosVal(steps){
   const now=new Date(),base=Math.max(0,100-((now.getHours()+now.getMinutes()/60)*100/24));
   energy.extraEnergy=Math.max(0,targetEnergy-base);
   updateAllLevels();plant.xp+=Math.floor(steps/500);checkLevelUp();
+  if(!dailyActions.pasosObjReached&&energy.stepsToday>=coreParams.pasos.objetivo){
+  dailyActions.pasosObjReached=true;
+  triggerMonthlyObjUpdate('__pasos');
+}
   toast(`👣 ${energy.stepsToday.toLocaleString()} pasos`);save();renderAll();
 }
 
@@ -3034,6 +3137,7 @@ function doSuenoVal(hours){
   sleep.history.push({date:todayStr(),hours,level:sleepLvl});
   if(sleep.history.length>30)sleep.history.shift();
   plant.xp+=hours>=coreParams.sueno.minOptimo?8:3;checkLevelUp();
+  triggerMonthlyObjUpdate('__sueno');
   toast(`😴 ${hours}h · Energía ${sleepLvl}%`);save();renderAll();renderSleepChart();
 }
 
@@ -3057,6 +3161,7 @@ function submitOrderTest(){
     needsState.calmness.value=100;
   }
   plant.xp+=8;checkLevelUp();
+  triggerMonthlyObjUpdate('__orden');
   toast(`🧹 Orden: ${note}/10`);save();renderAll();
 }
 
@@ -3074,7 +3179,9 @@ function doEstiramientosNoMedida(){
   const base=getCurrentFlexibilityLevel()-flexibility.extraFlexibility;
   flexibility.extraFlexibility=Math.min(100,100-Math.max(0,base));
   flexibility.doneToday=true;updateAllLevels();
-  plant.xp+=8;checkLevelUp();toast("🧘 Estiramientos · Elasticidad 100%");save();renderAll();
+  plant.xp+=8;checkLevelUp();
+  triggerMonthlyObjUpdate('__estiramientos');
+  toast("🧘 Estiramientos · Elasticidad 100%");save();renderAll();
 }
 
 function doLectura(){
@@ -3088,6 +3195,7 @@ function doLecturaVal(mins){
   if(goals.reading.entries.length>60)goals.reading.entries.shift();
   if(needsState.entertainment){needsState.entertainment.value=100;needsState.entertainment.lastFulfilled=Date.now();}
   plant.xp+=Math.floor(mins/15);checkLevelUp();
+  triggerMonthlyObjUpdate('__lectura');
   toast(`📚 +${mins} min`);save();renderAll();
 }
 
@@ -3113,6 +3221,7 @@ if(dailyActions.phoneDone){
   if(ex)ex.hours=h;else phoneUsage.push({date:today,hours:h});
   if(phoneUsage.length>14)phoneUsage.shift();
   dailyActions.phoneDone=true;
+  triggerMonthlyObjUpdate('__movil');
   if(!isProtectorActive()&&h>5){killPlant(`adicción al móvil — ${h}h de pantalla`);return;}
   if(h>2){const dmg=(h-2)*12;if(needsState.calmness){needsState.calmness.value=Math.max(0,needsState.calmness.value-dmg);needsState.calmness.extraCalmness=Math.max(0,(needsState.calmness.extraCalmness||0)-dmg);}}
   else toast(`📱 ${h}h · Sin penalización`);
@@ -3570,6 +3679,7 @@ function openEditCore(which){
   if(which==="aleman"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">🧠 Alemán</h4><div class="form-row"><div class="form-group"><label>Días sin estudiar → muerte</label><input type="number" id="ep_aleman_dias" step="0.5" min="0.5" max="30" value="${p.aleman.diasMaxSinHacer}"></div><div class="form-group"><label>Horas objetivo B2</label><input type="number" id="ep_aleman_horas" step="10" min="50" max="2000" value="${p.aleman.horasObjetivo}"></div></div>
   <div class="form-row"><div class="form-group"><label>Nivel de partida</label><select id="ep_aleman_start"><option value="0" ${(p.aleman.startHours||0)===0?"selected":""}>A1 (0h)</option><option value="200" ${(p.aleman.startHours||0)===200?"selected":""}>A2 (200h)</option><option value="400" ${(p.aleman.startHours||0)===400?"selected":""}>B1 (400h)</option></select></div><div class="form-group"><label>Horas ya acumuladas</label><input type="number" id="ep_aleman_current" step="1" min="0" max="2000" value="${Math.round(goals.german.hours)}"></div></div>`;}
   if(which==="deporte"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">💪 Deporte</h4><div class="form-row"><div class="form-group"><label>Días sin hacer → muerte</label><input type="number" id="ep_dep_dias" step="0.5" min="1" max="30" value="${p.deporte.diasMaxSinHacer}"></div></div>`;}
+  if(which==="lectura"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">📖 Lectura</h4><div class="form-row"><div class="form-group"><label>Días sin leer → muerte</label><input type="number" id="ep_lectura_dias" step="0.5" min="0.5" max="30" value="${coreParams.lectura?.diasMaxSinHacer||2}"></div></div>`;}
   content.innerHTML=html||"<p style='color:var(--text3);font-size:0.84rem'>Sin parámetros.</p>";
   modal.classList.add("open");
 }
@@ -3590,6 +3700,7 @@ function saveCoreEdit(){
     if(curEl){const cur=parseFloat(curEl.value)||0;goals.german.hours=Math.max(coreParams.aleman.startHours||0,cur);}
   }
   if(which==="deporte"||which==="all"){const d=get("ep_dep_dias");if(d>0)coreParams.deporte.diasMaxSinHacer=d;}
+  if(which==="lectura"||which==="all"){const d=get("ep_lectura_dias");if(d>0){if(!coreParams.lectura)coreParams.lectura={diasMaxSinHacer:2};coreParams.lectura.diasMaxSinHacer=d;}}
   closeEditCoreModal();save();renderAll();toast("⚙️ Parámetros guardados");
 }
 
@@ -3713,9 +3824,17 @@ function openMonthlyObjModal(editId){
   // Poblar selector de hábitos
   const sel=document.getElementById("mobjLinkedHabit");
   if(sel){
-    sel.innerHTML=`<option value="">-- Sin vincular --</option>`+
-      `<option value="__deporte">💪 Deporte (sesiones)</option>`+
-      customHabits.map(h=>`<option value="${h.id}">${h.icon} ${h.name}</option>`).join("");
+sel.innerHTML=`<option value="">-- Sin vincular --</option>`+
+  `<option value="__deporte">💪 Deporte (sesiones)</option>`+
+  `<option value="__agua">💧 Hidratación (días con objetivo)</option>`+
+  `<option value="__lectura">📖 Lectura (sesiones)</option>`+
+  `<option value="__sueno">😴 Sueño (noches registradas)</option>`+
+  `<option value="__pasos">⚡ Pasos (días con objetivo)</option>`+
+  `<option value="__orden">🍃 Orden (tests completados)</option>`+
+  `<option value="__estiramientos">🧘 Estiramientos (sesiones)</option>`+
+  `<option value="__movil">📱 Móvil (días registrados)</option>`+
+  `<option value="__aleman">🧠 Alemán (sesiones)</option>`+
+  customHabits.map(h=>`<option value="${h.id}">${h.icon} ${h.name}</option>`).join("");
   }
 
   if(editId){
@@ -3983,6 +4102,13 @@ function fullResetGameHard(){
   customHabits=[];
   disabledBuiltinGoals=[];
   defaultState();
+  // Al inicio de la función, antes de todo:
+const savedRecurring=[...recurringTasks];
+const savedForest=[...forest];
+
+// Después de defaultState() y needOverrides={}:
+recurringTasks=savedRecurring;
+forest=savedForest;
   localStorage.removeItem("levelup_need_overrides");
   needOverrides={};
   save();renderAll();renderNav();renderPhoneChart();renderSleepChart();startDecay();
@@ -3993,10 +4119,10 @@ function fullResetGameHard(){
 
 // LEVEL
 function checkLevelUp(){
-  while(plant.xp>=plant.xpNext){plant.xp-=plant.xpNext;plant.level++;plant.xpNext=Math.floor(plant.xpNext*1.2);toast(`🎋 ¡Nivel ${plant.level}!`);}
+  while(plant.xp>=plant.xpNext){plant.xp-=plant.xpNext;plant.level++;plant.xpNext=Math.floor(plant.xpNext*1.2);toast(`¡Nivel ${plant.level}!`);}
 }
-function plantEmoji(){if(!plant.alive)return"🥀";if(plant.level>=8)return"🌳";if(plant.level>=6)return"🌿";if(plant.level>=4)return"🌾";if(plant.level>=2)return"🌿";return"🌱";}
-function plantTagline(){if(!plant.alive)return"Ha muerto";if(plant.level>=8)return"Árbol majestuoso";if(plant.level>=6)return"Planta en plena forma";if(plant.level>=4)return"Brote maduro";if(plant.level>=2)return"Brote en crecimiento";return"Semilla en crecimiento";}
+function plantEmoji(){if(!plant.alive)return"🥀";if(plant.level>=8)return"🌳";if(plant.level>=6)return"🥦";if(plant.level>=4)return"🪴";if(plant.level>=2)return"🌿";return"🌱";}
+function plantTagline(){if(!plant.alive)return"Ha muerto";if(plant.level>=8)return"Árbol";if(plant.level>=6)return"Brócoli";if(plant.level>=4)return"Planta en crecimiento";if(plant.level>=2)return"Brote en crecimiento";return"Semilla en crecimiento";}
 function getLevelName(){const h=goals.german.hours;if(h>=600)return"B2";if(h>=400)return"B1";if(h>=200)return"A2";return"A1";}
 
 function getPendientes(){
@@ -4051,6 +4177,7 @@ function renderNav(){
   html+=`<div class="nav-section-label">App</div>`;
   html+=navLinkHtml("editar","✏️","Editar");
   html+=navLinkHtml("info","❓","Cómo funciona");
+  html+=navLinkHtml("bosque","🌳","Mi bosque");
 
   navLinks.innerHTML=html;
   navLinks.querySelectorAll(".nav-link").forEach(link=>{
@@ -4089,6 +4216,7 @@ function renderAll(){
   renderAgenda();
   renderMetasPage();
   renderEditPage();
+  renderForest();
 }
 
 function renderHome(){
@@ -4162,6 +4290,9 @@ function renderHome(){
   if(hxl) hxl.textContent = `✨ Nv.${plant.level}`;
   if(hxf) hxf.style.width = `${(plant.xp/plant.xpNext)*100}%`;
   if(hxt) hxt.textContent = `${plant.xp}/${plant.xpNext} XP`;
+
+  const pto=document.getElementById("plantTreeOverlay");
+if(pto)pto.style.display=(plant.alive&&plant.level>=8&&!treeOverlayDismissed)?"block":"none";
 }
 
 function buildAllGoalsData(){
@@ -4292,7 +4423,7 @@ function renderEditPage(){
     {key:"pasos",icon:"⚡",name:"Pasos diarios",desc:`Obj: ${coreParams.pasos.objetivo.toLocaleString()}`},
     {key:"orden",icon:"🍃",name:"Test de orden",desc:"Obligatorio · Reset medianoche"},
     {key:"estiramientos",icon:"🧘",name:"Estiramientos",desc:"Elasticidad"},
-    {key:"lectura",icon:"📖",name:"Lectura",desc:"Entretenimiento"},
+    {key:"lectura",icon:"📖",name:"Lectura",desc:`Sin leer ${coreParams.lectura?.diasMaxSinHacer||2}d → muerte`},
   ];
   const cel=document.getElementById("editCoreHabitsList");
   if(cel){
@@ -4547,6 +4678,8 @@ if(als) als.innerHTML = `Estudiar alemán mantiene la inteligencia de tu planta 
   const lma=document.getElementById("lecturaMedia");if(lma)lma.textContent=Math.round(lm);
   const ls=document.getElementById("lecturaSesiones");if(ls)ls.textContent=goals.reading.entries.length;
   const lb=document.getElementById("lecturaLibros");if(lb)lb.textContent=books.length;
+  const ls2=document.getElementById("lecturaSubtitle");
+if(ls2)ls2.innerHTML=`Leer mantiene a tu planta entretenida · Sin leer <strong>${coreParams.lectura?.diasMaxSinHacer||2}d</strong> → muerte · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('lectura')">⚙️ Ajustar</button> · <button class="btn btn-blue btn-xs" style="vertical-align:middle" onclick="openBookModal()">📚 Añadir libro</button>`;
   renderReadingHist();renderBooksSection();
 
   // SUEÑO
@@ -4928,6 +5061,7 @@ function navigateTo(pageId) {
     const st=document.getElementById("sportType");
     if(st){const rf=document.getElementById("runningExtraFields");if(rf)rf.style.display=st.value==="running"?"":"none";}
   }
+  if(pageId==="bosque"){setTimeout(renderForest,100);}
   renderHabitsPages();
 }
 
@@ -5222,6 +5356,118 @@ function updateTaskTimesInputs(){
     </div>`;
   }
   container.innerHTML=html;
+}
+
+
+// BOSQUE
+
+let forest = [];
+let lastAppTouch = Date.now();
+let treeOverlayDismissed = false;
+
+
+function triggerMonthlyObjUpdate(key){
+  const now=new Date();
+  const m=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  monthlyObjs.filter(o=>o.linkedHabit===key&&(!o.month||o.month===m)&&!o.done).forEach(o=>{
+    o.progress=(o.progress||0)+1;
+    if(o.target&&o.progress>=o.target){o.done=true;toast(`🎯 ¡Objetivo "${o.name}" completado!`);}
+  });
+}
+
+function checkForestBurn(lastActiveTs){
+  if(!forest.length)return;
+  const days=(Date.now()-(lastActiveTs||Date.now()))/86400000;
+  if(days>30){
+    forest=[];
+    toast("🔥 Tu bosque ha ardido — más de 30 días sin usar la app");
+    save();
+  }
+}
+
+function plantTree(){
+  if(!plant.alive){toast("Tu planta ha muerto, no puedes plantarla");return;}
+  if(plant.level<8){toast("Tu planta necesita nivel 8 para ser un árbol");return;}
+  const name=prompt("¿Cómo quieres llamar a este árbol?",`Árbol ${forest.length+1}`);
+  if(name===null)return;
+  forest.push({id:"ft_"+Date.now(),name:name.trim()||`Árbol ${forest.length+1}`,plantedAt:Date.now(),level:plant.level});
+  treeOverlayDismissed=false;
+  if(decayInterval)clearInterval(decayInterval);
+  Object.keys(customChartInsts).forEach(k=>{if(customChartInsts[k])customChartInsts[k].destroy();});
+  customChartInsts={};
+  const savedBooks=[...books],savedLongGoals=[...longGoals],savedMonthlyObjs=[...monthlyObjs];
+  const savedAgendaTasks=[...agendaTasks],savedCustomHabits=[...customHabits];
+  const savedSportCats=[...sportCats],savedOrderQuestions=[...orderQuestions];
+  const savedCoreParams=JSON.parse(JSON.stringify(coreParams));
+  const savedDisabledCore=[...disabledCoreHabits],savedDisabledBuiltin=[...disabledBuiltinGoals];
+  const savedRecurring=[...recurringTasks],savedForest=[...forest];
+  defaultState();
+  books=savedBooks;longGoals=savedLongGoals;monthlyObjs=savedMonthlyObjs;
+  agendaTasks=savedAgendaTasks;customHabits=savedCustomHabits;
+  sportCats=savedSportCats;orderQuestions=savedOrderQuestions;
+  coreParams=savedCoreParams;disabledCoreHabits=savedDisabledCore;
+  disabledBuiltinGoals=savedDisabledBuiltin;recurringTasks=savedRecurring;
+  forest=savedForest;lastAppTouch=Date.now();
+  customNeedStates={};habitLogs={};habitStreaks={};
+  customHabits.forEach(h=>{customNeedStates[h.id]=100;habitLogs[h.id]=[];habitStreaks[h.id]={current:0,last:null};h.createdAt=Date.now();if(h.goal)h.goal.progress=0;});
+  save();renderAll();renderPhoneChart();renderSleepChart();startDecay();
+  toast(`🌳 "${name.trim()||"Árbol"}" plantado en tu bosque`);
+  navigateTo('bosque');
+}
+
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return h;}
+
+function renderForest(){
+  const el=document.getElementById("forestContent");if(!el)return;
+  const ba=document.getElementById("forestBurnAlert");
+  if(ba){
+    const days=(Date.now()-lastAppTouch)/86400000;
+    ba.innerHTML=forest.length&&days>20
+      ?`<div class="alert alert-warn">⚠️ Han pasado ${Math.floor(days)} días. Si pasan 30 sin usar la app, el bosque arderá.</div>`:"";
+  }
+  const fc=document.getElementById("forestCount");
+  if(fc)fc.textContent=forest.length?`(${forest.length} árbol${forest.length!==1?"es":""})`:"";
+
+  const treeEmojis=["🌳","🌲","🎄","🌴"];
+  const flowerEmojis=["🌼","🌸","🌷","🍀"];
+
+  let html=`
+    <div class="meadow-wrap">
+      <div class="meadow-sun"></div>
+      <div class="meadow-cloud" style="width:70px;height:24px;top:30px;left:14%"></div>
+      <div class="meadow-cloud" style="width:50px;height:18px;top:54px;left:38%"></div>
+      <div class="meadow-hill"></div>`;
+
+  if(!forest.length){
+    html+=`<div class="meadow-empty">
+      <div class="sapling">🌱</div>
+      <div style="font-size:0.84rem;font-weight:500">Tu prado está vacío</div>
+      <div style="font-size:0.72rem;margin-top:2px">Lleva tu planta al nivel 8 y plántala aquí</div>
+    </div>`;
+  } else {
+    for(let i=0;i<10;i++){
+      const h=hashStr("flower"+i);
+      const x=(h%90)+2;
+      const y=(h>>3)%40+4;
+      const f=flowerEmojis[h%flowerEmojis.length];
+      html+=`<span class="meadow-flower" style="left:${x}%;bottom:${y}%">${f}</span>`;
+    }
+    forest.forEach((t,i)=>{
+      const h=hashStr(t.id);
+      const x=(h%88)+3;
+      const yBand=(h>>4)%55;
+      const size=0.85+(1-(yBand/55))*0.65;
+      const emoji=treeEmojis[h%treeEmojis.length];
+      const delay=(i%12)*0.04;
+      html+=`<div class="meadow-tree" style="left:${x}%;bottom:${yBand}%;font-size:${(2*size).toFixed(2)}rem;animation-delay:${delay}s;z-index:${100-yBand}">
+        ${emoji}
+        <span class="meadow-tree-label">${t.name} · Nv.${t.level}</span>
+      </div>`;
+    });
+  }
+
+  html+=`</div>`;
+  el.innerHTML=html;
 }
 
 // INIT
