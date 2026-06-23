@@ -1446,11 +1446,13 @@ textarea {
 .meadow-scroll{
   position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;z-index:1;
 }
-.meadow-canvas{position:relative;height:100%;}
+
 .meadow-flower{position:absolute;font-size:0.85rem;opacity:0.9;}
+.meadow-canvas{position:relative;height:100%;padding-bottom:14px;box-sizing:border-box;}
 .meadow-tree{
   position:absolute;line-height:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,0.2));
   cursor:default;transform-origin:bottom center;animation:treeGrow 0.5s ease both;transition:transform 0.2s;
+  overflow:visible;
 }
 .meadow-tree:hover{transform:scale(1.15) translateY(-2px);}
 
@@ -1580,6 +1582,7 @@ textarea {
         <div class="form-group"><label>Obligatorio (muere si no lo haces)</label>
           <select id="hObligatory"><option value="no">No</option><option value="yes">Sí ⚠️</option></select>
         </div>
+         <div class="form-group"><label>XP por registro</label><input type="number" id="hXpReward" min="1" max="50" step="1" value="6" placeholder="Ej: 6"></div>
         <div class="form-group"><label>Recordatorio</label><input type="time" id="hReminder"></div>
       </div>
       <div class="form-row">
@@ -1994,7 +1997,7 @@ textarea {
     <div id="plantTreeOverlay" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;text-align:center;background:var(--card);border-radius:var(--radius);padding:2rem;box-shadow:0 8px 40px rgba(0,0,0,0.25);max-width:320px;width:90%">
   <div style="font-size:3rem;margin-bottom:0.8rem">🌳</div>
   <h3 style="font-family:'Lora',serif;color:var(--green-dk);margin-bottom:0.5rem">¡Tu planta es un árbol!</h3>
-  <p style="font-size:0.82rem;color:var(--text2);margin-bottom:1.2rem">Ha alcanzado el nivel máximo. Plántala en tu bosque y empieza una nueva.</p>
+  <p style="font-size:0.82rem;color:var(--text2);margin-bottom:1.2rem">Ha alcanzado la evolución más alta. Plántala en tu bosque y empieza una nueva.</p>
   <button class="btn" onclick="plantTree()" style="background:var(--green-dk);width:100%">🌳 Plantar en el bosque</button>
   <br><button onclick="treeOverlayDismissed=true;document.getElementById('plantTreeOverlay').style.display='none'" style="margin-top:0.8rem;background:none;border:none;font-size:0.75rem;color:var(--text3);cursor:pointer">Recordármelo más tarde</button>
 </div>
@@ -2004,7 +2007,7 @@ textarea {
 
   <!-- MI BOSQUE -->
 <div class="page" id="page-bosque">
-  <div class="page-header"><h2>🌳 Mi bosque</h2><p>Cada árbol es una planta que ha alcanzado el nivel máximo</p></div>
+  <div class="page-header"><h2>🌳 Mi bosque</h2><p>Cada árbol es una planta que ha alcanzado la evolución máxima</p></div>
   <div id="forestBurnAlert"></div>
   <div class="card">
     <div class="card-title">Árboles plantados <span id="forestCount" style="font-size:0.75rem;color:var(--text3);font-family:'DM Sans',sans-serif;font-weight:400"></span></div>
@@ -2406,8 +2409,8 @@ textarea {
     </div>
 
     <div class="edit-section">
-      <div class="edit-section-title">⚠️ ¡DANGER ZONE!</div>
-      <button class="btn btn-danger btn-sm" onclick="fullResetGameHard()">🔄 Reiniciar toda la app </button>
+      <div class="edit-section-title">⚠️ ¡DANGER ZONE! ⚠️</div>
+      <button class="btn btn-danger btn-sm" onclick="fullResetGameHard()">⚠️ Reiniciar toda la app ⚠️</button>
     </div>
   </div>
 
@@ -2418,7 +2421,7 @@ textarea {
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.6rem;font-weight:500">🌱 La idea general</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">LevelUp es un tracker de hábitos donde tu progreso se refleja en una planta virtual. Cada hábito alimenta una <strong>necesidad</strong> de la planta. Si descuidas las necesidades, la planta muere y empiezas de cero, perdiendo el progreso de hábitos, XP y racha. Tus libros, metas, objetivos mensuales, agenda y hábitos personalizados se conservan tras una muerte. Al llegar al nivel 8, tu planta se convierte en árbol y puedes plantarla en <strong>Mi bosque</strong> para empezar una nueva.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">LevelUp es un tracker de hábitos donde tu progreso se refleja en una planta virtual. Cada hábito alimenta una necesidad de la planta. Si descuidas las necesidades, la planta muere y empiezas de cero, perdiendo el progreso de hábitos, XP y racha. Tus libros, metas, objetivos mensuales, agenda y hábitos personalizados se conservan tras una muerte. Al llegar al nivel 8, tu planta se convierte en árbol y puedes plantarla en <strong>Mi bosque</strong> para empezar una nueva.</p>
   </div>
 
   <div class="card">
@@ -2426,32 +2429,32 @@ textarea {
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-bottom:0.8rem">Tu planta tiene 8 necesidades vinculadas a hábitos predefinidos. Todas son ajustables o desactivables desde <strong>Editar</strong>.</p>
     <div class="need-table-wrap">
     <table class="need-table">
-      <thead><tr><th>Necesidad</th><th>Hábito</th><th>Se agota en</th><th>¿Mata?</th></tr></thead>
+      <thead><tr><th>Necesidad</th><th>Hábito</th><th>Se agota en...</th><th>¿Mata?</th></tr></thead>
       <tbody>
-        <tr><td>💧 Hidratación</td><td>Beber agua — objetivo configurable (por defecto 1,2 L)</td><td>Reset a medianoche</td><td>Sí (a 0%)</td></tr>
-        <tr><td>💪 Fuerza</td><td>Deporte — mínimo 1 sesión/semana</td><td>7 días (ajustable)</td><td>Sí</td></tr>
-        <tr><td>😴 Energía</td><td>Sueño — registrar horas cada día</td><td>Reset a medianoche</td><td>Sí (obligatorio diario)</td></tr>
-        <tr><td>🧠 Inteligencia</td><td>Alemán — estudiar horas acumuladas</td><td>3 días sin estudiar (ajustable)</td><td>Sí</td></tr>
-        <tr><td>⚡ Salud</td><td>Pasos diarios — objetivo y mínimo configurables</td><td>Reset a medianoche</td><td>Sí si &lt; mínimo</td></tr>
-        <tr><td>🍃 Tranquilidad</td><td>Test del orden — cuestionario diario</td><td>Reset a medianoche</td><td>Sí (obligatorio diario)</td></tr>
-        <tr><td>🧘 Elasticidad</td><td>Estiramientos — sesión diaria</td><td>Reset a medianoche</td><td>Sí (a 0%)</td></tr>
-        <tr><td>📖 Entretenimiento</td><td>Leer — sesiones de lectura</td><td>2 días sin leer (ajustable)</td><td>Sí</td></tr>
+        <tr><td>💧 Hidratación</td><td>Beber agua (por defecto 1,2 L)</td><td>Reset a medianoche</td><td>Sí (a medianoche si &lt; mínimo)</td></tr>
+        <tr><td>💪 Fuerza</td><td>Deporte</td><td>7 días (ajustable)</td><td>Sí</td></tr>
+        <tr><td>😴 Energía</td><td>Sueño (registrar horas cada día)</td><td>Reset a medianoche</td><td>Sí (si no ingresar las horas o si durmes menos de 5 H tres días seguidos)</td></tr>
+        <tr><td>🧠 Inteligencia</td><td>Alemán</td><td>3 días sin estudiar (ajustable)</td><td>Sí</td></tr>
+        <tr><td>⚡ Salud</td><td>Pasos diarios (objetivo y mínimo configurables)</td><td>Reset a medianoche</td><td>Sí si &lt; mínimo</td></tr>
+        <tr><td>🍃 Tranquilidad</td><td>Test del orden (cuestionario diario)</td><td>Reset a medianoche</td><td>Sí (obligatorio diario)</td></tr>
+        <tr><td>🧘 Elasticidad</td><td>Estiramientos (sesión diaria)</td><td>Reset a medianoche</td><td>Sí (a 0%)</td></tr>
+        <tr><td>📖 Entretenimiento</td><td>Leer</td><td>2 días sin leer (ajustable)</td><td>Sí (a 0%)</td></tr>
       </tbody>
     </table>
     </div>
-    <p style="font-size:0.78rem;color:var(--text3);margin-top:0.8rem">Además, <strong>el uso del móvil</strong> es un obligatorio diario independiente: más de 5 horas de pantalla mata a la planta. Registrar más de 2 horas aplica un penalizador de tranquilidad. Todos los parámetros se ajustan con el botón ⚙️ de cada página o desde la sección <strong>Editar → Hábitos del sistema</strong>.</p>
+    <p style="font-size:0.78rem;color:var(--text3);margin-top:0.8rem">Además, el uso del móvil es un obligatorio diario independiente: más de 5 horas de pantalla mata a la planta. Registrar más de 2 horas aplica un penalizador de tranquilidad. Todos los parámetros se ajustan con el botón ⚙️ de cada página o desde la sección <strong>Editar → Hábitos del sistema</strong>.</p>
   </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">⚠️ Obligatorios diarios</h3>
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Cuatro acciones deben completarse antes de medianoche o la planta muere al día siguiente:</p>
     <ul style="font-size:0.84rem;color:var(--text2);line-height:2;padding-left:1.2rem;margin-top:0.4rem">
-      <li><strong>💧 Agua</strong> — alcanzar el objetivo de litros configurado</li>
-      <li><strong>😴 Sueño</strong> — registrar las horas dormidas (dormir menos del mínimo fatal mata directamente)</li>
-      <li><strong>🍃 Test de orden</strong> — completar el cuestionario del día</li>
-      <li><strong>📱 Móvil</strong> — registrar las horas de pantalla</li>
+      <li><strong>💧 Agua:</strong> Alcanzar el objetivo de litros configurado</li>
+      <li><strong>😴 Sueño:</strong> Registrar las horas dormidas (dormir menos del mínimo fatal mata directamente)</li>
+      <li><strong>🍃 Test de orden:</strong> Completar el cuestionario del día</li>
+      <li><strong>📱 Móvil:</strong> Registrar las horas de pantalla</li>
     </ul>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem">Si ya registraste sueño o móvil y te equivocaste, volviendo a registrar te preguntará si quieres editar el valor anterior (revirtiendo el XP y los efectos de la primera vez). Los hábitos personalizados marcados como obligatorios también entran en esta lista.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem">Si ya has registrado las horas de sueño o móvil y te has equivocado, volviendolas a registrar puedes editar el valor anterior (revirtiendo el XP y los efectos de la primera vez). Los hábitos personalizados marcados como obligatorios también entran en esta lista.</p>
   </div>
 
   <div class="card">
@@ -2463,15 +2466,15 @@ textarea {
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">📅 Agenda</h3>
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Organiza tu día con tareas únicas y tareas recurrentes. Al añadir una tarea puedes configurar:</p>
     <ul style="font-size:0.84rem;color:var(--text2);line-height:2;padding-left:1.2rem;margin-top:0.4rem">
-      <li><strong>Nombre, hora, prioridad</strong> (alta / media / baja) y <strong>categoría</strong> (Personal, Trabajo, Salud, Deporte, Estudio, Casa, Social, Otro)</li>
-      <li><strong>Fecha</strong> — puede ser hoy, mañana o cualquier día futuro</li>
-      <li><strong>Veces al día</strong> — define cuántas repeticiones necesita la tarea (1–4). Puedes asignar una hora distinta a cada repetición y una unidad opcional (ej. "minutos", "vasos"). Cada vez que pulsas +1 ganas 1 XP; la tarea se completa cuando alcanzas el total de repeticiones.</li>
-      <li><strong>Notas</strong> — detalles adicionales visibles bajo el nombre</li>
+      <li><strong>Nombre, hora, prioridad</strong> (alta / media / baja) y <strong>categoría</strong> (Personal, Trabajo, Salud, Deporte, Estudio, Casa, Social u Otro)</li>
+      <li><strong>Fecha:</strong> Puede ser hoy, mañana o cualquier día futuro</li>
+      <li><strong>Veces al día:</strong> Define cuántas repeticiones necesita la tarea (de 1 a 4). Puedes asignar una hora distinta a cada repetición y una unidad opcional (ej. "minutos", "vasos" ...). Cada vez que pulsas +1 ganas 1 XP; la tarea se completa cuando alcanzas el total de repeticiones.</li>
+      <li><strong>Notas:</strong> Detalles o comentarios adicionales visibles bajo el nombre</li>
     </ul>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem"><strong>Tareas recurrentes (🔁):</strong> define los días de la semana y una hora diferente para cada día si quieres. Se generan automáticamente en la agenda solo el día que toca — no aparecen antes de tiempo. Para eliminar una recurrente, borra desde el icono 🗑️ en la tarea o edita desde ✏️.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem"><strong>Tareas recurrentes (🔁):</strong> define los días de la semana y una hora diferente para cada día si quieres. Se generan automáticamente en la agenda solo el día que toca. Para eliminar una tarea, borra desde el icono 🗑️ en la tarea o edita desde ✏️.</p>
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem"><strong>Marcar tareas:</strong><br>
-    • <strong>✓ Completada</strong> → +1 XP. Si la desmarcas, se resta el XP.<br>
-    • <strong>✕ No realizada</strong> → -1 XP. Si la desmarcas, se devuelve el XP.<br>
+    • <strong>✓ Completada</strong> → +1 XP.<br>
+    • <strong>✕ No realizada</strong> → -1 XP. ¿La has marcado por error? ¡Tranquil@! Si la desmarcas, se devuelve el XP.<br>
     • Las tareas de días anteriores sin marcar aparecen en rojo en la sección "Días anteriores — sin completar" para que no se pierdan.<br>
     • La línea <strong>▶ Ahora</strong> marca en qué punto del día estás respecto a tus tareas, para ver de un vistazo si vas según lo previsto.<br>
     • El resumen semanal solo cuenta tareas hasta el día de hoy (no las futuras como pendientes).<br>
@@ -2480,7 +2483,7 @@ textarea {
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">💧 Hidratación</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra el agua con botones rápidos (+1 vaso / +500ml / +1L), una cantidad personalizada en el campo de texto, o cliclando en los vasos del tanque. Si te equivocas, usa los botones "-1 vaso" / "-500ml" para restar. El nivel se ajusta con el botón ⚙️ (objetivo en litros).</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra el agua con botones rápidos (+1 vaso / +500ml / +1L), una cantidad personalizada en el campo de texto, o cliclando en los vasos del tanque. Si te equivocas, usa los botones "-1 vaso" / "-500ml" para restar. El nivel mínimo se ajusta con el botón ⚙️ (objetivo en litros).</p>
   </div>
 
   <div class="card">
@@ -2490,7 +2493,7 @@ textarea {
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🧠 Alemán</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra horas de estudio acumuladas. La hoja de ruta muestra tu progreso de A1 a B2 con barras por tramo. Desde ⚙️ Ajustar puedes cambiar el <strong>nivel de partida</strong> (A1/A2/B1), las horas ya acumuladas antes de usar la app, el objetivo total de horas y los días sin estudiar que provocan la muerte, útil si reinicias la planta pero no quieres perder tu progreso real.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra horas de estudio acumuladas. La hoja de ruta muestra tu progreso de A1 a B2. Desde ⚙️ Ajustar puedes cambiar el nivel de partida (A1/A2/B1), las horas ya acumuladas antes de usar la app, el objetivo total de horas y los días sin estudiar que provocan la muerte, útil si reinicias la planta pero no quieres perder tu progreso real.</p>
   </div>
 
   <div class="card">
@@ -2500,7 +2503,7 @@ textarea {
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🍃 Test del orden</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Un cuestionario de toggles que mide el orden de tu entorno. Cada pregunta es un sí/no. Al enviarlo se calcula una puntuación sobre 10 y se guarda el historial. Puedes <strong>añadir, editar y eliminar preguntas</strong> desde el botón ✏️ Editar preguntas o desde la sección Editar de la app. Por defecto incluye 6 preguntas sobre suelo, escritorio, ropa, cama, ventilación y limpieza.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Un cuestionario que mide el orden de tu entorno. Cada pregunta es un sí/no. Al enviarlo se calcula una puntuación sobre 10 y se guarda el historial. Puedes añadir, editar y eliminar preguntas desde el botón ✏️ <strong>Editar preguntas</strong> o desde la sección <strong>Editar</strong> de la app. Por defecto incluye 6 preguntas sobre suelo, escritorio, ropa, cama, ventilación y limpieza.</p>
   </div>
 
   <div class="card">
@@ -2510,36 +2513,36 @@ textarea {
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">📖 Lectura</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra minutos de lectura con botones rápidos (15, 30, 45 min, 1h) o campo personalizado. Desde el botón 📚 Añadir libro puedes registrar los libros que terminas, con título, autor, género, puntuación (1–5 estrellas), fecha de finalización y reseña opcional. La biblioteca filtra por género y muestra las reseñas inline. Los días sin leer que provocan la muerte son configurables desde ⚙️.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra minutos de lectura con botones rápidos (15, 30, 45 min, 1h) o campo personalizado. Desde el botón 📚 <strong>Añadir libro</strong> puedes registrar los libros que terminas, con título, autor, género, puntuación (1–5 estrellas), fecha de finalización y reseña opcional. La biblioteca filtra por género y muestra las reseñas. Los días sin leer que provocan la muerte son configurables desde ⚙️.</p>
   </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">✨ Hábitos personalizados</h3>
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Crea tus propios hábitos con control total. Al crear uno configuras:</p>
     <ul style="font-size:0.84rem;color:var(--text2);line-height:2;padding-left:1.2rem;margin-top:0.4rem">
-      <li><strong>Nombre y emoji</strong> — elige de la paleta rápida o escribe el tuyo</li>
-      <li><strong>Necesidad asociada</strong> — vincula a una de las 8 necesidades del sistema o crea una necesidad nueva con nombre e icono propios. Varios hábitos pueden compartir la misma necesidad nueva.</li>
-      <li><strong>Unidad de registro</strong> — hecho/no hecho, minutos, horas, km, cantidad, páginas o personalizada</li>
-      <li><strong>Días sin hacer</strong> que provocan la muerte (por ejemplo 3 días)</li>
-      <li><strong>Frecuencia</strong> — diaria o semanal</li>
-      <li><strong>Efecto al completar</strong>: sube la necesidad al 100%, sube un % concreto (acumulable o fijo), baja un % concreto (con opción de matar si llega a 0%), o solo registra sin afectar a la necesidad</li>
-      <li><strong>Obligatorio</strong> — si no lo haces, la planta muere al día siguiente</li>
-      <li><strong>Recordatorio</strong> — hora del día</li>
-      <li><strong>Mostrar en el menú lateral</strong> — elige sección (Hábitos core o Seguimiento)</li>
-      <li><strong>Funciones activables</strong>: racha, gráfico de historial, estadísticas (media/máx/total), notas, meta numérica y récord personal</li>
-      <li><strong>Meta</strong> — objetivo numérico con unidad, descripción, progreso inicial, color de la barra, fecha límite y cuenta atrás</li>
+      <li><strong>Nombre y emoji:</strong> Elige de la paleta rápida o escribe el tuyo</li>
+      <li><strong>Necesidad asociada:</strong> Vincula a una de las 8 necesidades del sistema o crea una necesidad nueva con nombre e icono propios. Varios hábitos pueden compartir la misma necesidad nueva.</li>
+      <li><strong>Unidad de registro:</strong> Hecho/no hecho, minutos, horas, km, cantidad, páginas o personalizada</li>
+      <li><strong>Días sin hacer:</strong> Días sin hacer que provocan la muerte de la planta</li>
+      <li><strong>Frecuencia:</strong> Diaria o semanal</li>
+      <li><strong>Efecto al completar:</strong>: Sube la necesidad al 100%, sube un % concreto (acumulable o fijo), baja un % concreto (con opción de matar si llega a 0%) o solo registra sin afectar a la necesidad</li>
+      <li><strong>Obligatorio:</strong> Si no lo haces, la planta muere al día siguiente</li>
+      <li><strong>Recordatorio:</strong> Hora del día. Aún en estado de desarrollo.</li>
+      <li><strong>Mostrar en el menú lateral:</strong> Elige sección (Hábitos core o Seguimiento)</li>
+      <li><strong>Funciones activables</strong>: Racha, gráfico de historial, estadísticas (media/máx/total), notas, meta numérica y récord personal. Aún en estado de desarrollo.</li>
+      <li><strong>Meta:</strong> — objetivo numérico con unidad, descripción, progreso inicial, color de la barra, fecha límite y cuenta atrás</li>
     </ul>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem">La página de detalle de cada hábito muestra el nivel de necesidad actual, la racha, estadísticas, el gráfico de historial, la meta y los últimos registros. Al registrar, el efecto configurado se aplica inmediatamente y los objetivos mensuales vinculados se actualizan solos.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem">La página de cada hábito muestra el nivel de necesidad actual, la racha, estadísticas, el gráfico de historial, la meta y los últimos registros. Al registrar, el efecto configurado se aplica inmediatamente y los objetivos mensuales vinculados se actualizan solos.</p>
   </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🏆 Metas a largo plazo</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Crea metas con nombre, emoji, objetivo numérico, unidad, descripción, color de barra, fecha límite y cuenta atrás. Para sumar progreso manualmente pulsa el botón <strong>+</strong> junto a la meta — te pedirá cuánto añadir. Hay tres metas predefinidas (Alemán B2, Spagatt, Biblioteca) que puedes ocultar o restaurar desde Editar. Las metas aparecen en la página de inicio y en la sección Metas.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Crea metas con nombre, emoji, objetivo numérico, unidad, descripción, color de barra, fecha límite y cuenta atrás. Para sumar progreso manualmente pulsa el botón <strong>+</strong> junto a la meta — te pedirá cuánto añadir. Hay tres metas predefinidas (Alemán B2, Spagatt, Biblioteca) que puedes ocultar o restaurar desde Editar. Las metas aparecen en la página de inicio y en la sección <strong>Metas</strong>.</p>
   </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">📅 Objetivos mensuales</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Añade objetivos con nombre, emoji, categoría, mes, fecha límite (con cuenta atrás), notas y un campo de veces objetivo. Puedes <strong>vincular un objetivo a cualquier hábito</strong> del sistema o personalizado: cada vez que registres ese hábito, el progreso sube +1 automáticamente y el objetivo se completa solo al llegar al número de veces marcado. Sin vinculación, puedes marcarlo como completado manualmente con un clic. Los objetivos se filtran por mes en la sección Metas y aparecen también en el inicio.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Añade objetivos con nombre, emoji, categoría, mes, fecha límite (con cuenta atrás), notas y un campo de "veces objetivo". Puedes vincular un objetivo a cualquier hábito del sistema o personalizado: cada vez que registres ese hábito, el progreso sube +1 automáticamente y el objetivo se completa solo al llegar al número de veces marcado. Sin vinculación, puedes marcarlo como completado manualmente con un clic. Los objetivos se filtran por mes en la sección <strong>Metas</strong> y aparecen también en el inicio.</p>
   </div>
 
   <div class="card">
@@ -2555,32 +2558,38 @@ textarea {
       <li>✨ Hábito personalizado → +6 XP por registro</li>
       <li>📚 Lectura → +1 XP por cada 15 min registrados</li>
       <li>😴 Sueño óptimo (≥ mínimo configurado) → +8 XP; sueño parcial → +3 XP</li>
-      <li>📅 Agenda → +1 XP al marcar completada, -1 XP al marcar fallida (reversible)</li>
+      <li>📅 Agenda → +1 XP al marcar completada, -1 XP al marcar fallida</li>
     </ul>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem">Al subir de nivel el umbral de XP sube un 20%. A partir del nivel 2 la planta cambia de aspecto: 🌱 → 🌿 → 🪴 → 🥦 → 🌳 (nivel 8, árbol). El nivel actual aparece en el menú lateral con barra de XP.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem">A partir del nivel 2 la planta cambia de aspecto: 🌱 → 🌿 → 🪴 → 🥦 (Sí, un brócoli) → 🌳 (nivel 8 = árbol). El nivel actual aparece en el menú principal y lateral con una barra de XP. Al subir de nivel el umbral de XP sube un 20%.</p>
   </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🌳 Mi bosque</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Cuando tu planta alcanza el nivel 8, aparece un panel para plantarla en el bosque. Le pones nombre, se guarda como árbol permanente con una animación de pradera, y se inicia una nueva planta desde cero (conservando todos tus datos). Si no usas la app durante más de 30 días, el bosque arde y los árboles se pierden.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Cuando tu planta alcanza el nivel 8, aparece un panel para plantarla en el prado. Ese árbol se guarda en la página <strong>Mi bosque</strong> y se inicia una nueva planta desde cero (conservando todos tus datos). Si no usas la app durante más de 30 días, el bosque arde y los árboles se pierden (no contribuyas a los incendios forestales...). A la hora de plantar el árbol, puedes cambiarle el nombre (lo cual, seamos sinceros, no tiene mucho sentido y recomiento seguir llamardo al árbol como le llamabas a la plant). Cuando tu árbol sea parte del bosque, solo tienes que hacer click para ver el nombre del árbol, cuándo empezaste a cuidarlo y cuando lo plantaste en el prado. Un bosque de recuerdos vegetales.</p>
   </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">✏️ Editar — personalización completa</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">La sección Editar es el panel de control de toda la app. Desde aquí puedes:</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">La sección <strong>Editar</strong> es el panel de control de toda la app. Desde aquí puedes:</p>
     <ul style="font-size:0.84rem;color:var(--text2);line-height:2;padding-left:1.2rem;margin-top:0.4rem">
-      <li><strong>Renombrar tu planta</strong></li>
-      <li><strong>Ajustar todos los parámetros</strong> de los hábitos del sistema de golpe o uno a uno</li>
-      <li><strong>Desactivar y reactivar</strong> cualquier hábito del sistema — su necesidad desaparece de la planta y deja de contar como obligatorio</li>
+      <li><strong>Renombrar tu planta (utilizar un nombre original es obligatorio)</strong></li>
+      <li><strong>Ajustar todos los parámetros</strong> de los hábitos del sistema a la vez o uno a uno</li>
+      <li><strong>Desactivar y reactivar</strong> cualquier hábito del sistema (su necesidad desaparece de la planta y deja de contar como obligatorio). Aunque bastante tops los habitos que ya os he puesto</li>
       <li><strong>Crear, editar y eliminar hábitos personalizados</strong> con todas las opciones descritas arriba</li>
-      <li><strong>Editar las preguntas del test de orden</strong> — añadir, editar con prompt inline o eliminar</li>
-      <li><strong>Gestionar categorías deportivas</strong> — crear con emoji y nombre, activar km y ritmo, marcar como obligatoria semanal, eliminar</li>
+      <li><strong>Editar las preguntas del test de orden:</strong> añadir, editar o eliminar</li>
+      <li><strong>Gestionar categorías deportivas:</strong> Crear con emoji y nombre, activar km y ritmo, marcar como obligatoria semanal y eliminarla</li>
       <li><strong>Editar, añadir o eliminar metas a largo plazo</strong> y objetivos mensuales</li>
-      <li><strong>Editar o eliminar necesidades</strong> — cambia nombre e icono de cualquier necesidad del sistema o personalizada, o crea necesidades nuevas vinculadas a un hábito</li>
-      <li><strong>Ocultar y restaurar metas predefinidas</strong> (Alemán B2, Spagatt, Biblioteca)</li>
-      <li><strong>Reiniciar la planta</strong> (conserva datos) o <strong>reiniciar toda la app</strong> (borra todo)</li>
+      <li><strong>Editar o eliminar necesidades:</strong> Puedes cambiar el nombre e icono de cualquier necesidad del sistema o personalizada, o crea necesidades nuevas vinculadas a un hábito</li>
+      <li><strong>Ocultar y restaurar metas predefinidas</strong> (Alemán B2, Spagatt y/o Biblioteca)</li>
+      <li><strong>Reiniciar la planta</strong> (conservando tus datos) o <strong>reiniciar toda la app</strong> (borrando todo, incluyendo tus árboles ya plantados). Ten cuidado, no hay vuelta atrás...</li>
     </ul>
   </div>
+
+<div class="card">
+  <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500"> 🧡 Última nota de la autora</h3>
+  <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Esta web no es perfecta, hay muchas formas de hacer trampa. El objetivo es que utilizando esta web podamos convertirnos en adultos funcionales (que ya es hora) y llegar a parecernos un poquito más cada día a nuestro yo ideal. Cree esta web porque nada me funcionaba, siempre acababa volviendo al punto de partida, y esto de alguna forma me está ayudando. Hacer trampa solo te afecta a ti y marea a tu planta. Y nadie quiere una planta mareada. ¡Cuidala bien y crece con ella!</p>
+</div>
+
 </div>
 
 </main>
@@ -2721,7 +2730,7 @@ function getCurrentCustomNeedLevel(habit){
 // DEFAULT STATE
 function defaultState(){
   const now=Date.now();
-  plant={name:"Mi planta",level:1,xp:0,xpNext:5,alive:true,deathReason:null,createdAt:now};
+  plant={name:"Mi planta",level:1,xp:0,xpNext:1000,alive:true,deathReason:null,createdAt:now};
   needsState={strength:{value:100,lastFulfilled:now},intelligence:{value:100,lastFulfilled:now},calmness:{value:100,extraCalmness:0,lastResetDate:getTodayKey()},entertainment:{value:100,lastFulfilled:now},vitality:{value:100,lastFulfilled:now}};
   hydration={level:100,extraHydration:0,loggedToday:0,target:1.2,lastResetDate:getTodayKey()};
   flexibility={level:100,extraFlexibility:0,doneToday:false,lastResetDate:getTodayKey()};
@@ -2877,9 +2886,6 @@ function checkDailyObligatory(){
 }
 
 function isDisabledCore(id){ return disabledCoreHabits.includes(id); }
-
-
-
 
 // SAVE Y LOAD
 function save(){
@@ -3097,15 +3103,19 @@ function getAllNeeds(){
 function addWater(liters){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
   if(isNaN(liters)||liters<=0){toast("Cantidad inválida");return;}
+  if(liters<0.1){toast("❌ Mínimo 0.1L por registro");return;}
+  liters=Math.round(liters*100)/100;
   const pct=(liters/hydration.target)*100;
   hydration.extraHydration=Math.min(100,hydration.extraHydration+pct);
   hydration.loggedToday=Math.min(hydration.target*2,hydration.loggedToday+liters);
-  updateAllLevels();plant.xp+=3;checkLevelUp();
+  updateAllLevels();
+  const xpGained=Math.max(1,Math.round((liters/0.3)*3));
+  plant.xp+=xpGained;checkLevelUp();
   if(!dailyActions.aguaObjReached&&hydration.loggedToday>=hydration.target){
   dailyActions.aguaObjReached=true;
   triggerMonthlyObjUpdate('__agua');
 }
-  toast(`💧 +${liters}L · ${Math.round(hydration.level)}%`);
+  toast(`💧 +${liters}L · +${xpGained} XP · ${Math.round(hydration.level)}%`);
   save();renderAll();
 }
 
@@ -3162,9 +3172,10 @@ function doAleman(){
   goals.german.hours=Math.min(coreParams.aleman.horasObjetivo,goals.german.hours+h);
   document.getElementById("germanHoursInput").value="";
   if(needsState.intelligence){needsState.intelligence.value=100;needsState.intelligence.lastFulfilled=Date.now();}
-  plant.xp+=8;checkLevelUp();
+  const xpGained=Math.max(1,Math.round(h*8));
+  plant.xp+=xpGained;checkLevelUp();
   triggerMonthlyObjUpdate('__aleman');
-  toast(`📖 +${h}h de alemán`);save();renderAll();
+  toast(`📖 +${h}h de alemán · +${xpGained} XP`);save();renderAll();
 }
 
 function doPasos(){
@@ -3453,7 +3464,7 @@ function confirmLogHabit(){
   updateHabitStreak(h.id);
   if(h.obligatory)dailyActions["custom_"+h.id]=true;
   if(h.features&&h.features.includes("pb")&&h.unit!=="done"){if(!h.pb||val>h.pb)h.pb=val;}
-  plant.xp+=6;checkLevelUp();
+  plant.xp+=(h.xpReward||6);checkLevelUp();
 
   const effectMsg = eff.type==="fill100"?"→ Necesidad al 100%":
                     eff.type==="fillCustom"?`→ Necesidad ${eff.accumulate?"+"+eff.value:eff.value}%`:
@@ -3516,6 +3527,7 @@ function openHabitModal(editId){
   document.getElementById("hEditId").value=editId||"";
   document.getElementById("habitModalTitle").textContent=editId?"Editar hábito":"Nuevo hábito";
   document.getElementById("hDeleteBtn").style.display=editId?"":"none";
+  document.getElementById("hXpReward").value=h.xpReward||6;
   switchHabitTab('basic',modal.querySelector('.modal-tab'));
   if(editId){
     const h=customHabits.find(x=>x.id===editId);
@@ -3567,6 +3579,7 @@ function openHabitModal(editId){
     document.getElementById("hGoalCountdown").value="no";
     document.getElementById("hShowNav").value="no";
     document.getElementById("hNavSection").value="core";
+    document.getElementById("hXpReward").value=6;
     selectedHabitEmoji="⭐";
     activeHabitFeatures=new Set(["streak","stats"]);
     document.getElementById("hEffectType").value = "fill100";
@@ -3574,6 +3587,7 @@ function openHabitModal(editId){
     document.getElementById("hEffectAccumulate").value = "yes";
     document.getElementById("hEffectDamage").value = 20;
     document.getElementById("hEffectDamageKill").value = "yes";
+    document.getElementById("hXpReward").value=6;
     toggleEffectFields();
   }
   toggleCustomNeedField();toggleCustomUnitField();
@@ -3672,11 +3686,11 @@ function saveHabit(){
   const features=Array.from(activeHabitFeatures);
   if(editId){
     const idx=customHabits.findIndex(x=>x.id===editId);
-    if(idx>=0)customHabits[idx]={...customHabits[idx],name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customUnit,features,goal,showNav,navSection,effect};
+    if(idx>=0)customHabits[idx]={...customHabits[idx],name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customUnit,features,goal,showNav,navSection,effect,xpReward};
 
   } else {
     const id="ch_"+Date.now();
-    customHabits.push({id,name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customUnit,features,goal,showNav,navSection,effect,createdAt:Date.now()});
+    customHabits.push({id,name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customUnit,features,goal,showNav,navSection,effect,xpReward,createdAt:Date.now()});
     customNeedStates[id]=100;
     if(!habitLogs[id])habitLogs[id]=[];
     habitStreaks[id]={current:0,last:null};
@@ -3754,8 +3768,8 @@ function openEditCore(which){
   if(which==="agua"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">💧 Hidratación</h4><div class="form-row"><div class="form-group"><label>Objetivo agua (L)</label><input type="number" id="ep_agua_target" step="0.1" min="0.5" max="5" value="${p.agua.target}"></div></div>`;}
   if(which==="pasos"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">⚡ Pasos</h4><div class="form-row"><div class="form-group"><label>Objetivo</label><input type="number" id="ep_pasos_obj" step="500" min="1000" max="30000" value="${p.pasos.objetivo}"></div><div class="form-group"><label>Mínimo</label><input type="number" id="ep_pasos_min" step="500" min="0" max="15000" value="${p.pasos.minimo}"></div></div>`;}
   if(which==="sueno"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">😴 Sueño</h4><div class="form-row"><div class="form-group"><label>Horas mínimas fatales</label><input type="number" id="ep_sueno_fatal" step="0.5" min="1" max="6" value="${p.sueno.minFatal}"></div><div class="form-group"><label>Horas óptimas</label><input type="number" id="ep_sueno_opt" step="0.5" min="5" max="10" value="${p.sueno.minOptimo}"></div></div>`;}
-  if(which==="aleman"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">🧠 Alemán</h4><div class="form-row"><div class="form-group"><label>Días sin estudiar → muerte</label><input type="number" id="ep_aleman_dias" step="0.5" min="0.5" max="30" value="${p.aleman.diasMaxSinHacer}"></div><div class="form-group"><label>Horas objetivo B2</label><input type="number" id="ep_aleman_horas" step="10" min="50" max="2000" value="${p.aleman.horasObjetivo}"></div></div>
-  <div class="form-row"><div class="form-group"><label>Nivel de partida</label><select id="ep_aleman_start"><option value="0" ${(p.aleman.startHours||0)===0?"selected":""}>A1 (0h)</option><option value="200" ${(p.aleman.startHours||0)===200?"selected":""}>A2 (200h)</option><option value="400" ${(p.aleman.startHours||0)===400?"selected":""}>B1 (400h)</option></select></div><div class="form-group"><label>Horas ya acumuladas</label><input type="number" id="ep_aleman_current" step="1" min="0" max="2000" value="${Math.round(goals.german.hours)}"></div></div>`;}
+  if(which==="aleman"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">🧠 Alemán</h4><div class="form-row"><div class="form-group"><label>Días sin estudiar → muerte</label><input type="number" id="ep_aleman_dias" step="0.5" min="0.5" max="30" value="${p.aleman.diasMaxSinHacer}"></div><div class="form-group"><label>Horas objetivo C2</label><input type="number" id="ep_aleman_horas" step="10" min="50" max="3000" value="${p.aleman.horasObjetivo}"></div></div>
+  <div class="form-row"><div class="form-group"><label>Nivel de partida</label><select id="ep_aleman_start"><option value="0" ${(p.aleman.startHours||0)===0?"selected":""}>A1 (0h)</option><option value="200" ${(p.aleman.startHours||0)===200?"selected":""}>A2 (200h)</option><option value="400" ${(p.aleman.startHours||0)===400?"selected":""}>B1 (400h)</option><option value="660" ${(p.aleman.startHours||0)===660?"selected":""}>B2 (660h)</option></select></div><div class="form-group"><label>Horas ya acumuladas</label><input type="number" id="ep_aleman_current" step="1" min="0" max="3000" value="${Math.round(goals.german.hours)}"></div></div>`;}
   if(which==="deporte"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">💪 Deporte</h4><div class="form-row"><div class="form-group"><label>Días sin hacer → muerte</label><input type="number" id="ep_dep_dias" step="0.5" min="1" max="30" value="${p.deporte.diasMaxSinHacer}"></div></div>`;}
   if(which==="lectura"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">📖 Lectura</h4><div class="form-row"><div class="form-group"><label>Días sin leer → muerte</label><input type="number" id="ep_lectura_dias" step="0.5" min="0.5" max="30" value="${coreParams.lectura?.diasMaxSinHacer||2}"></div></div>`;}
   content.innerHTML=html||"<p style='color:var(--text3);font-size:0.84rem'>Sin parámetros.</p>";
@@ -4195,7 +4209,7 @@ function checkLevelUp(){
 }
 function plantEmoji(){if(!plant.alive)return"🥀";if(plant.level>=8)return"🌳";if(plant.level>=6)return"🥦";if(plant.level>=4)return"🪴";if(plant.level>=2)return"🌿";return"🌱";}
 function plantTagline(){if(!plant.alive)return"Ha muerto";if(plant.level>=8)return"Árbol";if(plant.level>=6)return"Brócoli";if(plant.level>=4)return"Planta en crecimiento";if(plant.level>=2)return"Brote en crecimiento";return"Semilla en crecimiento";}
-function getLevelName(){const h=goals.german.hours;if(h>=600)return"B2";if(h>=400)return"B1";if(h>=200)return"A2";return"A1";}
+function getLevelName(){const h=goals.german.hours;if(h>=1200)return"C2";if(h>=900)return"C1";if(h>=660)return"B2";if(h>=400)return"B1";if(h>=200)return"A2";return"A1";}
 
 function getPendientes(){
   const pending=[];
@@ -4247,9 +4261,10 @@ function renderNav(){
   html+=navLinkHtml("habitos-custom","✨","Mis hábitos");
   customNavTracking.forEach(h=>{html+=navLinkHtml("custom-habit-detail",h.icon,h.name,h.id);});
   html+=`<div class="nav-section-label">App</div>`;
+  html+=navLinkHtml("bosque","🌳","Mi bosque");
   html+=navLinkHtml("editar","✏️","Editar");
   html+=navLinkHtml("info","❓","Cómo funciona");
-  html+=navLinkHtml("bosque","🌳","Mi bosque");
+
 
   navLinks.innerHTML=html;
   navLinks.querySelectorAll(".nav-link").forEach(link=>{
@@ -4772,7 +4787,7 @@ if(ls2)ls2.innerHTML=`Leer mantiene a tu planta entretenida · Sin leer <strong>
 
 function renderAlemanRoadmap(){
   const rm=document.getElementById("alemanRoadmap");if(!rm)return;
-  const levels=[{name:"A1",hours:0},{name:"A2",hours:200},{name:"B1",hours:400},{name:"B2",hours:goals.german.target||660}];
+  const levels=[{name:"A1",hours:0},{name:"A2",hours:200},{name:"B1",hours:400},{name:"B2",hours:660},{name:"C1",hours:900},{name:"C2",hours:goals.german.target||1200}];
   const h=goals.german.hours;
   rm.innerHTML=levels.map((lv,i)=>{
     const next=levels[i+1],done=next&&h>=next.hours,current=!done&&(i===0||h>=lv.hours);
@@ -5529,7 +5544,7 @@ function renderForest(){
     forest.forEach((t,i)=>{
       const h=hashStr(t.id);
       const band=h%3; // 0 cerca, 1 medio, 2 lejos
-      const yBase=[6,24,42][band]+((h>>4)%10);
+const yBase=[12,28,44][band]+((h>>4)%8);
       const size=[1.5,1.15,0.9][band];
       const x=40+i*STEP_X+((h%26)-13);
       const delay=(i%14)*0.04;
