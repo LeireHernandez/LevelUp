@@ -2029,10 +2029,11 @@ textarea {
       </div>
     </div>
 
-      <div class="card" id="agendaOverdueCard" style="display:none">
+<div class="card" id="agendaOverdueCard" style="display:none">
   <div class="agenda-day-header" style="color:var(--red)">⚠️ Días anteriores — sin completar</div>
   <div id="agendaOverdueList"></div>
-
+</div>
+<div class="card">
       <div class="agenda-day-header" id="agendaTodayHeader">Hoy</div>
       <div id="agendaTodayList"></div>
     </div>
@@ -2188,7 +2189,7 @@ textarea {
       </div>
     </div>
     <div class="card">
-      <div class="card-title">🗺️ Hoja de ruta A1 → B2</div>
+      <div class="card-title">🗺️ Hoja de ruta A1 → C2</div>
       <div id="alemanRoadmap"></div>
     </div>
   </div>
@@ -2493,7 +2494,7 @@ textarea {
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🧠 Alemán</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra horas de estudio acumuladas. La hoja de ruta muestra tu progreso de A1 a B2. Desde ⚙️ Ajustar puedes cambiar el nivel de partida (A1/A2/B1), las horas ya acumuladas antes de usar la app, el objetivo total de horas y los días sin estudiar que provocan la muerte, útil si reinicias la planta pero no quieres perder tu progreso real.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra horas de estudio acumuladas. La hoja de ruta muestra tu progreso de A1 a C2. Desde ⚙️ Ajustar puedes cambiar el nivel de partida (A1/A2/B1/B2/C1/C2), las horas ya acumuladas antes de usar la app, el objetivo total de horas y los días sin estudiar que provocan la muerte, útil si reinicias la planta pero no quieres perder tu progreso real.</p>
   </div>
 
   <div class="card">
@@ -2537,7 +2538,7 @@ textarea {
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🏆 Metas a largo plazo</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Crea metas con nombre, emoji, objetivo numérico, unidad, descripción, color de barra, fecha límite y cuenta atrás. Para sumar progreso manualmente pulsa el botón <strong>+</strong> junto a la meta — te pedirá cuánto añadir. Hay tres metas predefinidas (Alemán B2, Spagatt, Biblioteca) que puedes ocultar o restaurar desde Editar. Las metas aparecen en la página de inicio y en la sección <strong>Metas</strong>.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Crea metas con nombre, emoji, objetivo numérico, unidad, descripción, color de barra, fecha límite y cuenta atrás. Para sumar progreso manualmente pulsa el botón <strong>+</strong> junto a la meta. Te pedirá cuánto añadir. Hay tres metas predefinidas (Alemán B2, Spagatt, Biblioteca) que puedes ocultar o restaurar desde Editar. Las metas aparecen en la página de inicio y en la sección <strong>Metas</strong>.</p>
   </div>
 
   <div class="card">
@@ -2587,7 +2588,7 @@ textarea {
 
 <div class="card">
   <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500"> 🧡 Última nota de la autora</h3>
-  <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Esta web no es perfecta, hay muchas formas de hacer trampa. El objetivo es que utilizando esta web podamos convertirnos en adultos funcionales (que ya es hora) y llegar a parecernos un poquito más cada día a nuestro yo ideal. Cree esta web porque nada me funcionaba, siempre acababa volviendo al punto de partida, y esto de alguna forma me está ayudando. Hacer trampa solo te afecta a ti y marea a tu planta. Y nadie quiere una planta mareada. ¡Cuidala bien y crece con ella!</p>
+  <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Esta web no es perfecta, hay muchas formas de hacer trampa. El objetivo es que utilizando esta web podamos convertirnos en adultos funcionales (que ya es hora) y llegar a parecernos un poquito más cada día a nuestro yo ideal. Creé esta web porque nada me funcionaba, siempre acababa volviendo al punto de partida, y esto de alguna forma me está ayudando. Hacer trampa solo te afecta a ti y marea a tu planta. Y nadie quiere una planta mareada. ¡Cuidala bien y crece con ella!</p>
 </div>
 
 </div>
@@ -3527,7 +3528,6 @@ function openHabitModal(editId){
   document.getElementById("hEditId").value=editId||"";
   document.getElementById("habitModalTitle").textContent=editId?"Editar hábito":"Nuevo hábito";
   document.getElementById("hDeleteBtn").style.display=editId?"":"none";
-  document.getElementById("hXpReward").value=h.xpReward||6;
   switchHabitTab('basic',modal.querySelector('.modal-tab'));
   if(editId){
     const h=customHabits.find(x=>x.id===editId);
@@ -4216,7 +4216,6 @@ function getPendientes(){
   if(!isDisabledCore('orden')&&!dailyActions.orderDone)pending.push({icon:"🍃",name:"Test de orden",page:"orden"});
   if(!dailyActions.phoneDone)pending.push({icon:"📱",name:"Horas de móvil",page:"movil"});
   if(!isDisabledCore('sueno')&&!dailyActions.suenoDone)pending.push({icon:"😴",name:"Sueño de anoche",page:"sueno"});
-  if(!isDisabledCore('deporte')&&!isSportWeekDone())pending.push({icon:"💪",name:"Sesión deportiva esta semana",page:"deporte"});
   customHabits.filter(h=>h.obligatory&&!dailyActions["custom_"+h.id]).forEach(h=>pending.push({icon:h.icon,name:h.name,page:"habitos-custom"}));
   return pending;
 }
@@ -4995,7 +4994,7 @@ if(ol){
 
 const tl=document.getElementById("agendaTodayList");
 if(tl){
-  if(!todayTasks.length){tl.innerHTML=`<p style="font-size:0.84rem;color:var(--text3);padding:0.5rem 0">Sin tareas hoy.</p>`;}
+  if(!todayTasks.length){tl.innerHTML=`<p style="font-size:0.84rem;color:var(--text3);padding:0.5rem 0">✅ No hay tareas sin completar.</p>`;}
   else{
     const nowStr=new Date().toTimeString().slice(0,5);
     let lineAdded=false;
