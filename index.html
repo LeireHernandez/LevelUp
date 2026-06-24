@@ -1428,12 +1428,24 @@ textarea {
   color:white!important;
   border-color:var(--green-md)!important;
 }
+
 .meadow-outer{
   position:relative;width:100%;height:320px;border-radius:var(--radius);
   overflow:hidden;
   background:linear-gradient(180deg,#bfe3f5 0%,#d9f0e0 55%,#9fcf7a 56%,#7fb35a 100%);
   box-shadow:inset 0 -4px 18px rgba(0,0,0,0.08);
   margin-top:0.6rem;
+}
+.meadow-scroll{
+  position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;z-index:1;
+}
+
+.meadow-outer::before{
+  content:'';
+  position:absolute;inset:0;border-radius:var(--radius);
+  background:linear-gradient(180deg,#bfe3f5 0%,#d9f0e0 55%,#9fcf7a 56%,#7fb35a 100%);
+  box-shadow:inset 0 -4px 18px rgba(0,0,0,0.08);
+  z-index:0;pointer-events:none;
 }
 .meadow-sky{position:absolute;inset:0;pointer-events:none;z-index:0;}
 .meadow-sun{
@@ -1443,9 +1455,7 @@ textarea {
 }
 .meadow-cloud{position:absolute;background:rgba(255,255,255,0.85);border-radius:30px;}
 .meadow-hill{position:absolute;bottom:-10%;left:-5%;width:120%;height:50%;background:#8dc25f;border-radius:50% 50% 0 0/30% 30% 0 0;opacity:0.55;}
-.meadow-scroll{
-  position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;z-index:1;
-}
+
 
 .meadow-flower{position:absolute;font-size:0.85rem;opacity:0.9;}
 .meadow-canvas{position:relative;height:100%;padding-bottom:14px;box-sizing:border-box;}
@@ -1457,13 +1467,13 @@ textarea {
 }
 .meadow-tree:hover{transform:scale(1.15) translateY(-2px);}
 
-.meadow-scroll{
-  position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;z-index:1;
-}
+
+
 .meadow-tree-label{
-  position:fixed;left:0;top:0;transform:translate(-50%,-100%);
+  position:fixed;left:-9999px;top:-9999px;
   background:rgba(45,80,22,0.97);color:#d6f0b8;font-size:0.68rem;padding:7px 11px;border-radius:6px;
-  white-space:normal;max-width:200px;width:max-content;opacity:0;pointer-events:none;transition:opacity 0.12s;z-index:9999;
+  white-space:normal;max-width:200px;width:max-content;opacity:0;pointer-events:none;
+  transition:opacity 0.12s;z-index:9999;
   text-align:center;line-height:1.55;box-shadow:0 6px 18px rgba(0,0,0,0.3);
 }
 .meadow-tree-label.show{opacity:1;}
@@ -2238,7 +2248,6 @@ textarea {
     </div>
     <div class="card">
       <div class="card-title">📋 Test de hoy</div>
-      <div class="alert alert-danger">🚨 <strong>Obligatorio:</strong> Si no completas el test antes de medianoche, tu planta muere.</div>
       <div id="orderQuestionsContainer"></div>
       <div class="order-score-display" id="orderScoreDisplay" style="display:none">
         <div style="font-size:0.78rem;color:var(--text3)">Puntuación de hoy</div>
@@ -5659,29 +5668,41 @@ html+=`<div class="meadow-tree" style="left:${x}px;bottom:${yBase}%;font-size:${
 el.innerHTML=html;
 
   // Posicionar las etiquetas con position:fixed para que no se recorten por overflow:hidden
-  el.querySelectorAll(".meadow-tree").forEach(treeEl=>{
+el.querySelectorAll(".meadow-tree").forEach(treeEl=>{
     const label=treeEl.querySelector(".meadow-tree-label");
     if(!label)return;
-    const showLabel=()=>{
-      const rect=treeEl.getBoundingClientRect();
-      label.style.left=(rect.left+rect.width/2)+"px";
-      label.style.top=(rect.top+14)+"px";
-      label.classList.add("show");
+
+    // Mover la etiqueta al body para que no herede overflow ni opacity del prado
+    document.body.appendChild(label);
+
+    const showLabel=(e)=>{
+      label.style.left="-9999px";
+      label.style.top="-9999px";
+      label.style.opacity="1";
       label.style.pointerEvents="auto";
+      const lw=label.offsetWidth||200;
+      const lh=label.offsetHeight||120;
+      const left=Math.max(8, Math.min(e.clientX-lw/2, window.innerWidth-lw-8));
+      const top=Math.max(8, e.clientY-lh-14);
+      label.style.left=left+"px";
+      label.style.top=top+"px";
     };
+
     const hideLabel=(e)=>{
       if(e&&e.relatedTarget&&label.contains(e.relatedTarget))return;
-      label.classList.remove("show");
+      label.style.opacity="0";
       label.style.pointerEvents="none";
     };
-    treeEl.addEventListener("mouseenter",showLabel);
-    treeEl.addEventListener("mouseleave",hideLabel);
+
+    treeEl.addEventListener("mouseenter", showLabel);
+    treeEl.addEventListener("mousemove", showLabel);
+    treeEl.addEventListener("mouseleave", hideLabel);
     treeEl.addEventListener("click",(e)=>{
       if(label.contains(e.target))return;
-      if(label.classList.contains("show")){hideLabel();}
-      else{showLabel();}
+      if(label.style.opacity==="1") hideLabel(e);
+      else showLabel(e);
     });
-    label.addEventListener("mouseleave",()=>hideLabel());
+    label.addEventListener("mouseleave", hideLabel);
   });
 }
 
