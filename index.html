@@ -5688,11 +5688,18 @@ el.querySelectorAll(".meadow-tree").forEach(treeEl=>{
       label.style.top=top+"px";
     };
 
-    treeEl.addEventListener("touchstart",(e)=>{
+treeEl.addEventListener("touchstart",(e)=>{
       e.preventDefault();
       const touch=e.touches[0];
-      if(label.style.opacity==="1"){hideLabel(null);}
-      else{showLabel({clientX:touch.clientX,clientY:touch.clientY});}
+      if(label.style.opacity==="1"){
+        hideLabel(null);
+      } else {
+        // Ocultar cualquier otra etiqueta abierta primero
+        document.querySelectorAll(".meadow-tree-label").forEach(l=>{
+          if(l!==label){l.style.opacity="0";l.style.pointerEvents="none";}
+        });
+        showLabel({clientX:touch.clientX,clientY:touch.clientY});
+      }
     },{passive:false});
 
     const hideLabel=(e)=>{
