@@ -2902,12 +2902,17 @@ function save(){
   const s={plant,needsState,hydration,flexibility,energy,sleep,goals,phoneUsage,dailyActions,streak,customHabits,customNeedStates,habitLogs,habitStreaks,protector,agendaTasks,books,longGoals,monthlyObjs,orderQuestions,coreParams,lastDecayTs,sportCats,disabledCoreHabits,disabledBuiltinGoals,recurringTasks,forest,lastAppTouch};
   try{localStorage.setItem("levelup_v7",JSON.stringify(s));}catch(e){console.warn(e);}
 }
+
 function load(){
   try{
     const raw=localStorage.getItem("levelup_v7");
     if(!raw){defaultState();return;}
     const s=JSON.parse(raw);
     plant=s.plant||{};
+    // Migración: si sigue en nivel 1, actualizar xpNext al valor por defecto actual sin tocar XP ni nivel
+    if(plant.level===1&&plant.xpNext!==undefined&&plant.xpNext!==500){
+      plant.xpNext=500;
+    }
     needsState=s.needsState||{};
     hydration=s.hydration||{};
     flexibility=s.flexibility||{};
