@@ -1458,9 +1458,16 @@ textarea {
 
 .meadow-tree-label{
   position:absolute;bottom:100%;left:50%;transform:translateX(-50%) translateY(4px);
-  background:rgba(45,80,22,0.92);color:#d6f0b8;font-size:0.62rem;padding:5px 9px;border-radius:6px;
-  white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.15s,transform 0.15s;z-index:20;
-  text-align:center;line-height:1.7;
+  background:rgba(45,80,22,0.92);color:#d6f0b8;font-size:0.62rem;padding:6px 10px;border-radius:6px;
+  white-space:normal;max-width:170px;width:max-content;opacity:0;pointer-events:none;transition:opacity 0.15s,transform 0.15s;z-index:20;
+  text-align:center;line-height:1.5;
+}
+.meadow-tree:hover .meadow-tree-label{pointer-events:auto;}
+.meadow-tree-note-full{
+  white-space:normal;word-wrap:break-word;
+}
+.meadow-note-toggle{
+  display:inline;color:#a8d97a;text-decoration:underline;cursor:pointer;font-weight:500;margin-left:3px;
 }
 
 .meadow-tree:hover .meadow-tree-label{opacity:1;transform:translateX(-50%) translateY(-2px);}
@@ -1529,10 +1536,10 @@ textarea {
           </select>
         </div>
       </div>
-      <div class="form-group" style="margin-bottom:10px" id="hCustomNeedGroup">
-        <label>Nombre de la nueva necesidad</label>
-        <input type="text" id="hCustomNeedName" placeholder="Ej: Creatividad" maxlength="20">
-      </div>
+      <div class="form-row" id="hCustomNeedGroup" style="display:none">
+  <div class="form-group"><label>Nombre de la nueva necesidad</label><input type="text" id="hCustomNeedName" placeholder="Ej: Creatividad" maxlength="20"></div>
+  <div class="form-group"><label>Icono de la necesidad</label><input type="text" id="hCustomNeedIcon" placeholder="🎨" maxlength="2" style="font-size:1.3rem;text-align:center"></div>
+</div>
       <div class="form-group" style="margin-bottom:10px" id="hCustomUnitGroup">
         <label>Nombre de tu unidad</label>
         <input type="text" id="hCustomUnit" placeholder="Ej: vasos, repeticiones..." maxlength="20">
@@ -2262,8 +2269,8 @@ textarea {
 
   <!-- LECTURA -->
   <div class="page" id="page-lectura">
-    <div class="page-header"><h2>📖 Lectura</h2><p>Leer mantiene a tu planta entretenida · <button class="btn btn-blue btn-xs" style="vertical-align:middle" onclick="openBookModal()">📚 Añadir libro</button></p></div>
-    <div class="stats-row">
+  <div class="page-header"><h2>📖 Lectura</h2><p id="lecturaSubtitle">Leer mantiene a tu planta entretenida · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('lectura')">⚙️ Ajustar</button> · <button class="btn btn-blue btn-xs" style="vertical-align:middle" onclick="openBookModal()">📚 Añadir libro</button></p></div>
+  <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="lecturaMedia">0</div><div class="stat-lbl">Min/día (media)</div></div>
       <div class="stat-card"><div class="stat-val" id="lecturaSesiones">0</div><div class="stat-lbl">Sesiones</div></div>
       <div class="stat-card"><div class="stat-val" id="lecturaLibros">0</div><div class="stat-lbl">Libros leídos</div></div>
@@ -2731,7 +2738,7 @@ function getCurrentCustomNeedLevel(habit){
 // DEFAULT STATE
 function defaultState(){
   const now=Date.now();
-  plant={name:"Mi planta",level:1,xp:0,xpNext:500,alive:true,deathReason:null,createdAt:now};
+  plant={name:"Mi planta",level:1,xp:0,xpNext:2,alive:true,deathReason:null,createdAt:now};
   needsState={strength:{value:100,lastFulfilled:now},intelligence:{value:100,lastFulfilled:now},calmness:{value:100,extraCalmness:0,lastResetDate:getTodayKey()},entertainment:{value:100,lastFulfilled:now},vitality:{value:100,lastFulfilled:now}};
   hydration={level:100,extraHydration:0,loggedToday:0,target:1.2,lastResetDate:getTodayKey()};
   flexibility={level:100,extraFlexibility:0,doneToday:false,lastResetDate:getTodayKey()};
@@ -2768,7 +2775,8 @@ customHabits.forEach(h=>{
     {id:"sc_swim",name:"Natación",emoji:"🏊",hasKm:false,required:false},
     {id:"sc_yoga",name:"Yoga",emoji:"🧘",hasKm:false,required:false}
   ];
-coreParams={agua:{target:1.2},pasos:{objetivo:10000,minimo:7000},sueno:{minFatal:5,minOptimo:7},deporte:{diasMaxSinHacer:7},aleman:{diasMaxSinHacer:3,horasObjetivo:660,startHours:0},lectura:{diasMaxSinHacer:2}};
+
+coreParams={agua:{target:1.2},pasos:{objetivo:10000,minimo:7000},sueno:{minFatal:5,minOptimo:7,lowSleepThreshold:6.5,maxLowSleepStreak:3},deporte:{diasMaxSinHacer:7},aleman:{diasMaxSinHacer:3,horasObjetivo:660,startHours:0},lectura:{diasMaxSinHacer:2}};
 
   lastDecayTs=now;
 }
@@ -2875,7 +2883,7 @@ function checkDailyObligatory(){
     if(!isDisabledCore('orden')&&!dailyActions.orderDone){killPlant("no hiciste el test de orden ayer");return;}
     if(!isDisabledCore('sueno')&&!dailyActions.suenoDone){killPlant("no registraste las horas de sueño ayer");return;}
     if(energy.doneToday&&energy.stepsToday<coreParams.pasos.minimo){killPlant("sedentarismo — pocos pasos ayer");return;}
-    if(sleep.lowSleepStreak>=3){killPlant("agotamiento crónico — 3 noches con poco sueño");return;}
+    if(sleep.lowSleepStreak>=(coreParams.sueno.maxLowSleepStreak||3)){killPlant(`agotamiento crónico — ${coreParams.sueno.maxLowSleepStreak||3} noches con poco sueño`);return;}
     for(const h of customHabits){
       if(h.obligatory&&!dailyActions["custom_"+h.id]){killPlant(`no hiciste tu hábito obligatorio: "${h.name}"`);return;}
     }
@@ -2940,7 +2948,9 @@ function load(){
     if(needsState.calmness&&!needsState.calmness.lastResetDate) needsState.calmness.lastResetDate=getTodayKey();
     if(!coreParams.agua)coreParams.agua={target:1.2};
     if(!coreParams.pasos)coreParams.pasos={objetivo:10000,minimo:7000};
-    if(!coreParams.sueno)coreParams.sueno={minFatal:5,minOptimo:7};
+    if(!coreParams.sueno)coreParams.sueno={minFatal:5,minOptimo:7,lowSleepThreshold:6.5,maxLowSleepStreak:3};
+if(coreParams.sueno&&!coreParams.sueno.maxLowSleepStreak)coreParams.sueno.maxLowSleepStreak=3;
+if(coreParams.sueno&&coreParams.sueno.lowSleepThreshold===undefined)coreParams.sueno.lowSleepThreshold=6.5;
     if(!coreParams.deporte)coreParams.deporte={diasMaxSinHacer:7};
     if(!coreParams.aleman)coreParams.aleman={diasMaxSinHacer:3,horasObjetivo:660};
     if(!sportCats.length)sportCats=[{id:"sc_run",name:"Running",emoji:"🏃",hasKm:true,required:false}];
@@ -3086,12 +3096,12 @@ function getAllNeeds(){
     seenNeedIds.add(needId);
     if(h.affects === "custom" && h.customNeedName){
       customNeeds.push({
-        id: h.id, // se usa para llamar a needValue getCurrentCustomNeedLevel
-        name: needOverrides[needId]?.name || h.customNeedName,
-        icon: needOverrides[needId]?.icon || h.icon,
-        page: "custom-habit-detail",
-        customId: h.id
-      });
+  id: h.id,
+  name: needOverrides[needId]?.name || h.customNeedName,
+  icon: needOverrides[needId]?.icon || h.customNeedIcon || h.icon,
+  page: "custom-habit-detail",
+  customId: h.id
+});
     }
   }
 
@@ -3207,12 +3217,13 @@ function doSueno(){
 }
 function doSuenoVal(hours){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
-  if(dailyActions.suenoDone){
+if(dailyActions.suenoDone){
   if(!confirm(`Ya registraste ${sleep.hoursToday}h. ¿Editar el valor?`))return;
   // Revertir el XP anterior
   plant.xp=Math.max(0,plant.xp-(sleep.hoursToday>=coreParams.sueno.minOptimo?8:3));
   // Revertir lowSleepStreak si fue mal
-  if(sleep.hoursToday<coreParams.sueno.minOptimo&&sleep.lowSleepStreak>0)sleep.lowSleepStreak--;
+  const lowThreshPrev=coreParams.sueno.lowSleepThreshold!==undefined?coreParams.sueno.lowSleepThreshold:6.5;
+  if(sleep.hoursToday<lowThreshPrev&&sleep.lowSleepStreak>0)sleep.lowSleepStreak--;
   // Revertir en historial
   sleep.history=sleep.history.filter(h=>h.date!==todayStr());
   dailyActions.suenoDone=false;
@@ -3220,9 +3231,16 @@ function doSuenoVal(hours){
   if(!isProtectorActive()&&hours<coreParams.sueno.minFatal){killPlant(`menos de ${coreParams.sueno.minFatal}h de sueño`);return;}
   sleep.hoursToday=hours;sleep.doneToday=true;dailyActions.suenoDone=true;
   let sleepLvl;
-  if(hours>=coreParams.sueno.minOptimo){sleepLvl=100;sleep.lowSleepStreak=0;}
-  else{sleepLvl=Math.round((hours/coreParams.sueno.minOptimo)*100);sleep.lowSleepStreak=(sleep.lowSleepStreak||0)+1;
-    if(!isProtectorActive()&&sleep.lowSleepStreak>=3){killPlant("agotamiento crónico — 3 noches con poco sueño");return;}}
+  const lowThresh=coreParams.sueno.lowSleepThreshold!==undefined?coreParams.sueno.lowSleepThreshold:6.5;
+  if(hours>=coreParams.sueno.minOptimo){sleepLvl=100;}
+  else{sleepLvl=Math.round((hours/coreParams.sueno.minOptimo)*100);}
+  if(hours<lowThresh){
+    sleep.lowSleepStreak=(sleep.lowSleepStreak||0)+1;
+    const maxStreak=coreParams.sueno.maxLowSleepStreak||3;
+    if(!isProtectorActive()&&sleep.lowSleepStreak>=maxStreak){killPlant(`agotamiento crónico — ${maxStreak} noches durmiendo menos de ${lowThresh}h`);return;}
+  } else {
+    sleep.lowSleepStreak=0;
+  }
   sleep.level=sleepLvl;needsState.vitality={value:sleepLvl,lastFulfilled:Date.now()};
   sleep.history.push({date:todayStr(),hours,level:sleepLvl});
   if(sleep.history.length>30)sleep.history.shift();
@@ -3543,6 +3561,7 @@ function openHabitModal(editId){
       document.getElementById("hReminder").value=h.reminder||"";
       document.getElementById("hDesc").value=h.desc||"";
       document.getElementById("hCustomNeedName").value=h.customNeedName||"";
+      document.getElementById("hCustomNeedIcon").value=h.customNeedIcon||"";
       document.getElementById("hCustomUnit").value=h.customUnit||"";
       document.getElementById("hShowNav").value=h.showNav?"yes":"no";
       document.getElementById("hNavSection").value=h.navSection||"core";
@@ -3568,7 +3587,7 @@ function openHabitModal(editId){
     }
 
   } else {
-    ["hName","hDays","hDesc","hCustomNeedName","hCustomUnit","hGoalTarget","hGoalUnit","hGoalDesc","hGoalDeadline","hReminder"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+    ["hName","hDays","hDesc","hCustomNeedName","hCustomNeedIcon","hCustomUnit","hGoalTarget","hGoalUnit","hGoalDesc","hGoalDeadline","hReminder"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
     document.getElementById("hIcon").value="⭐";
     document.getElementById("hAffects").value="calmness";
     document.getElementById("hUnit").value="done";
@@ -3668,6 +3687,7 @@ function saveHabit(){
   const reminder=document.getElementById("hReminder").value;
   const desc=document.getElementById("hDesc").value.trim();
   const customNeedName=document.getElementById("hCustomNeedName").value.trim();
+  const customNeedIcon=document.getElementById("hCustomNeedIcon").value.trim();
   const customUnit=document.getElementById("hCustomUnit").value.trim();
   const showNav=document.getElementById("hShowNav").value==="yes";
   const navSection=document.getElementById("hNavSection").value;
@@ -3687,11 +3707,11 @@ function saveHabit(){
   const features=Array.from(activeHabitFeatures);
   if(editId){
     const idx=customHabits.findIndex(x=>x.id===editId);
-    if(idx>=0)customHabits[idx]={...customHabits[idx],name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customUnit,features,goal,showNav,navSection,effect,xpReward};
+    if(idx>=0)customHabits[idx]={...customHabits[idx],name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customNeedIcon,customUnit,features,goal,showNav,navSection,effect,xpReward};
 
   } else {
     const id="ch_"+Date.now();
-    customHabits.push({id,name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customUnit,features,goal,showNav,navSection,effect,xpReward,createdAt:Date.now()});
+    customHabits.push({id,name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customNeedIcon,customUnit,features,goal,showNav,navSection,effect,xpReward,createdAt:Date.now()});
     customNeedStates[id]=100;
     if(!habitLogs[id])habitLogs[id]=[];
     habitStreaks[id]={current:0,last:null};
@@ -3768,7 +3788,7 @@ function openEditCore(which){
   let html="";
   if(which==="agua"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">💧 Hidratación</h4><div class="form-row"><div class="form-group"><label>Objetivo agua (L)</label><input type="number" id="ep_agua_target" step="0.1" min="0.5" max="5" value="${p.agua.target}"></div></div>`;}
   if(which==="pasos"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">⚡ Pasos</h4><div class="form-row"><div class="form-group"><label>Objetivo</label><input type="number" id="ep_pasos_obj" step="500" min="1000" max="30000" value="${p.pasos.objetivo}"></div><div class="form-group"><label>Mínimo</label><input type="number" id="ep_pasos_min" step="500" min="0" max="15000" value="${p.pasos.minimo}"></div></div>`;}
-  if(which==="sueno"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">😴 Sueño</h4><div class="form-row"><div class="form-group"><label>Horas mínimas fatales</label><input type="number" id="ep_sueno_fatal" step="0.5" min="1" max="6" value="${p.sueno.minFatal}"></div><div class="form-group"><label>Horas óptimas</label><input type="number" id="ep_sueno_opt" step="0.5" min="5" max="10" value="${p.sueno.minOptimo}"></div></div>`;}
+  if(which==="sueno"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">😴 Sueño</h4><div class="form-row" style="align-items:end"><div class="form-group" style="display:grid;grid-template-rows:34px auto;gap:5px"><label style="display:flex;align-items:flex-end">Horas mínimas fatales</label><input type="number" id="ep_sueno_fatal" step="0.5" min="1" max="6" value="${p.sueno.minFatal}"></div><div class="form-group" style="display:grid;grid-template-rows:34px auto;gap:5px"><label style="display:flex;align-items:flex-end">Horas óptimas</label><input type="number" id="ep_sueno_opt" step="0.5" min="5" max="10" value="${p.sueno.minOptimo}"></div></div><div class="form-row" style="align-items:end"><div class="form-group" style="display:grid;grid-template-rows:34px auto;gap:5px"><label style="display:flex;align-items:flex-end">Umbral "poco sueño" (horas)</label><input type="number" id="ep_sueno_thresh" step="0.5" min="3" max="9" value="${p.sueno.lowSleepThreshold!==undefined?p.sueno.lowSleepThreshold:6.5}"></div><div class="form-group" style="display:grid;grid-template-rows:34px auto;gap:5px"><label style="display:flex;align-items:flex-end">Noches seguidas con poco sueño → muerte</label><input type="number" id="ep_sueno_streak" step="1" min="2" max="14" value="${p.sueno.maxLowSleepStreak||3}"></div></div>`;}
   if(which==="aleman"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">🧠 Alemán</h4><div class="form-row"><div class="form-group"><label>Días sin estudiar → muerte</label><input type="number" id="ep_aleman_dias" step="0.5" min="0.5" max="30" value="${p.aleman.diasMaxSinHacer}"></div><div class="form-group"><label>Horas objetivo C2</label><input type="number" id="ep_aleman_horas" step="10" min="50" max="3000" value="${p.aleman.horasObjetivo}"></div></div>
   <div class="form-row"><div class="form-group"><label>Nivel de partida</label><select id="ep_aleman_start"><option value="0" ${(p.aleman.startHours||0)===0?"selected":""}>A1 (0h)</option><option value="200" ${(p.aleman.startHours||0)===200?"selected":""}>A2 (200h)</option><option value="400" ${(p.aleman.startHours||0)===400?"selected":""}>B1 (400h)</option><option value="660" ${(p.aleman.startHours||0)===660?"selected":""}>B2 (660h)</option></select></div><div class="form-group"><label>Horas ya acumuladas</label><input type="number" id="ep_aleman_current" step="1" min="0" max="3000" value="${Math.round(goals.german.hours)}"></div></div>`;}
   if(which==="deporte"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">💪 Deporte</h4><div class="form-row"><div class="form-group"><label>Días sin hacer → muerte</label><input type="number" id="ep_dep_dias" step="0.5" min="1" max="30" value="${p.deporte.diasMaxSinHacer}"></div></div>`;}
@@ -3782,7 +3802,7 @@ function saveCoreEdit(){
   const get=id=>{const el=document.getElementById(id);return el?parseFloat(el.value):null;};
   if(which==="agua"||which==="all"){const v=get("ep_agua_target");if(v>0){coreParams.agua.target=v;hydration.target=v;}}
   if(which==="pasos"||which==="all"){const o=get("ep_pasos_obj"),m=get("ep_pasos_min");if(o>0)coreParams.pasos.objetivo=o;if(m>=0)coreParams.pasos.minimo=m;}
-  if(which==="sueno"||which==="all"){const f=get("ep_sueno_fatal"),o=get("ep_sueno_opt");if(f>0)coreParams.sueno.minFatal=f;if(o>0)coreParams.sueno.minOptimo=o;}
+  if(which==="sueno"||which==="all"){const f=get("ep_sueno_fatal"),o=get("ep_sueno_opt"),t=get("ep_sueno_thresh"),s=get("ep_sueno_streak");if(f>0)coreParams.sueno.minFatal=f;if(o>0)coreParams.sueno.minOptimo=o;if(t>=0)coreParams.sueno.lowSleepThreshold=t;if(s>0)coreParams.sueno.maxLowSleepStreak=s;}
   if(which==="aleman"||which==="all"){
     const d=get("ep_aleman_dias"),h=get("ep_aleman_horas");
     if(d>0)coreParams.aleman.diasMaxSinHacer=d;
@@ -4778,7 +4798,7 @@ if(ls2)ls2.innerHTML=`Leer mantiene a tu planta entretenida · Sin leer <strong>
   const sme=document.getElementById("suenoMoonEmoji");if(sme){const h=sleep.hoursToday||0;sme.textContent=h>=8?"🌟":h>=7?"🌙":h>=5?"😐":"😩";}
   const shd=document.getElementById("suenoHorasDisplay");if(shd)shd.textContent=sleep.hoursToday!=null?sleep.hoursToday+"h":"— h";
   const sda=document.getElementById("suenoDoneAlert");
-  if(sda)sda.innerHTML=dailyActions.suenoDone?`<div class="alert alert-info">✅ Registrado (${sleep.hoursToday}h)${sleep.lowSleepStreak>0?` · ⚠️ ${sleep.lowSleepStreak}/3`:""}</div>`:`<div class="alert alert-danger">🚨 Pendiente: registra antes de medianoche.</div>`;
+  if(sda)sda.innerHTML=dailyActions.suenoDone?`<div class="alert alert-info">✅ Registrado (${sleep.hoursToday}h)${sleep.lowSleepStreak>0?` · ⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3}`:""}</div>`:`<div class="alert alert-danger">🚨 Pendiente: registra antes de medianoche.</div>`;
   renderSleepStats();
 
   // MÓVIL
@@ -4847,7 +4867,7 @@ function renderSleepStats(){
   const best=Math.max(...hist.map(h=>h.hours));
   const worst=Math.min(...hist.map(h=>h.hours));
   const goodNights=hist.filter(h=>h.hours>=coreParams.sueno.minOptimo).length;
-  ss.innerHTML=`<div class="stats-row"><div class="stat-card"><div class="stat-val">${avg.toFixed(1)}h</div><div class="stat-lbl">Media</div></div><div class="stat-card"><div class="stat-val">${best}h</div><div class="stat-lbl">Mejor noche</div></div><div class="stat-card"><div class="stat-val">${worst}h</div><div class="stat-lbl">Peor noche</div></div><div class="stat-card"><div class="stat-val">${goodNights}</div><div class="stat-lbl">≥${coreParams.sueno.minOptimo}h</div></div></div>${sleep.lowSleepStreak>0?`<div class="alert alert-warn">⚠️ ${sleep.lowSleepStreak}/3 noches con poco sueño.</div>`:""}`;
+  ss.innerHTML=`<div class="stats-row"><div class="stat-card"><div class="stat-val">${avg.toFixed(1)}h</div><div class="stat-lbl">Media</div></div><div class="stat-card"><div class="stat-val">${best}h</div><div class="stat-lbl">Mejor noche</div></div><div class="stat-card"><div class="stat-val">${worst}h</div><div class="stat-lbl">Peor noche</div></div><div class="stat-card"><div class="stat-val">${goodNights}</div><div class="stat-lbl">≥${coreParams.sueno.minOptimo}h</div></div></div>${sleep.lowSleepStreak>0?`<div class="alert alert-warn">⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3} noches con poco sueño.</div>`:""}`;
 }
 
 
@@ -5487,7 +5507,8 @@ function plantTree(){
 const defaultName=plant.name||`Árbol ${forest.length+1}`;
   const name=prompt("¿Cómo quieres llamar a este árbol?",defaultName);
   if(name===null)return;
-  forest.push({id:"ft_"+Date.now(),name:name.trim()||defaultName,plantedAt:Date.now(),level:plant.level,createdAt:plant.createdAt||Date.now()});
+  const note=prompt("¿Qué has conseguido con esta planta? Escribe los objetivos logrados, el progreso realizado (opcional)","");
+  forest.push({id:"ft_"+Date.now(),name:name.trim()||defaultName,plantedAt:Date.now(),level:plant.level,createdAt:plant.createdAt||Date.now(),note:note?note.trim():""});
   treeOverlayDismissed=false;
   if(decayInterval)clearInterval(decayInterval);
   Object.keys(customChartInsts).forEach(k=>{if(customChartInsts[k])customChartInsts[k].destroy();});
@@ -5513,7 +5534,29 @@ const defaultName=plant.name||`Árbol ${forest.length+1}`;
 }
 
 
+function toggleTreeNote(toggleEl){
+  const noteSpan=toggleEl.previousElementSibling;
+  if(!noteSpan)return;
+  const expanded=noteSpan.dataset.expanded==="1";
+  if(expanded){
+    noteSpan.textContent=noteSpan.dataset.short;
+    noteSpan.dataset.expanded="0";
+    toggleEl.textContent="Leer más";
+  } else {
+    noteSpan.textContent=noteSpan.dataset.full;
+    noteSpan.dataset.expanded="1";
+    toggleEl.textContent="Leer menos";
+  }
+}
 
+function editTreeNote(treeId){
+  const tree=forest.find(t=>t.id===treeId);if(!tree)return;
+  const newNote=prompt("Editar nota ¿Qué conseguiste con esta planta?",tree.note||"");
+  if(newNote===null)return;
+  tree.note=newNote.trim();
+  save();renderForest();
+  toast("📝 Nota actualizada");
+}
 
 function hashStr(s){let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return h;}
 
@@ -5553,16 +5596,27 @@ function renderForest(){
     forest.forEach((t,i)=>{
       const h=hashStr(t.id);
       const band=h%3; // 0 cerca, 1 medio, 2 lejos
-const yBase=[12,28,44][band]+((h>>4)%8);
+const yBase=[2,12,22][band]+((h>>4)%6);
       const size=[1.5,1.15,0.9][band];
       const x=40+i*STEP_X+((h%26)-13);
       const delay=(i%14)*0.04;
 const plantedDate=new Date(t.plantedAt).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
       const createdDate=t.createdAt?new Date(t.createdAt).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'}):'—';
-      html+=`<div class="meadow-tree" style="left:${x}px;bottom:${yBase}%;font-size:${size}rem;animation-delay:${delay}s;z-index:${10-band}">
-        ${treeEmojis[h%treeEmojis.length]}
-        <span class="meadow-tree-label">${t.name} · Nv.${t.level}<br><span style="font-weight:400;opacity:0.8">🌱 ${createdDate}</span><br><span style="font-weight:400;opacity:0.8">🌳 ${plantedDate}</span></span>
-      </div>`;
+      let noteHtml="";
+if(t.note){
+  const escaped=t.note.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+  if(t.note.length>60){
+    const short=t.note.slice(0,60).trim();
+    noteHtml=`<br><span style="font-weight:400;opacity:0.85;font-style:italic">📝 <span class="meadow-tree-note-full" data-short="${short}…" data-full="${escaped}" data-expanded="0">${short}…</span><span class="meadow-note-toggle" onclick="event.stopPropagation();toggleTreeNote(this)">Leer más</span></span>`;
+  } else {
+    noteHtml=`<br><span style="font-weight:400;opacity:0.85;font-style:italic">📝 ${t.note}</span>`;
+  }
+}
+html+=`<div class="meadow-tree" style="left:${x}px;bottom:${yBase}%;font-size:${size}rem;animation-delay:${delay}s;z-index:${10-band}">
+  ${treeEmojis[h%treeEmojis.length]}
+  <span class="meadow-tree-label">${t.name} · Nv.${t.level}<br><span style="font-weight:400;opacity:0.8">🌱 ${createdDate}</span><br><span style="font-weight:400;opacity:0.8">🌳 ${plantedDate}</span>${noteHtml}<br><span class="meadow-note-toggle" onclick="event.stopPropagation();editTreeNote('${t.id}')">✏️ Editar nota</span></span>
+</div>`;
+
     });
     html+=`</div></div>`;
     if(canvasW>MIN_CANVAS) html+=`<div class="meadow-scroll-hint">⇠ desliza para ver todo el bosque ⇢</div>`;
