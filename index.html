@@ -2731,7 +2731,7 @@ function getCurrentCustomNeedLevel(habit){
 // DEFAULT STATE
 function defaultState(){
   const now=Date.now();
-  plant={name:"Mi planta",level:1,xp:0,xpNext:1000,alive:true,deathReason:null,createdAt:now};
+  plant={name:"Mi planta",level:1,xp:0,xpNext:500,alive:true,deathReason:null,createdAt:now};
   needsState={strength:{value:100,lastFulfilled:now},intelligence:{value:100,lastFulfilled:now},calmness:{value:100,extraCalmness:0,lastResetDate:getTodayKey()},entertainment:{value:100,lastFulfilled:now},vitality:{value:100,lastFulfilled:now}};
   hydration={level:100,extraHydration:0,loggedToday:0,target:1.2,lastResetDate:getTodayKey()};
   flexibility={level:100,extraFlexibility:0,doneToday:false,lastResetDate:getTodayKey()};
@@ -3556,16 +3556,16 @@ function openHabitModal(editId){
         document.getElementById("hGoalCountdown").value=h.goal.countdown?"yes":"no";
       }
       activeHabitFeatures=new Set(h.features||["streak","stats"]);
-    }
 
-    // Cargar efecto al editar
-    const eff = h.effect || {};
-    document.getElementById("hEffectType").value = eff.type || "fill100";
-    document.getElementById("hEffectValue").value = eff.value || 50;
-    document.getElementById("hEffectAccumulate").value = eff.accumulate ? "yes" : "no";
-    document.getElementById("hEffectDamage").value = eff.damage || 20;
-    document.getElementById("hEffectDamageKill").value = eff.damageKill ? "yes" : "no";
-    toggleEffectFields();
+      // Cargar efecto al editar
+      const eff = h.effect || {};
+      document.getElementById("hEffectType").value = eff.type || "fill100";
+      document.getElementById("hEffectValue").value = eff.value || 50;
+      document.getElementById("hEffectAccumulate").value = eff.accumulate ? "yes" : "no";
+      document.getElementById("hEffectDamage").value = eff.damage || 20;
+      document.getElementById("hEffectDamageKill").value = eff.damageKill ? "yes" : "no";
+      toggleEffectFields();
+    }
 
   } else {
     ["hName","hDays","hDesc","hCustomNeedName","hCustomUnit","hGoalTarget","hGoalUnit","hGoalDesc","hGoalDeadline","hReminder"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
@@ -3671,6 +3671,7 @@ function saveHabit(){
   const customUnit=document.getElementById("hCustomUnit").value.trim();
   const showNav=document.getElementById("hShowNav").value==="yes";
   const navSection=document.getElementById("hNavSection").value;
+  const xpReward=parseInt(document.getElementById("hXpReward")?.value)||6;
   const effectType=document.getElementById("hEffectType").value;
   const effectValue=parseInt(document.getElementById("hEffectValue")?.value)||50;
   const effectAccumulate=document.getElementById("hEffectAccumulate")?.value==="yes";
@@ -5249,6 +5250,7 @@ function openNeedEditModal(needId){
   modal.classList.add("open");
 }
 function closeNeedEditModal(){document.getElementById("needEditModal").classList.remove("open");}
+
 function saveNeedEdit(){
   const name=document.getElementById("nedName").value.trim();
   const icon=document.getElementById("nedIcon").value.trim()||"✨";
@@ -5257,6 +5259,13 @@ function saveNeedEdit(){
   if(!name){toast("Escribe un nombre");return;}
   if(needId){
     needOverrides[needId]={name,icon,habitId};
+    const isCore=!!CORE_NEEDS_DEF.find(n=>n.id===needId);
+    if(!isCore){
+      customHabits.filter(h=>getHabitNeedId(h)===needId).forEach(h=>{
+        h.icon=icon;
+        if(h.affects==="custom")h.customNeedName=name;
+      });
+    }
   } else {
     
     
@@ -5267,6 +5276,7 @@ function saveNeedEdit(){
   }
   closeNeedEditModal();saveNeedsOverrides();renderAll();toast(`✅ Necesidad actualizada`);
 }
+
 function deleteNeedFromModal(){
   const needId=document.getElementById("nedEditId").value;
   if(!needId)return;
