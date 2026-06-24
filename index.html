@@ -3802,8 +3802,22 @@ function saveCoreEdit(){
   const get=id=>{const el=document.getElementById(id);return el?parseFloat(el.value):null;};
   if(which==="agua"||which==="all"){const v=get("ep_agua_target");if(v>0){coreParams.agua.target=v;hydration.target=v;}}
   if(which==="pasos"||which==="all"){const o=get("ep_pasos_obj"),m=get("ep_pasos_min");if(o>0)coreParams.pasos.objetivo=o;if(m>=0)coreParams.pasos.minimo=m;}
-  if(which==="sueno"||which==="all"){const f=get("ep_sueno_fatal"),o=get("ep_sueno_opt"),t=get("ep_sueno_thresh"),s=get("ep_sueno_streak");if(f>0)coreParams.sueno.minFatal=f;if(o>0)coreParams.sueno.minOptimo=o;if(t>=0)coreParams.sueno.lowSleepThreshold=t;if(s>0)coreParams.sueno.maxLowSleepStreak=s;}
-  if(which==="aleman"||which==="all"){
+  if(which==="sueno"||which==="all"){
+  const f=get("ep_sueno_fatal"),o=get("ep_sueno_opt"),t=get("ep_sueno_thresh"),s=get("ep_sueno_streak");
+  if(f>0)coreParams.sueno.minFatal=f;
+  if(o>0)coreParams.sueno.minOptimo=o;
+  if(t>=0)coreParams.sueno.lowSleepThreshold=t;
+  if(s>0)coreParams.sueno.maxLowSleepStreak=s;
+  // Recalcular la racha de noches malas con el nuevo umbral, usando el historial real
+  const newThresh=coreParams.sueno.lowSleepThreshold;
+  let recalculated=0;
+  for(let i=sleep.history.length-1;i>=0;i--){
+    if(sleep.history[i].hours<newThresh)recalculated++;
+    else break;
+  }
+  sleep.lowSleepStreak=recalculated;
+}
+if(which==="aleman"||which==="all"){
     const d=get("ep_aleman_dias"),h=get("ep_aleman_horas");
     if(d>0)coreParams.aleman.diasMaxSinHacer=d;
     if(h>0){coreParams.aleman.horasObjetivo=h;goals.german.target=h;}
