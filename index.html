@@ -1456,12 +1456,16 @@ textarea {
 }
 .meadow-tree:hover{transform:scale(1.15) translateY(-2px);}
 
+.meadow-scroll{
+  position:absolute;inset:0;overflow-x:auto;overflow-y:visible;z-index:1;
+}
 .meadow-tree-label{
   position:absolute;bottom:100%;left:50%;transform:translateX(-50%) translateY(4px);
-  background:rgba(45,80,22,0.92);color:#d6f0b8;font-size:0.62rem;padding:6px 10px;border-radius:6px;
-  white-space:normal;max-width:170px;width:max-content;opacity:0;pointer-events:none;transition:opacity 0.15s,transform 0.15s;z-index:20;
-  text-align:center;line-height:1.5;
+  background:rgba(45,80,22,0.96);color:#d6f0b8;font-size:0.62rem;padding:6px 10px;border-radius:6px;
+  white-space:normal;max-width:180px;width:max-content;opacity:0;pointer-events:none;transition:opacity 0.15s,transform 0.15s;z-index:50;
+  text-align:center;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,0.25);
 }
+
 .meadow-tree:hover .meadow-tree-label{pointer-events:auto;}
 .meadow-tree-note-full{
   white-space:normal;word-wrap:break-word;
@@ -2738,7 +2742,7 @@ function getCurrentCustomNeedLevel(habit){
 // DEFAULT STATE
 function defaultState(){
   const now=Date.now();
-  plant={name:"Mi planta",level:1,xp:0,xpNext:2,alive:true,deathReason:null,createdAt:now};
+  plant={name:"Mi planta",level:1,xp:0,xpNext:250,alive:true,deathReason:null,createdAt:now};
   needsState={strength:{value:100,lastFulfilled:now},intelligence:{value:100,lastFulfilled:now},calmness:{value:100,extraCalmness:0,lastResetDate:getTodayKey()},entertainment:{value:100,lastFulfilled:now},vitality:{value:100,lastFulfilled:now}};
   hydration={level:100,extraHydration:0,loggedToday:0,target:1.2,lastResetDate:getTodayKey()};
   flexibility={level:100,extraFlexibility:0,doneToday:false,lastResetDate:getTodayKey()};
@@ -4010,7 +4014,8 @@ function saveMonthlyObj(){
   const existingObj=editId?monthlyObjs.find(x=>x.id===editId):null;
   const linkedHabit=document.getElementById("mobjLinkedHabit")?.value||"";
   const target=parseInt(document.getElementById("mobjTarget")?.value)||0;
-  const progress=parseInt(document.getElementById("mobjProgress")?.value)||(existingObj?.progress||0);
+  const progressRaw=document.getElementById("mobjProgress")?.value;
+  const progress=progressRaw===""?(existingObj?.progress||0):(parseInt(progressRaw)||0);
   const obj={
     id:editId||"mo_"+Date.now(),
     name,cat:document.getElementById("mobjCat").value,
@@ -5577,6 +5582,14 @@ function editTreeNote(treeId){
   toast("📝 Nota actualizada");
 }
 
+function deleteTreeFromForest(treeId){
+  const tree=forest.find(t=>t.id===treeId);if(!tree)return;
+  if(!confirm(`¿Eliminar el árbol "${tree.name}" del bosque? Esta acción no se puede deshacer.`))return;
+  forest=forest.filter(t=>t.id!==treeId);
+  save();renderForest();
+  toast("🗑️ Árbol eliminado del bosque");
+}
+
 function hashStr(s){let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return h;}
 
 function renderForest(){
@@ -5633,7 +5646,7 @@ if(t.note){
 }
 html+=`<div class="meadow-tree" style="left:${x}px;bottom:${yBase}%;font-size:${size}rem;animation-delay:${delay}s;z-index:${10-band}">
   ${treeEmojis[h%treeEmojis.length]}
-  <span class="meadow-tree-label">${t.name} · Nv.${t.level}<br><span style="font-weight:400;opacity:0.8">🌱 ${createdDate}</span><br><span style="font-weight:400;opacity:0.8">🌳 ${plantedDate}</span>${noteHtml}<br><span class="meadow-note-toggle" onclick="event.stopPropagation();editTreeNote('${t.id}')">✏️ Editar nota</span></span>
+  <span class="meadow-tree-label">${t.name} · Nv.${t.level}<br><span style="font-weight:400;opacity:0.8">🌱 ${createdDate}</span><br><span style="font-weight:400;opacity:0.8">🌳 ${plantedDate}</span>${noteHtml}<br><span class="meadow-note-toggle" onclick="event.stopPropagation();editTreeNote('${t.id}')">✏️ Editar nota</span> · <span class="meadow-note-toggle" style="color:#f5b0a0" onclick="event.stopPropagation();deleteTreeFromForest('${t.id}')">🗑️ Eliminar</span></span>
 </div>`;
 
     });
