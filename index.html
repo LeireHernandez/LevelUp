@@ -1452,7 +1452,8 @@ textarea {
 .meadow-tree{
   position:absolute;line-height:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,0.2));
   cursor:default;transform-origin:bottom center;animation:treeGrow 0.5s ease both;transition:transform 0.2s;
-  overflow:visible;
+  overflow:visible;display:inline-flex;align-items:flex-end;justify-content:center;
+  padding:14px 16px;margin:-14px -16px;
 }
 .meadow-tree:hover{transform:scale(1.15) translateY(-2px);}
 
@@ -4396,7 +4397,7 @@ function renderHome(){
     ps.innerHTML=`<div class="alert alert-purple" style="margin-bottom:0.8rem">🛡️ Activo · ~${rem}h restantes · Todas las muertes pausadas · ${protector.reason}</div>`;
     pBtn.style.display="none";
   } else {
-    ps.innerHTML=`<p style="font-size:0.82rem;color:var(--text3);margin-bottom:0.8rem">Pausa todas las muertes 24h. Cuesta -20% XP y -3 días racha.</p>`;
+    ps.innerHTML=`<p style="font-size:0.82rem;color:var(--text3);margin-bottom:0.8rem">Pausa todas las muertes 24h. Cuesta -50 XP y -3 días racha.</p>`;
     pBtn.style.display="";
   }
 
@@ -5655,28 +5656,32 @@ html+=`<div class="meadow-tree" style="left:${x}px;bottom:${yBase}%;font-size:${
   }
 
   html+=`</div>`;
-  el.innerHTML=html;
+el.innerHTML=html;
 
   // Posicionar las etiquetas con position:fixed para que no se recorten por overflow:hidden
   el.querySelectorAll(".meadow-tree").forEach(treeEl=>{
     const label=treeEl.querySelector(".meadow-tree-label");
     if(!label)return;
-    treeEl.addEventListener("mouseenter",()=>{
+    const showLabel=()=>{
       const rect=treeEl.getBoundingClientRect();
       label.style.left=(rect.left+rect.width/2)+"px";
-      label.style.top=(rect.top-6)+"px";
+      label.style.top=(rect.top+14)+"px";
       label.classList.add("show");
       label.style.pointerEvents="auto";
-    });
-    treeEl.addEventListener("mouseleave",(e)=>{
-      if(label.contains(e.relatedTarget))return;
+    };
+    const hideLabel=(e)=>{
+      if(e&&e.relatedTarget&&label.contains(e.relatedTarget))return;
       label.classList.remove("show");
       label.style.pointerEvents="none";
+    };
+    treeEl.addEventListener("mouseenter",showLabel);
+    treeEl.addEventListener("mouseleave",hideLabel);
+    treeEl.addEventListener("click",(e)=>{
+      if(label.contains(e.target))return;
+      if(label.classList.contains("show")){hideLabel();}
+      else{showLabel();}
     });
-    label.addEventListener("mouseleave",()=>{
-      label.classList.remove("show");
-      label.style.pointerEvents="none";
-    });
+    label.addEventListener("mouseleave",()=>hideLabel());
   });
 }
 
