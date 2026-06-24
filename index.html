@@ -1457,16 +1457,17 @@ textarea {
 .meadow-tree:hover{transform:scale(1.15) translateY(-2px);}
 
 .meadow-scroll{
-  position:absolute;inset:0;overflow-x:auto;overflow-y:visible;z-index:1;
+  position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;z-index:1;
 }
 .meadow-tree-label{
-  position:absolute;bottom:100%;left:50%;transform:translateX(-50%) translateY(4px);
-  background:rgba(45,80,22,0.96);color:#d6f0b8;font-size:0.62rem;padding:6px 10px;border-radius:6px;
-  white-space:normal;max-width:180px;width:max-content;opacity:0;pointer-events:none;transition:opacity 0.15s,transform 0.15s;z-index:50;
-  text-align:center;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,0.25);
+  position:fixed;left:0;top:0;transform:translate(-50%,-100%);
+  background:rgba(45,80,22,0.97);color:#d6f0b8;font-size:0.68rem;padding:7px 11px;border-radius:6px;
+  white-space:normal;max-width:200px;width:max-content;opacity:0;pointer-events:none;transition:opacity 0.12s;z-index:9999;
+  text-align:center;line-height:1.55;box-shadow:0 6px 18px rgba(0,0,0,0.3);
 }
+.meadow-tree-label.show{opacity:1;}
 
-.meadow-tree:hover .meadow-tree-label{pointer-events:auto;}
+
 .meadow-tree-note-full{
   white-space:normal;word-wrap:break-word;
 }
@@ -1474,7 +1475,6 @@ textarea {
   display:inline;color:#a8d97a;text-decoration:underline;cursor:pointer;font-weight:500;margin-left:3px;
 }
 
-.meadow-tree:hover .meadow-tree-label{opacity:1;transform:translateX(-50%) translateY(-2px);}
 @keyframes treeGrow{from{transform:scale(0) translateY(10px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
 .meadow-empty{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -5656,7 +5656,30 @@ html+=`<div class="meadow-tree" style="left:${x}px;bottom:${yBase}%;font-size:${
 
   html+=`</div>`;
   el.innerHTML=html;
+
+  // Posicionar las etiquetas con position:fixed para que no se recorten por overflow:hidden
+  el.querySelectorAll(".meadow-tree").forEach(treeEl=>{
+    const label=treeEl.querySelector(".meadow-tree-label");
+    if(!label)return;
+    treeEl.addEventListener("mouseenter",()=>{
+      const rect=treeEl.getBoundingClientRect();
+      label.style.left=(rect.left+rect.width/2)+"px";
+      label.style.top=(rect.top-6)+"px";
+      label.classList.add("show");
+      label.style.pointerEvents="auto";
+    });
+    treeEl.addEventListener("mouseleave",(e)=>{
+      if(label.contains(e.relatedTarget))return;
+      label.classList.remove("show");
+      label.style.pointerEvents="none";
+    });
+    label.addEventListener("mouseleave",()=>{
+      label.classList.remove("show");
+      label.style.pointerEvents="none";
+    });
+  });
 }
+
 
 
 // INIT
