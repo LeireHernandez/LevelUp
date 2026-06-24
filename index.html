@@ -5614,7 +5614,6 @@ function renderForest(){
   if(fc)fc.textContent=forest.length?`(${forest.length} árbol${forest.length!==1?"es":""})`:"";
 
   const treeEmojis=["🌳"];
-
   const STEP_X=86, MIN_CANVAS=640;
   const canvasW=Math.max(MIN_CANVAS, forest.length*STEP_X+80);
 
@@ -5637,42 +5636,40 @@ function renderForest(){
 
     forest.forEach((t,i)=>{
       const h=hashStr(t.id);
-      const band=h%3; // 0 cerca, 1 medio, 2 lejos
-const yBase=[2,12,22][band]+((h>>4)%6);
+      const band=h%3;
+      const yBase=[2,12,22][band]+((h>>4)%6);
       const size=[1.5,1.15,0.9][band];
       const x=40+i*STEP_X+((h%26)-13);
       const delay=(i%14)*0.04;
-const plantedDate=new Date(t.plantedAt).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+      const plantedDate=new Date(t.plantedAt).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
       const createdDate=t.createdAt?new Date(t.createdAt).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'}):'—';
       let noteHtml="";
-if(t.note){
-  const escaped=t.note.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
-  if(t.note.length>60){
-    const short=t.note.slice(0,60).trim();
-    noteHtml=`<br><span style="font-weight:400;opacity:0.85;font-style:italic">📝 <span class="meadow-tree-note-full" data-short="${short}…" data-full="${escaped}" data-expanded="0">${short}…</span><span class="meadow-note-toggle" onclick="event.stopPropagation();toggleTreeNote(this)">Leer más</span></span>`;
-  } else {
-    noteHtml=`<br><span style="font-weight:400;opacity:0.85;font-style:italic">📝 ${t.note}</span>`;
-  }
-}
-html+=`<div class="meadow-tree" style="left:${x}px;bottom:${yBase}%;font-size:${size}rem;animation-delay:${delay}s;z-index:${10-band}">
+      if(t.note){
+        const escaped=t.note.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+        if(t.note.length>60){
+          const short=t.note.slice(0,60).trim();
+          noteHtml=`<br><span style="font-weight:400;opacity:0.85;font-style:italic">📝 <span class="meadow-tree-note-full" data-short="${short}…" data-full="${escaped}" data-expanded="0">${short}…</span><span class="meadow-note-toggle" onclick="event.stopPropagation();toggleTreeNote(this)">Leer más</span></span>`;
+        } else {
+          noteHtml=`<br><span style="font-weight:400;opacity:0.85;font-style:italic">📝 ${t.note}</span>`;
+        }
+      }
+      html+=`<div class="meadow-tree" style="left:${x}px;bottom:${yBase}%;font-size:${size}rem;animation-delay:${delay}s;z-index:${10-band}">
   ${treeEmojis[h%treeEmojis.length]}
   <span class="meadow-tree-label">${t.name} · Nv.${t.level}<br><span style="font-weight:400;opacity:0.8">🌱 ${createdDate}</span><br><span style="font-weight:400;opacity:0.8">🌳 ${plantedDate}</span>${noteHtml}<br><span class="meadow-note-toggle" onclick="event.stopPropagation();editTreeNote('${t.id}')">✏️ Editar nota</span> · <span class="meadow-note-toggle" style="color:#f5b0a0" onclick="event.stopPropagation();deleteTreeFromForest('${t.id}')">🗑️ Eliminar</span></span>
 </div>`;
-
     });
     html+=`</div></div>`;
     if(canvasW>MIN_CANVAS) html+=`<div class="meadow-scroll-hint">⇠ desliza para ver todo el bosque ⇢</div>`;
   }
 
   html+=`</div>`;
-el.innerHTML=html;
+  el.innerHTML=html;
 
-  // Posicionar las etiquetas con position:fixed para que no se recorten por overflow:hidden
-el.querySelectorAll(".meadow-tree").forEach(treeEl=>{
+  // Mover etiquetas al body y añadir listeners
+  el.querySelectorAll(".meadow-tree").forEach(treeEl=>{
     const label=treeEl.querySelector(".meadow-tree-label");
     if(!label)return;
 
-    // Mover la etiqueta al body para que no herede overflow ni opacity del prado
     document.body.appendChild(label);
 
     const showLabel=(e)=>{
@@ -5682,25 +5679,17 @@ el.querySelectorAll(".meadow-tree").forEach(treeEl=>{
       label.style.pointerEvents="auto";
       const lw=label.offsetWidth||200;
       const lh=label.offsetHeight||120;
-      const left=Math.max(8, Math.min(e.clientX-lw/2, window.innerWidth-lw-8));
-      const top=Math.max(8, e.clientY-lh-14);
+      const vw=window.innerWidth;
+      const vh=window.innerHeight;
+      const margin=10;
+      let left=e.clientX-lw/2;
+      left=Math.max(margin, Math.min(left, vw-lw-margin));
+      let top=e.clientY-lh-20;
+      if(top<margin) top=e.clientY+30;
+      if(top+lh>vh-margin) top=vh-lh-margin;
       label.style.left=left+"px";
       label.style.top=top+"px";
     };
-
-treeEl.addEventListener("touchstart",(e)=>{
-      e.preventDefault();
-      const touch=e.touches[0];
-      if(label.style.opacity==="1"){
-        hideLabel(null);
-      } else {
-        // Ocultar cualquier otra etiqueta abierta primero
-        document.querySelectorAll(".meadow-tree-label").forEach(l=>{
-          if(l!==label){l.style.opacity="0";l.style.pointerEvents="none";}
-        });
-        showLabel({clientX:touch.clientX,clientY:touch.clientY});
-      }
-    },{passive:false});
 
     const hideLabel=(e)=>{
       if(e&&e.relatedTarget&&label.contains(e.relatedTarget))return;
@@ -5708,16 +5697,46 @@ treeEl.addEventListener("touchstart",(e)=>{
       label.style.pointerEvents="none";
     };
 
+    // Mouse
     treeEl.addEventListener("mouseenter", showLabel);
     treeEl.addEventListener("mousemove", showLabel);
     treeEl.addEventListener("mouseleave", hideLabel);
     treeEl.addEventListener("click",(e)=>{
       if(label.contains(e.target))return;
-      if(label.style.opacity==="1") hideLabel(e);
+      if(label.style.opacity==="1") hideLabel(null);
       else showLabel(e);
     });
     label.addEventListener("mouseleave", hideLabel);
+
+    // Touch
+    treeEl.addEventListener("touchstart",(e)=>{
+      e.stopPropagation();
+      const touch=e.touches[0];
+      if(label.style.opacity==="1"){
+        hideLabel(null);
+      } else {
+        document.querySelectorAll(".meadow-tree-label").forEach(l=>{
+          if(l!==label){l.style.opacity="0";l.style.pointerEvents="none";}
+        });
+        showLabel({clientX:touch.clientX,clientY:touch.clientY});
+      }
+    },{passive:false});
   });
+
+  // Listeners globales para cerrar al tocar fuera (solo se añaden una vez)
+  if(!window._forestListenersAdded){
+    window._forestListenersAdded=true;
+    const closeAll=(e)=>{
+      if(!e.target.closest(".meadow-tree")&&!e.target.closest(".meadow-tree-label")){
+        document.querySelectorAll(".meadow-tree-label").forEach(l=>{
+          l.style.opacity="0";
+          l.style.pointerEvents="none";
+        });
+      }
+    };
+    document.addEventListener("touchstart", closeAll,{passive:true});
+    document.addEventListener("click", closeAll);
+  }
 }
 
 
