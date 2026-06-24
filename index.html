@@ -2910,8 +2910,8 @@ function load(){
     const s=JSON.parse(raw);
     plant=s.plant||{};
     // Migración: si sigue en nivel 1, actualizar xpNext al valor por defecto actual sin tocar XP ni nivel
-    if(plant.level===1&&plant.xpNext!==undefined&&plant.xpNext!==500){
-      plant.xpNext=500;
+    if(plant.level===1&&plant.xpNext!==undefined&&plant.xpNext!==250){
+      plant.xpNext=250;
     }
     needsState=s.needsState||{};
     hydration=s.hydration||{};
