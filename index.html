@@ -5688,6 +5688,13 @@ el.querySelectorAll(".meadow-tree").forEach(treeEl=>{
       label.style.top=top+"px";
     };
 
+    treeEl.addEventListener("touchstart",(e)=>{
+      e.preventDefault();
+      const touch=e.touches[0];
+      if(label.style.opacity==="1"){hideLabel(null);}
+      else{showLabel({clientX:touch.clientX,clientY:touch.clientY});}
+    },{passive:false});
+
     const hideLabel=(e)=>{
       if(e&&e.relatedTarget&&label.contains(e.relatedTarget))return;
       label.style.opacity="0";
