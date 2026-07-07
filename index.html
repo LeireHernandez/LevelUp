@@ -1498,6 +1498,266 @@ textarea {
   background:rgba(255,255,255,0.7);padding:2px 8px;border-radius:10px;z-index:2;
 }
 
+/* MOTIVACIÓN */
+.motiv-hero{
+  background:linear-gradient(135deg,var(--green-dk) 0%,#1a3d08 60%,#2d5016 100%);
+  border-radius:var(--radius);
+  padding:2.2rem 2rem;
+  color:#d6f0b8;
+  margin-bottom:1.1rem;
+  position:relative;
+  overflow:hidden;
+}
+.motiv-hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events:none;
+}
+.motiv-hero-quote{
+  font-family:'Lora',serif;
+  font-size:1.25rem;
+  font-weight:500;
+  line-height:1.55;
+  color:#d6f0b8;
+  margin-bottom:0.5rem;
+  position:relative;
+}
+.motiv-hero-quote::before{
+  content:'"';
+  font-size:3rem;
+  color:rgba(214,240,184,0.2);
+  position:absolute;
+  top:-0.8rem;left:-0.5rem;
+  font-family:'Lora',serif;
+  line-height:1;
+}
+.motiv-hero-sub{
+  font-size:0.75rem;
+  color:rgba(214,240,184,0.6);
+  margin-top:0.8rem;
+}
+
+.motiv-section{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.4rem;
+  margin-bottom:1.1rem;
+  box-shadow:var(--shadow);
+}
+.motiv-section-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:1rem;
+}
+.motiv-section-title{
+  font-family:'Lora',serif;
+  font-size:1.05rem;
+  font-weight:500;
+  color:var(--green-dk);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.motiv-view{cursor:default;}
+.motiv-edit{display:none;}
+.motiv-section.editing .motiv-view{display:none;}
+.motiv-section.editing .motiv-edit{display:block;}
+
+.motiv-ideal-text{
+  font-family:'Lora',serif;
+  font-size:0.95rem;
+  color:var(--text);
+  line-height:1.8;
+  white-space:pre-wrap;
+  min-height:40px;
+}
+.motiv-ideal-placeholder{
+  color:var(--text3);
+  font-style:italic;
+  font-size:0.88rem;
+}
+
+.motiv-why-list{
+  display:flex;
+  flex-direction:column;
+  gap:0.7rem;
+}
+.motiv-why-item{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:0.9rem 1rem;
+  background:var(--green-mist);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  border-left:3px solid var(--green-lt);
+}
+.motiv-why-num{
+  font-family:'Lora',serif;
+  font-size:1.1rem;
+  font-weight:600;
+  color:var(--green-lt);
+  flex-shrink:0;
+  min-width:20px;
+  line-height:1.4;
+}
+.motiv-why-text{
+  font-size:0.86rem;
+  color:var(--text);
+  line-height:1.6;
+  flex:1;
+}
+.motiv-why-placeholder{
+  color:var(--text3);
+  font-style:italic;
+  font-size:0.84rem;
+  text-align:center;
+  padding:1rem;
+}
+.motiv-why-input-row{
+  display:flex;
+  gap:8px;
+  margin-bottom:8px;
+  align-items:center;
+}
+.motiv-why-input-row input{flex:1;}
+.motiv-why-edit-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 0;
+  border-bottom:1px solid var(--border);
+}
+.motiv-why-edit-item:last-child{border-bottom:none;}
+
+.motiv-streak-banner{
+  background:linear-gradient(135deg,#ff6b35,#f7c59f);
+  border-radius:var(--radius-sm);
+  padding:0.9rem 1.1rem;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:1.1rem;
+  color:white;
+}
+.motiv-streak-num{
+  font-size:2rem;
+  font-weight:700;
+  line-height:1;
+  flex-shrink:0;
+}
+.motiv-streak-label{font-size:0.82rem;opacity:0.92;line-height:1.4;}
+
+/* CORCHO DE NOTAS */
+.cork-board{
+  background:
+    repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(139,100,60,0.06) 28px,rgba(139,100,60,0.06) 29px),
+    repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(139,100,60,0.06) 28px,rgba(139,100,60,0.06) 29px),
+    linear-gradient(135deg,#c8a96e 0%,#b8955a 30%,#c4a060 60%,#b08040 100%);
+  border-radius:var(--radius);
+  padding:1.4rem;
+  min-height:340px;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,0.15),0 4px 20px rgba(0,0,0,0.1);
+  border:3px solid #8b6035;
+  display:flex;
+  flex-wrap:wrap;
+  gap:1.1rem;
+  align-content:flex-start;
+  position:relative;
+}
+.cork-board-empty{
+  width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:3rem 1rem;color:rgba(80,50,20,0.5);text-align:center;gap:0.5rem;
+}
+.cork-note{
+  position:relative;
+  width:180px;
+  min-height:130px;
+  padding:1rem 0.9rem 0.8rem;
+  border-radius:3px;
+  box-shadow:3px 4px 12px rgba(0,0,0,0.22),0 1px 3px rgba(0,0,0,0.15);
+  font-size:0.8rem;
+  line-height:1.55;
+  color:#2a1f0e;
+  word-break:break-word;
+  transition:transform 0.15s,box-shadow 0.15s;
+  cursor:default;
+  flex-shrink:0;
+}
+.cork-note:hover{
+  transform:scale(1.03) rotate(0deg)!important;
+  box-shadow:5px 8px 20px rgba(0,0,0,0.3),0 1px 3px rgba(0,0,0,0.15);
+  z-index:10;
+}
+.cork-pin{
+  position:absolute;
+  top:-10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  box-shadow:0 2px 4px rgba(0,0,0,0.4),inset 0 1px 2px rgba(255,255,255,0.3);
+  z-index:2;
+}
+.cork-pin::after{
+  content:'';
+  position:absolute;
+  bottom:-6px;
+  left:50%;
+  transform:translateX(-50%);
+  width:2px;
+  height:8px;
+  background:rgba(0,0,0,0.3);
+  border-radius:1px;
+}
+.cork-note-title{
+  font-weight:600;
+  font-size:0.82rem;
+  margin-bottom:0.35rem;
+  color:#1a1208;
+  line-height:1.3;
+  font-family:'Lora',serif;
+}
+.cork-note-body{
+  font-size:0.75rem;
+  color:#3a2d1a;
+  opacity:0.88;
+  white-space:pre-wrap;
+}
+.cork-note-date{
+  margin-top:0.6rem;
+  font-size:0.62rem;
+  opacity:0.5;
+  color:#1a1208;
+}
+.cork-note-actions{
+  display:flex;
+  gap:6px;
+  margin-top:0.7rem;
+  opacity:0;
+  transition:opacity 0.15s;
+}
+.cork-note:hover .cork-note-actions{opacity:1;}
+.cork-note-btn{
+  background:rgba(0,0,0,0.1);
+  border:none;
+  border-radius:5px;
+  padding:3px 7px;
+  font-size:0.65rem;
+  cursor:pointer;
+  color:#2a1f0e;
+  transition:background 0.12s;
+}
+.cork-note-btn:hover{background:rgba(0,0,0,0.2);}
+.cork-note-btn.del:hover{background:rgba(139,46,26,0.25);color:var(--red);}
+
+/* Modal corcho */
+#corkNoteModal .modal{max-width:440px;}
+
 </style>
 </head>
 <body>
@@ -1686,6 +1946,20 @@ textarea {
   </div>
 </div>
 
+<div class="modal-overlay" id="agendaCatModal">
+  <div class="modal" style="max-width:420px">
+    <h3>📅 Categorías de agenda</h3>
+    <div id="agendaCatListEdit"></div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0">
+    <p style="font-size:0.78rem;font-weight:500;color:var(--text2);margin-bottom:0.8rem">Nueva categoría</p>
+    <div class="form-row">
+      <div class="form-group" style="flex:1"><label>Nombre</label><input type="text" id="newAgendaCatName" placeholder="Ej: Familia..." maxlength="20"></div>
+    </div>
+    <button class="btn btn-sm" onclick="addAgendaCategory()">+ Añadir</button>
+    <div class="modal-footer"><button class="btn btn-secondary btn-sm" onclick="closeAgendaCatModal()">Cerrar</button></div>
+  </div>
+</div>
+
 <!-- MODAL: LIBRO -->
 <div class="modal-overlay" id="bookModal">
   <div class="modal">
@@ -1736,7 +2010,7 @@ textarea {
 <div id="taskMultiTimesContainer" style="display:none;margin-bottom:10px"></div>
     <div class="form-row">
       <div class="form-group"><label>Categoría</label>
-        <select id="taskCategory"><option>Personal</option><option>Trabajo</option><option>Salud</option><option>Deporte</option><option>Estudio</option><option>Casa</option><option>Social</option><option>Otro</option></select>
+        <select id="taskCategory"></select>
       </div>
       <div class="form-group"><label>Fecha</label><input type="date" id="taskDate"></div>
     </div>
@@ -1918,7 +2192,7 @@ textarea {
     </div>
     <div class="form-row" style="margin-top:0.6rem">
       <div class="form-group"><label>Categoría</label>
-        <select id="recCategory"><option>Personal</option><option>Trabajo</option><option>Salud</option><option>Deporte</option><option>Estudio</option><option>Casa</option><option>Social</option><option>Otro</option></select>
+        <select id="recCategory"></select>
       </div>
       <div class="form-group"><label>Prioridad</label>
         <select id="recPriority"><option value="high">🔴 Alta</option><option value="mid" selected>🟡 Media</option><option value="low">🟢 Baja</option></select>
@@ -1999,7 +2273,7 @@ textarea {
         <div class="card-title">⚠️ Pendientes obligatorios hoy</div>
         <div id="pendientesList"></div>
       </div>
-      <div class="card">
+      <div class="card" style="margin-top:1.8rem">
         <div class="card-title">🛡️ Protector de racha</div>
         <div id="protectorStatus"></div>
         <button class="btn btn-purple btn-sm" onclick="openProtectorModal()" id="protectorActivateBtn">🛡️ Activar protector</button>
@@ -2043,11 +2317,9 @@ textarea {
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem">
       <button class="btn btn-blue btn-sm" onclick="openTaskModal()">+ Nueva tarea</button>
       <button class="btn btn-blue btn-sm" onclick="openRecurringModal()">+ Recurrente</button>
+      <button class="btn btn-secondary btn-sm" onclick="openAgendaCatModal()">🏷️ Categorías</button>
       <div style="display:flex;gap:6px;flex-wrap:wrap" id="agendaFilterBtns">
         <button class="btn btn-secondary btn-xs active-filter" onclick="filterAgenda('all',this)">Todas</button>
-        <button class="btn btn-secondary btn-xs" onclick="filterAgenda('Trabajo',this)">Trabajo</button>
-        <button class="btn btn-secondary btn-xs" onclick="filterAgenda('Personal',this)">Personal</button>
-        <button class="btn btn-secondary btn-xs" onclick="filterAgenda('Salud',this)">Salud</button>
       </div>
     </div>
 
@@ -2162,27 +2434,11 @@ textarea {
     <div id="suenoDoneAlert" style="margin-bottom:1rem"></div>
     <div class="card">
       <div class="card-title">🌙 Registrar descanso</div>
-      <div class="alert alert-danger">🚨 <strong>Obligatorio:</strong> Si no lo registras antes de medianoche, tu planta muere.</div>
-      <div style="text-align:center;margin:1.2rem 0">
-        <div style="font-size:3rem" id="suenoMoonEmoji">🌙</div>
-        <div style="font-size:2.2rem;font-weight:500;color:var(--green-dk);margin-top:6px" id="suenoHorasDisplay">— h</div>
-        <div class="sleep-zones" style="justify-content:center;margin-top:10px">
-          <span class="sleep-zone danger">💀 &lt;5h</span>
-          <span class="sleep-zone warn">⚠️ 5-7h</span>
-          <span class="sleep-zone ok">✅ 7-9h</span>
-          <span class="sleep-zone warn">⚠️ &gt;9h</span>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
-        <input type="number" id="suenoHorasInput" step="0.5" min="0" max="14" placeholder="Horas dormidas" style="flex:1;min-width:150px">
-        <button class="btn" onclick="doSueno()">😴 Registrar</button>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-secondary btn-sm" onclick="doSuenoVal(5)">5h</button>
-        <button class="btn btn-secondary btn-sm" onclick="doSuenoVal(6)">6h</button>
-        <button class="btn btn-secondary btn-sm" onclick="doSuenoVal(7)">7h</button>
-        <button class="btn btn-secondary btn-sm" onclick="doSuenoVal(8)">8h ✅</button>
-        <button class="btn btn-secondary btn-sm" onclick="doSuenoVal(9)">9h</button>
+      <p style="font-size:0.7rem;color:var(--text3);margin-bottom:1rem" id="suenoHorasDisplay">Última noche: —</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:1rem">
+        <div class="form-group" style="flex:1;min-width:110px;margin:0"><label>Horas</label><input type="number" id="suenoHorasInput" step="1" min="0" max="14" placeholder="8"></div>
+        <div class="form-group" style="flex:1;min-width:110px;margin:0"><label>Minutos</label><input type="number" id="suenoMinutosInput" step="5" min="0" max="59" placeholder="0"></div>
+        <button class="btn" onclick="doSueno()">Registrar</button>
       </div>
     </div>
     <div class="card">
@@ -2326,13 +2582,14 @@ textarea {
       <div class="stat-card"><div class="stat-val" id="movilMedia">0</div><div class="stat-lbl">Media semanal</div></div>
       <div class="stat-card"><div class="stat-val" id="movilMax">0</div><div class="stat-lbl">Máx. semanal</div></div>
     </div>
+    <div class="alert alert-danger" style="margin-bottom:1rem">🚨 <strong>Obligatorio.</strong> Más de 5h con el móvil mata a tu planta.</div>
+    <div id="movilDoneAlert" style="margin-bottom:1rem"></div>
     <div id="movilAlert" class="alert" style="display:none;margin-bottom:1rem"></div>
     <div class="card">
       <div class="card-title">📲 Registrar uso de hoy</div>
-      <div class="alert alert-danger">🚨 <strong>Obligatorio.</strong> Más de 5h con el móvil mata a tu planta.</div>
-      <div id="movilDoneAlert" style="margin-bottom:0.8rem"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input type="number" id="phoneInput" step="0.5" min="0" max="24" placeholder="Horas de móvil hoy" value="0" style="flex:1;min-width:130px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+        <div class="form-group" style="flex:1;min-width:110px;margin:0"><label>Horas</label><input type="number" id="phoneHorasInput" step="1" min="0" max="24" placeholder="0"></div>
+        <div class="form-group" style="flex:1;min-width:110px;margin:0"><label>Minutos</label><input type="number" id="phoneMinutosInput" step="5" min="0" max="59" placeholder="0"></div>
         <button class="btn btn-amber" onclick="doPhone()">📱 Registrar</button>
       </div>
     </div>
@@ -2408,6 +2665,18 @@ textarea {
       <div class="edit-section-title">🏅 Categorías de deporte</div>
       <button class="btn btn-secondary btn-sm" onclick="openSportCatModal()" style="margin-bottom:1rem">🏅 Gestionar categorías</button>
       <div id="editSportCatPreview"></div>
+    </div>
+
+    <div class="edit-section">
+      <div class="edit-section-title">📅 Categorías de agenda</div>
+      <button class="btn btn-secondary btn-sm" onclick="openAgendaCatModal()" style="margin-bottom:1rem">🏷️ Gestionar categorías</button>
+      <div id="editAgendaCatPreview"></div>
+    </div>
+
+    <div class="edit-section">
+      <div class="edit-section-title">👁️ Pantallas visibles</div>
+      <p style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem">Oculta las pantallas que no quieras usar. Podrás volver a activarlas cuando quieras.</p>
+      <div id="editAppPagesList"></div>
     </div>
 
     <div class="edit-section">
@@ -2614,7 +2883,109 @@ textarea {
 
 </div>
 
+  <!-- MOTIVACIÓN -->
+  <div class="page" id="page-motivacion">
+    <div class="page-header">
+      <h2>🌟 Mi motivación</h2>
+      <p>Recuerda por qué empezaste y hacia dónde vas</p>
+    </div>
+
+    <!-- Banner racha -->
+    <div class="motiv-streak-banner" id="motivStreakBanner">
+      <div class="motiv-streak-num" id="motivStreakNum">0</div>
+      <div>
+        <div style="font-weight:600;font-size:0.9rem">días construyendo tu mejor versión</div>
+        <div class="motiv-streak-label" id="motivStreakSub">Cada día cuenta. Sigue.</div>
+      </div>
+    </div>
+
+    <!-- Hero con frase del yo ideal -->
+    <div class="motiv-hero" id="motivHero">
+      <div class="motiv-hero-quote" id="motivHeroQuote">Escribe quién quieres ser y aparecerá aquí cada vez que abras esta página.</div>
+      <div class="motiv-hero-sub" id="motivHeroSub">Tu yo ideal · Edita abajo para personalizar</div>
+    </div>
+
+    <!-- Quién quiero ser -->
+    <div class="motiv-section" id="motivIdealSection">
+      <div class="motiv-section-header">
+        <div class="motiv-section-title">🪞 Quién quiero ser</div>
+        <button class="btn btn-secondary btn-xs" id="motivIdealEditBtn" onclick="toggleMotivEdit('ideal')">✏️ Editar</button>
+      </div>
+      <div class="motiv-view" id="motivIdealView">
+        <div class="motiv-ideal-text" id="motivIdealText">
+          <span class="motiv-ideal-placeholder">Describe a tu yo ideal. ¿Cómo vive? ¿Cómo se cuida? ¿Qué hace cada día? Escríbelo en presente, como si ya fuera real.</span>
+        </div>
+      </div>
+      <div class="motiv-edit" id="motivIdealEdit">
+        <textarea id="motivIdealInput" rows="6" placeholder="Soy alguien que cuida su cuerpo y su mente cada día. Me levanto temprano, hago deporte, leo, estudio y mantengo mi entorno en orden. Vivo con intención y claridad..." style="width:100%;margin-bottom:0.8rem"></textarea>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-secondary btn-sm" onclick="cancelMotivEdit('ideal')">Cancelar</button>
+          <button class="btn btn-sm" onclick="saveMotivIdeal()">💾 Guardar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mis porqués -->
+    <div class="motiv-section" id="motivWhySection">
+      <div class="motiv-section-header">
+        <div class="motiv-section-title">💬 Mis porqués</div>
+        <button class="btn btn-secondary btn-xs" id="motivWhyEditBtn" onclick="toggleMotivEdit('why')">✏️ Editar</button>
+      </div>
+      <div class="motiv-view" id="motivWhyView">
+        <div class="motiv-why-list" id="motivWhyList">
+          <div class="motiv-why-placeholder">Aún no has añadido tus porqués. Pulsa "Editar" para escribir las razones que te mueven.</div>
+        </div>
+      </div>
+      <div class="motiv-edit" id="motivWhyEdit">
+        <p style="font-size:0.78rem;color:var(--text3);margin-bottom:0.9rem">¿Por qué quieres convertirte en tu mejor versión? Escribe tus razones más honestas.</p>
+        <div id="motivWhyInputList"></div>
+        <button class="btn btn-secondary btn-sm" onclick="addMotivWhyInput()" style="margin-top:0.4rem">+ Añadir razón</button>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem">
+          <button class="btn btn-secondary btn-sm" onclick="cancelMotivEdit('why')">Cancelar</button>
+          <button class="btn btn-sm" onclick="saveMotivWhy()">💾 Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTAS (CORCHO) -->
+  <div class="page" id="page-notas">
+    <div class="page-header">
+      <h2>📌 Mi corcho</h2>
+      <p>Tus notas clavadas. Toca una nota para editarla.</p>
+    </div>
+    <div style="margin-bottom:1.2rem">
+      <button class="btn btn-sm" onclick="openCorkNoteModal()">+ Nueva nota</button>
+    </div>
+    <div class="cork-board" id="corkBoard"></div>
+  </div>
+
 </main>
+
+<!-- MODAL: NOTA DEL CORCHO -->
+<div class="modal-overlay" id="corkNoteModal">
+  <div class="modal" style="max-width:420px">
+    <h3 id="corkNoteModalTitle">Nueva nota</h3>
+    <div class="form-group-full">
+      <label>Título (opcional)</label>
+      <input type="text" id="corkNoteTitle" placeholder="Ej: Idea importante" maxlength="50">
+    </div>
+    <div class="form-group-full" style="margin-top:0.7rem">
+      <label>Nota *</label>
+      <textarea id="corkNoteBody" rows="5" placeholder="Escribe tu nota aquí..."></textarea>
+    </div>
+    <div class="form-group-full" style="margin-top:0.7rem">
+      <label>Color</label>
+      <div style="display:flex;gap:8px;margin-top:5px;flex-wrap:wrap" id="corkColorPicker"></div>
+    </div>
+    <input type="hidden" id="corkNoteEditId">
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" onclick="closeCorkNoteModal()">Cancelar</button>
+      <button class="btn btn-danger btn-sm" id="corkNoteDeleteBtn" style="display:none" onclick="deleteCorkNoteFromModal()">🗑️ Eliminar</button>
+      <button class="btn btn-sm" onclick="saveCorkNote()">📌 Clavar</button>
+    </div>
+  </div>
+</div>
 
 <script>
 
@@ -2662,6 +3033,9 @@ let sportCats = [
   {id:"sc_swim",name:"Natación",emoji:"🏊",hasKm:false,required:false},
   {id:"sc_yoga",name:"Yoga",emoji:"🧘",hasKm:false,required:false}
 ];
+
+let agendaCats = ["Personal","Trabajo","Salud","Deporte","Estudio","Casa","Social","Otro"];
+let disabledAppPages = [];
 
 let coreParams = {
   agua:{target:1.2}, pasos:{objetivo:10000,minimo:7000},
@@ -2783,6 +3157,8 @@ customHabits.forEach(h=>{
   orderQuestions=[...DEFAULT_ORDER_QUESTIONS];
   disabledCoreHabits=[];
   disabledBuiltinGoals=[];
+  disabledAppPages=[];
+  agendaCats=["Personal","Trabajo","Salud","Deporte","Estudio","Casa","Social","Otro"];
   sportCats=[
     {id:"sc_run",name:"Running",emoji:"🏃",hasKm:true,required:false},
     {id:"sc_gym",name:"Gym",emoji:"🏋️",hasKm:false,required:false},
@@ -2909,11 +3285,22 @@ function checkDailyObligatory(){
 }
 
 function isDisabledCore(id){ return disabledCoreHabits.includes(id); }
+function isAppPageDisabled(id){ return disabledAppPages.includes(id); }
+function toggleAppPage(id){
+  if(isAppPageDisabled(id)){
+    disabledAppPages=disabledAppPages.filter(k=>k!==id);
+    toast("✅ Pantalla activada");
+  } else {
+    disabledAppPages.push(id);
+    toast("👁️ Pantalla ocultada");
+  }
+  save();renderNav();renderEditPage();
+}
 
 // SAVE Y LOAD
 function save(){
   updateAllLevels();
-  const s={plant,needsState,hydration,flexibility,energy,sleep,goals,phoneUsage,dailyActions,streak,customHabits,customNeedStates,habitLogs,habitStreaks,protector,agendaTasks,books,longGoals,monthlyObjs,orderQuestions,coreParams,lastDecayTs,sportCats,disabledCoreHabits,disabledBuiltinGoals,recurringTasks,forest,lastAppTouch};
+  const s={plant,needsState,hydration,flexibility,energy,sleep,goals,phoneUsage,dailyActions,streak,customHabits,customNeedStates,habitLogs,habitStreaks,protector,agendaTasks,books,longGoals,monthlyObjs,orderQuestions,coreParams,lastDecayTs,sportCats,disabledCoreHabits,disabledBuiltinGoals,recurringTasks,forest,lastAppTouch,corkNotes,motivData,agendaCats,disabledAppPages};
   try{localStorage.setItem("levelup_v7",JSON.stringify(s));}catch(e){console.warn(e);}
 }
 
@@ -2948,6 +3335,8 @@ function load(){
     coreParams=s.coreParams||{};
     sportCats=s.sportCats||[];
     disabledCoreHabits=s.disabledCoreHabits||[];
+    agendaCats=(s.agendaCats&&s.agendaCats.length)?s.agendaCats:["Personal","Trabajo","Salud","Deporte","Estudio","Casa","Social","Otro"];
+    disabledAppPages=s.disabledAppPages||[];
     disabledBuiltinGoals=s.disabledBuiltinGoals||[];
     lastDecayTs=s.lastDecayTs||Date.now();
     if(!hydration.lastResetDate)hydration.lastResetDate=getTodayKey();
@@ -2975,6 +3364,8 @@ if(coreParams.sueno&&coreParams.sueno.lowSleepThreshold===undefined)coreParams.s
     if(!sportCats.length)sportCats=[{id:"sc_run",name:"Running",emoji:"🏃",hasKm:true,required:false}];
     forest=s.forest||[];
 lastAppTouch=s.lastAppTouch||Date.now();
+corkNotes=s.corkNotes||[];
+motivData=s.motivData||{ideal:"",whys:[]};
 if(!coreParams.lectura)coreParams.lectura={diasMaxSinHacer:2};
 if(dailyActions.aguaObjReached===undefined)dailyActions.aguaObjReached=false;
 if(dailyActions.pasosObjReached===undefined)dailyActions.pasosObjReached=false;
@@ -3229,10 +3620,24 @@ function doPasosVal(steps){
   toast(`👣 ${energy.stepsToday.toLocaleString()} pasos`);save();renderAll();
 }
 
+function hmToDecimalHours(h,m){
+  const hh=parseInt(h)||0, mm=parseInt(m)||0;
+  return hh+(mm/60);
+}
+function decimalHoursToHM(dec){
+  if(dec===null||dec===undefined||isNaN(dec))return "—";
+  const h=Math.floor(dec);
+  const m=Math.round((dec-h)*60);
+  return m>0?`${h}h ${m}min`:`${h}h`;
+}
 function doSueno(){
-  const h=parseFloat(document.getElementById("suenoHorasInput")?.value);
+  const hEl=document.getElementById("suenoHorasInput"),mEl=document.getElementById("suenoMinutosInput");
+  const hRaw=hEl?.value, mRaw=mEl?.value;
+  if(hRaw===""&&mRaw==="") {toast("Introduce las horas dormidas");return;}
+  const h=hmToDecimalHours(hRaw,mRaw);
   if(isNaN(h)||h<0){toast("Horas inválidas");return;}
-  doSuenoVal(h);document.getElementById("suenoHorasInput").value="";
+  doSuenoVal(h);
+  if(hEl)hEl.value="";if(mEl)mEl.value="";
 }
 function doSuenoVal(hours){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
@@ -3247,7 +3652,7 @@ if(dailyActions.suenoDone){
   sleep.history=sleep.history.filter(h=>h.date!==todayStr());
   dailyActions.suenoDone=false;
 }
-  if(!isProtectorActive()&&hours<coreParams.sueno.minFatal){killPlant(`menos de ${coreParams.sueno.minFatal}h de sueño`);return;}
+  if(!isProtectorActive()&&hours<coreParams.sueno.minFatal){killPlant(`menos de ${decimalHoursToHM(coreParams.sueno.minFatal)} de sueño`);return;}
   sleep.hoursToday=hours;sleep.doneToday=true;dailyActions.suenoDone=true;
   let sleepLvl;
   const lowThresh=coreParams.sueno.lowSleepThreshold!==undefined?coreParams.sueno.lowSleepThreshold:6.5;
@@ -3329,7 +3734,7 @@ function doLecturaVal(mins){
 function doPhone(){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
 if(dailyActions.phoneDone){
-  if(!confirm(`Ya registraste ${phoneUsage.find(p=>p.date===todayStr())?.hours||0}h de móvil. ¿Editar el valor?`))return;
+  if(!confirm(`Ya registraste ${decimalHoursToHM(phoneUsage.find(p=>p.date===todayStr())?.hours||0)} de móvil. ¿Editar el valor?`))return;
   // Revertir penalización de calmness si la hubo
   const prev=phoneUsage.find(p=>p.date===todayStr());
   if(prev&&prev.hours>2){
@@ -3341,7 +3746,9 @@ if(dailyActions.phoneDone){
   }
   dailyActions.phoneDone=false;
 }
-  const h=parseFloat(document.getElementById("phoneInput")?.value);
+  const hEl=document.getElementById("phoneHorasInput"),mEl=document.getElementById("phoneMinutosInput");
+  if((hEl?.value??"")===""&&(mEl?.value??"")===""){toast("Introduce las horas de móvil");return;}
+  const h=hmToDecimalHours(hEl?.value,mEl?.value);
   if(isNaN(h)||h<0){toast("Horas inválidas");return;}
   const today=todayStr();
   const ex=phoneUsage.find(p=>p.date===today);
@@ -3349,9 +3756,10 @@ if(dailyActions.phoneDone){
   if(phoneUsage.length>14)phoneUsage.shift();
   dailyActions.phoneDone=true;
   triggerMonthlyObjUpdate('__movil');
-  if(!isProtectorActive()&&h>5){killPlant(`adicción al móvil — ${h}h de pantalla`);return;}
+  if(!isProtectorActive()&&h>5){killPlant(`adicción al móvil — ${decimalHoursToHM(h)} de pantalla`);return;}
   if(h>2){const dmg=(h-2)*12;if(needsState.calmness){needsState.calmness.value=Math.max(0,needsState.calmness.value-dmg);needsState.calmness.extraCalmness=Math.max(0,(needsState.calmness.extraCalmness||0)-dmg);}}
-  else toast(`📱 ${h}h · Sin penalización`);
+  else toast(`📱 ${decimalHoursToHM(h)} · Sin penalización`);
+  if(hEl)hEl.value="";if(mEl)mEl.value="";
   checkDeath();save();renderAll();renderPhoneChart();
 }
 
@@ -3797,6 +4205,75 @@ function renderSportCatListEdit(){
     </div>`).join("")||"<p style='font-size:0.82rem;color:var(--text3)'>Añade una categoría.</p>";
 }
 
+// CATEGORÍAS DE AGENDA
+function openAgendaCatModal(){
+  renderAgendaCatListEdit();
+  document.getElementById("agendaCatModal").classList.add("open");
+}
+function closeAgendaCatModal(){document.getElementById("agendaCatModal").classList.remove("open");renderAgendaCatOptions();renderAgenda();}
+
+function addAgendaCategory(){
+  const nameEl=document.getElementById("newAgendaCatName");
+  const name=nameEl.value.trim();
+  if(!name){toast("Escribe el nombre");return;}
+  if(agendaCats.some(c=>c.toLowerCase()===name.toLowerCase())){toast("Esa categoría ya existe");return;}
+  agendaCats.push(name);
+  nameEl.value="";
+  save();renderAgendaCatListEdit();toast(`"${name}" añadida`);
+}
+
+function renameAgendaCategory(oldName){
+  const newName=prompt("Nuevo nombre de la categoría:",oldName);
+  if(!newName||!newName.trim())return;
+  const trimmed=newName.trim();
+  agendaCats=agendaCats.map(c=>c===oldName?trimmed:c);
+  agendaTasks.forEach(t=>{if(t.category===oldName)t.category=trimmed;});
+  if(typeof recurringTasks!=="undefined")recurringTasks.forEach(r=>{if(r.category===oldName)r.category=trimmed;});
+  if(agendaFilter===oldName)agendaFilter=trimmed;
+  save();renderAgendaCatListEdit();toast("Categoría renombrada");
+}
+
+function deleteAgendaCategory(name){
+  if(agendaCats.length<=1){toast("⚠️ Necesitas al menos una categoría");return;}
+  if(!confirm(`¿Eliminar la categoría "${name}"? Las tareas existentes con esta categoría se pasarán a "${agendaCats.find(c=>c!==name)}".`))return;
+  const fallback=agendaCats.find(c=>c!==name);
+  agendaCats=agendaCats.filter(c=>c!==name);
+  agendaTasks.forEach(t=>{if(t.category===name)t.category=fallback;});
+  if(typeof recurringTasks!=="undefined")recurringTasks.forEach(r=>{if(r.category===name)r.category=fallback;});
+  if(agendaFilter===name)agendaFilter="all";
+  save();renderAgendaCatListEdit();toast(`"${name}" eliminada`);
+}
+
+function renderAgendaCatListEdit(){
+  const el=document.getElementById("agendaCatListEdit");if(!el)return;
+  el.innerHTML=agendaCats.map(name=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1;font-size:0.84rem;font-weight:500">${name}</div>
+      <button class="btn btn-secondary btn-xs" onclick="renameAgendaCategory('${name.replace(/'/g,"\\'")}')">✏️</button>
+      <button class="btn btn-danger btn-xs" onclick="deleteAgendaCategory('${name.replace(/'/g,"\\'")}')">🗑️</button>
+    </div>`).join("");
+}
+
+function renderAgendaCatOptions(){
+  const optsHtml=agendaCats.map(c=>`<option value="${c}">${c}</option>`).join("");
+  ["taskCategory","recCategory"].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel)return;
+    const prev=sel.value;
+    sel.innerHTML=optsHtml;
+    if(agendaCats.includes(prev))sel.value=prev;
+  });
+  const filterBtns=document.getElementById("agendaFilterBtns");
+  if(filterBtns){
+    let html=`<button class="btn btn-secondary btn-xs${agendaFilter==="all"?" active-filter":""}" onclick="filterAgenda('all',this)">Todas</button>`;
+    agendaCats.forEach(c=>{html+=`<button class="btn btn-secondary btn-xs${agendaFilter===c?" active-filter":""}" onclick="filterAgenda('${c.replace(/'/g,"\\'")}',this)">${c}</button>`;});
+    filterBtns.innerHTML=html;
+  }
+  // Preview en Editar app
+  const prev=document.getElementById("editAgendaCatPreview");
+  if(prev)prev.innerHTML=agendaCats.map(c=>`<span style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--border2);border-radius:16px;padding:3px 10px;font-size:0.75rem;margin:2px">${c}</span>`).join("");
+}
+
 
 
 // EDITAR HABITOS DEL SISTEMA
@@ -3807,7 +4284,26 @@ function openEditCore(which){
   let html="";
   if(which==="agua"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">💧 Hidratación</h4><div class="form-row"><div class="form-group"><label>Objetivo agua (L)</label><input type="number" id="ep_agua_target" step="0.1" min="0.5" max="5" value="${p.agua.target}"></div></div>`;}
   if(which==="pasos"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">⚡ Pasos</h4><div class="form-row"><div class="form-group"><label>Objetivo</label><input type="number" id="ep_pasos_obj" step="500" min="1000" max="30000" value="${p.pasos.objetivo}"></div><div class="form-group"><label>Mínimo</label><input type="number" id="ep_pasos_min" step="500" min="0" max="15000" value="${p.pasos.minimo}"></div></div>`;}
-  if(which==="sueno"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">😴 Sueño</h4><div class="form-row" style="align-items:end"><div class="form-group" style="display:grid;grid-template-rows:34px auto;gap:5px"><label style="display:flex;align-items:flex-end">Horas mínimas fatales</label><input type="number" id="ep_sueno_fatal" step="0.5" min="1" max="6" value="${p.sueno.minFatal}"></div><div class="form-group" style="display:grid;grid-template-rows:34px auto;gap:5px"><label style="display:flex;align-items:flex-end">Horas óptimas</label><input type="number" id="ep_sueno_opt" step="0.5" min="5" max="10" value="${p.sueno.minOptimo}"></div></div><div class="form-row" style="align-items:end"><div class="form-group" style="display:grid;grid-template-rows:34px auto;gap:5px"><label style="display:flex;align-items:flex-end">Umbral "poco sueño" (horas)</label><input type="number" id="ep_sueno_thresh" step="0.5" min="3" max="9" value="${p.sueno.lowSleepThreshold!==undefined?p.sueno.lowSleepThreshold:6.5}"></div><div class="form-group" style="display:grid;grid-template-rows:34px auto;gap:5px"><label style="display:flex;align-items:flex-end">Noches seguidas con poco sueño → muerte</label><input type="number" id="ep_sueno_streak" step="1" min="2" max="14" value="${p.sueno.maxLowSleepStreak||3}"></div></div>`;}
+  if(which==="sueno"||which==="all"){
+    const fatalH=Math.floor(p.sueno.minFatal),fatalM=Math.round((p.sueno.minFatal-fatalH)*60);
+    const optH=Math.floor(p.sueno.minOptimo),optM=Math.round((p.sueno.minOptimo-optH)*60);
+    const threshVal=p.sueno.lowSleepThreshold!==undefined?p.sueno.lowSleepThreshold:6.5;
+    const threshH=Math.floor(threshVal),threshM=Math.round((threshVal-threshH)*60);
+    html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">😴 Sueño</h4>
+    <div class="form-row" style="align-items:end">
+      <div class="form-group" style="margin:0"><label>Horas mínimas fatales (h)</label><input type="number" id="ep_sueno_fatal_h" step="1" min="0" max="6" value="${fatalH}"></div>
+      <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_fatal_m" step="5" min="0" max="59" value="${fatalM}"></div>
+    </div>
+    <div class="form-row" style="align-items:end">
+      <div class="form-group" style="margin:0"><label>Horas óptimas (h)</label><input type="number" id="ep_sueno_opt_h" step="1" min="5" max="10" value="${optH}"></div>
+      <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_opt_m" step="5" min="0" max="59" value="${optM}"></div>
+    </div>
+    <div class="form-row" style="align-items:end">
+      <div class="form-group" style="margin:0"><label>Umbral "poco sueño" (h)</label><input type="number" id="ep_sueno_thresh_h" step="1" min="3" max="9" value="${threshH}"></div>
+      <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_thresh_m" step="5" min="0" max="59" value="${threshM}"></div>
+    </div>
+    <div class="form-row"><div class="form-group"><label>Noches seguidas con poco sueño → muerte</label><input type="number" id="ep_sueno_streak" step="1" min="2" max="14" value="${p.sueno.maxLowSleepStreak||3}"></div></div>`;
+  }
   if(which==="aleman"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">🧠 Alemán</h4><div class="form-row"><div class="form-group"><label>Días sin estudiar → muerte</label><input type="number" id="ep_aleman_dias" step="0.5" min="0.5" max="30" value="${p.aleman.diasMaxSinHacer}"></div><div class="form-group"><label>Horas objetivo C2</label><input type="number" id="ep_aleman_horas" step="10" min="50" max="3000" value="${p.aleman.horasObjetivo}"></div></div>
   <div class="form-row"><div class="form-group"><label>Nivel de partida</label><select id="ep_aleman_start"><option value="0" ${(p.aleman.startHours||0)===0?"selected":""}>A1 (0h)</option><option value="200" ${(p.aleman.startHours||0)===200?"selected":""}>A2 (200h)</option><option value="400" ${(p.aleman.startHours||0)===400?"selected":""}>B1 (400h)</option><option value="660" ${(p.aleman.startHours||0)===660?"selected":""}>B2 (660h)</option></select></div><div class="form-group"><label>Horas ya acumuladas</label><input type="number" id="ep_aleman_current" step="1" min="0" max="3000" value="${Math.round(goals.german.hours)}"></div></div>`;}
   if(which==="deporte"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">💪 Deporte</h4><div class="form-row"><div class="form-group"><label>Días sin hacer → muerte</label><input type="number" id="ep_dep_dias" step="0.5" min="1" max="30" value="${p.deporte.diasMaxSinHacer}"></div></div>`;}
@@ -3822,7 +4318,10 @@ function saveCoreEdit(){
   if(which==="agua"||which==="all"){const v=get("ep_agua_target");if(v>0){coreParams.agua.target=v;hydration.target=v;}}
   if(which==="pasos"||which==="all"){const o=get("ep_pasos_obj"),m=get("ep_pasos_min");if(o>0)coreParams.pasos.objetivo=o;if(m>=0)coreParams.pasos.minimo=m;}
   if(which==="sueno"||which==="all"){
-  const f=get("ep_sueno_fatal"),o=get("ep_sueno_opt"),t=get("ep_sueno_thresh"),s=get("ep_sueno_streak");
+  const f=hmToDecimalHours(get("ep_sueno_fatal_h"),get("ep_sueno_fatal_m"));
+  const o=hmToDecimalHours(get("ep_sueno_opt_h"),get("ep_sueno_opt_m"));
+  const t=hmToDecimalHours(get("ep_sueno_thresh_h"),get("ep_sueno_thresh_m"));
+  const s=get("ep_sueno_streak");
   if(f>0)coreParams.sueno.minFatal=f;
   if(o>0)coreParams.sueno.minOptimo=o;
   if(t>=0)coreParams.sueno.lowSleepThreshold=t;
@@ -4091,6 +4590,7 @@ function filterBooks(genre,btn){booksFilter=genre;document.querySelectorAll("#bo
 // AGENDA
 function openTaskModal(editId){
   document.getElementById("taskModal").classList.add("open");
+  renderAgendaCatOptions();
   document.getElementById("taskEditId").value=editId||"";
   document.getElementById("taskModalTitle").textContent=editId?"Editar tarea":"Nueva tarea";
   document.getElementById("taskDate").value=getTodayKey();
@@ -4191,53 +4691,43 @@ function renamePlant(){
 }
 
 function fullResetGame(){
-  if(!confirm("¿Reiniciar la planta? Se perderá el progreso de hábitos, XP y racha, pero se conservarán tus libros, metas, objetivos, agenda y hábitos personalizados."))return;
+  if(!confirm("¿Reiniciar la planta? Se reiniciará la racha, el XP y el nivel de tu planta, y sus necesidades volverán al 100%. Todos tus demás datos (lecturas, horas de alemán, registros de sueño y móvil, libros, metas, objetivos, agenda y hábitos) se conservan tal cual."))return;
   if(decayInterval)clearInterval(decayInterval);
-  Object.keys(customChartInsts).forEach(k=>{if(customChartInsts[k])customChartInsts[k].destroy();});
-  customChartInsts={};
 
-  // Guardar lo que queremos conservar
-  const savedBooks=[...books];
-  const savedLongGoals=[...longGoals];
-  const savedMonthlyObjs=[...monthlyObjs];
-  const savedAgendaTasks=[...agendaTasks];
-  const savedCustomHabits=[...customHabits];
-  const savedSportCats=[...sportCats];
-  const savedOrderQuestions=[...orderQuestions];
-  const savedCoreParams=JSON.parse(JSON.stringify(coreParams));
-  const savedDisabledCore=[...disabledCoreHabits];
-  const savedDisabledBuiltin=[...disabledBuiltinGoals];
-  const savedRecurring=typeof recurringTasks!=="undefined"?[...recurringTasks]:[];
+  // Solo reiniciamos lo relativo a la racha, XP y nivel de la planta,
+  // y el estado "de hoy" de sus necesidades (para que revive sana y no
+  // vuelva a morir al instante por datos de un día ya cerrado).
+  // Todo el HISTORIAL real (goals, phoneUsage, sleep.history, habitLogs,
+  // coreParams, hábitos, agenda, libros, metas...) se conserva intacto.
+  const now=Date.now(), todayKey=getTodayKey(), today=todayStr();
+  plant.level=1;
+  plant.xp=0;
+  plant.xpNext=250;
+  plant.alive=true;
+  plant.deathReason=null;
+  plant.createdAt=now;
+  streak={current:0,lastAliveDay:null};
+  lastDecayTs=now;
 
-  defaultState();
-
-  // Restaurar lo conservado
-  books=savedBooks;
-  longGoals=savedLongGoals;
-  monthlyObjs=savedMonthlyObjs;
-  agendaTasks=savedAgendaTasks;
-  customHabits=savedCustomHabits;
-  sportCats=savedSportCats;
-  orderQuestions=savedOrderQuestions;
-  coreParams=savedCoreParams;
-  disabledCoreHabits=savedDisabledCore;
-  disabledBuiltinGoals=savedDisabledBuiltin;
-  if(typeof recurringTasks!=="undefined")recurringTasks=savedRecurring;
-
-  // Reiniciar logs y estados de hábitos custom pero conservar los hábitos en sí
-  customNeedStates={};
-  habitLogs={};
-  habitStreaks={};
+  dailyActions={orderDone:false,phoneDone:false,suenoDone:false,aguaObjReached:false,pasosObjReached:false,date:today};
+  hydration.loggedToday=0;hydration.extraHydration=0;hydration.lastResetDate=todayKey;
+  flexibility.doneToday=false;flexibility.extraFlexibility=0;flexibility.lastResetDate=todayKey;
+  energy.doneToday=false;energy.stepsToday=0;energy.extraEnergy=0;energy.lastResetDate=todayKey;
+  sleep.doneToday=false;sleep.hoursToday=null;sleep.lowSleepStreak=0;sleep.lastResetDate=todayKey;
+  Object.keys(needsState).forEach(k=>{
+    needsState[k].value=100;
+    if("extraCalmness" in needsState[k])needsState[k].extraCalmness=0;
+    if("lastResetDate" in needsState[k])needsState[k].lastResetDate=todayKey;
+    if("lastFulfilled" in needsState[k])needsState[k].lastFulfilled=now;
+  });
   customHabits.forEach(h=>{
     customNeedStates[h.id]=100;
-    habitLogs[h.id]=[];
-    habitStreaks[h.id]={current:0,last:null};
-    h.createdAt=Date.now();
-    if(h.goal)h.goal.progress=0;
+    dailyActions["custom_"+h.id]=false;
   });
+  protector={active:false,expiresAt:null,reason:""};
 
   save();renderAll();renderNav();renderPhoneChart();renderSleepChart();startDecay();
-  toast("🌱 Planta reiniciada · Tus datos guardados");
+  toast("🌱 Planta reiniciada · Racha, XP y nivel a cero · Tus registros se conservan");
 }
 
 function fullResetGameHard(){
@@ -4315,9 +4805,11 @@ function renderNav(){
   html+=navLinkHtml("habitos-custom","✨","Mis hábitos");
   customNavTracking.forEach(h=>{html+=navLinkHtml("custom-habit-detail",h.icon,h.name,h.id);});
   html+=`<div class="nav-section-label">App</div>`;
-  html+=navLinkHtml("bosque","🌳","Mi bosque");
+  if(!isAppPageDisabled("bosque"))html+=navLinkHtml("bosque","🌳","Mi bosque");
+  if(!isAppPageDisabled("motivacion"))html+=navLinkHtml("motivacion","🌟","Mi motivación");
+  if(!isAppPageDisabled("notas"))html+=navLinkHtml("notas","📌","Mi corcho");
   html+=navLinkHtml("editar","✏️","Editar");
-  html+=navLinkHtml("info","❓","Cómo funciona");
+  if(!isAppPageDisabled("info"))html+=navLinkHtml("info","❓","Cómo funciona");
 
 
   navLinks.innerHTML=html;
@@ -4358,6 +4850,8 @@ function renderAll(){
   renderMetasPage();
   renderEditPage();
   renderForest();
+  renderCorkBoard();
+  renderMotivPage();
 }
 
 function renderHome(){
@@ -4555,11 +5049,37 @@ function setMobjFilter(m,btn){
 
 // EDIT PAGE
 function renderEditPage(){
+  // Categorías de agenda (preview)
+  renderAgendaCatOptions();
+
+  // Pantallas visibles/ocultables
+  const appPagesItems=[
+    {key:"info",icon:"❓",name:"Cómo funciona"},
+    {key:"bosque",icon:"🌳",name:"Mi bosque"},
+    {key:"notas",icon:"📌",name:"Mi corcho (notas)"},
+    {key:"motivacion",icon:"🌟",name:"Mi motivación"},
+  ];
+  const eapl=document.getElementById("editAppPagesList");
+  if(eapl){
+    eapl.innerHTML=appPagesItems.map(p=>{
+      const disabled=isAppPageDisabled(p.key);
+      return `<div class="edit-item-row" style="${disabled?"opacity:0.5":""}">
+        <div class="edit-item-icon">${p.icon}</div>
+        <div class="edit-item-info">
+          <div class="edit-item-name">${p.name} ${disabled?"<span style='font-size:0.65rem;color:var(--red)'>OCULTA</span>":""}</div>
+        </div>
+        <div class="edit-item-actions">
+          <button class="btn btn-xs ${disabled?"":"btn-danger"}" onclick="toggleAppPage('${p.key}')">${disabled?"👁️ Mostrar":"🙈 Ocultar"}</button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
   // Core habits
   const coreItems=[
     {key:"agua",icon:"💧",name:"Hidratación",desc:`Obj: ${coreParams.agua.target}L`},
     {key:"deporte",icon:"💪",name:"Deporte",desc:`Muerte si no hace en ${coreParams.deporte.diasMaxSinHacer}d`},
-    {key:"sueno",icon:"😴",name:"Sueño",desc:`Fatal <${coreParams.sueno.minFatal}h, óptimo ≥${coreParams.sueno.minOptimo}h`},
+    {key:"sueno",icon:"😴",name:"Sueño",desc:`Fatal <${decimalHoursToHM(coreParams.sueno.minFatal)}, óptimo ≥${decimalHoursToHM(coreParams.sueno.minOptimo)}`},
     {key:"aleman",icon:"🧠",name:"Alemán",desc:`Sin estudiar ${coreParams.aleman.diasMaxSinHacer}d → muerte`},
     {key:"pasos",icon:"⚡",name:"Pasos diarios",desc:`Obj: ${coreParams.pasos.objetivo.toLocaleString()}`},
     {key:"orden",icon:"🍃",name:"Test de orden",desc:"Obligatorio · Reset medianoche"},
@@ -4759,7 +5279,7 @@ if(as) as.innerHTML = `Beber agua mantiene tu planta hidratada · Objetivo: <str
 const ps2 = document.getElementById("pasosSubtitle");
 if(ps2) ps2.innerHTML = `Caminar mantiene sana a tu planta · Objetivo: <strong>${coreParams.pasos.objetivo.toLocaleString()} pasos</strong>, mín: <strong>${coreParams.pasos.minimo.toLocaleString()}</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('pasos')">⚙️ Ajustar</button>`;
 const ss2 = document.getElementById("suenoSubtitle");
-if(ss2) ss2.innerHTML = `El descanso mantiene a tu planta con energía · Fatal <strong>&lt;${coreParams.sueno.minFatal}h</strong>, óptimo <strong>≥${coreParams.sueno.minOptimo}h</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('sueno')">⚙️ Ajustar</button>`;
+if(ss2) ss2.innerHTML = `El descanso mantiene a tu planta con energía · Fatal <strong>&lt;${decimalHoursToHM(coreParams.sueno.minFatal)}</strong>, óptimo <strong>≥${decimalHoursToHM(coreParams.sueno.minOptimo)}</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('sueno')">⚙️ Ajustar</button>`;
 const ds2 = document.getElementById("deporteSubtitle");
 if(ds2) ds2.innerHTML = `Realiza <strong>una sesión</strong> para mantener tu planta fuerte · Muerte si no hace en <strong>${coreParams.deporte.diasMaxSinHacer}d</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openSportCatModal()">🏅 Categorías</button> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('deporte')">⚙️ Ajustar</button>`;
 const als = document.getElementById("alemanSubtitle");
@@ -4826,13 +5346,12 @@ if(ls2)ls2.innerHTML=`Leer mantiene a tu planta entretenida · Sin leer <strong>
   // SUEÑO
   const sv=Math.round(sleep.level);
   const sn=document.getElementById("suenoNeed");if(sn)sn.textContent=sv+"%";
-  const sh=document.getElementById("suenoHoy");if(sh)sh.textContent=sleep.hoursToday!=null?sleep.hoursToday+"h":"—";
+  const sh=document.getElementById("suenoHoy");if(sh)sh.textContent=sleep.hoursToday!=null?decimalHoursToHM(sleep.hoursToday):"—";
   const sm=document.getElementById("suenoMedia");
-  if(sm){const hist=sleep.history.slice(-7);sm.textContent=hist.length?(hist.reduce((a,b)=>a+b.hours,0)/hist.length).toFixed(1)+"h":"—";}
-  const sme=document.getElementById("suenoMoonEmoji");if(sme){const h=sleep.hoursToday||0;sme.textContent=h>=8?"🌟":h>=7?"🌙":h>=5?"😐":"😩";}
-  const shd=document.getElementById("suenoHorasDisplay");if(shd)shd.textContent=sleep.hoursToday!=null?sleep.hoursToday+"h":"— h";
+  if(sm){const hist=sleep.history.slice(-7);sm.textContent=hist.length?decimalHoursToHM(hist.reduce((a,b)=>a+b.hours,0)/hist.length):"—";}
+  const shd=document.getElementById("suenoHorasDisplay");if(shd)shd.textContent=sleep.hoursToday!=null?`Última noche: ${decimalHoursToHM(sleep.hoursToday)}`:"Última noche: —";
   const sda=document.getElementById("suenoDoneAlert");
-  if(sda)sda.innerHTML=dailyActions.suenoDone?`<div class="alert alert-info">✅ Registrado (${sleep.hoursToday}h)${sleep.lowSleepStreak>0?` · ⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3}`:""}</div>`:`<div class="alert alert-danger">🚨 Pendiente: registra antes de medianoche.</div>`;
+  if(sda)sda.innerHTML=dailyActions.suenoDone?`<div class="alert alert-info">✅ Registrado (${decimalHoursToHM(sleep.hoursToday)})${sleep.lowSleepStreak>0?` · ⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3}`:""}</div>`:`<div class="alert alert-danger">🚨 Pendiente: registra antes de medianoche.</div>`;
   renderSleepStats();
 
   // MÓVIL
@@ -4884,13 +5403,13 @@ function renderMovilStats(){
   const last7=[];
   for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const e=phoneUsage.find(p=>p.date===d.toDateString());last7.push(e?.hours||0);}
   const today=last7[6],avg=last7.reduce((a,b)=>a+b,0)/7,max=Math.max(...last7);
-  const mh=document.getElementById("movilHoy");if(mh)mh.textContent=today.toFixed(1);
-  const mm=document.getElementById("movilMedia");if(mm)mm.textContent=avg.toFixed(1);
-  const mx=document.getElementById("movilMax");if(mx)mx.textContent=max.toFixed(1);
+  const mh=document.getElementById("movilHoy");if(mh)mh.textContent=decimalHoursToHM(today);
+  const mm=document.getElementById("movilMedia");if(mm)mm.textContent=decimalHoursToHM(avg);
+  const mx=document.getElementById("movilMax");if(mx)mx.textContent=decimalHoursToHM(max);
   const ma=document.getElementById("movilAlert");
   if(ma){if(today>5){ma.style.display="";ma.className="alert alert-danger";ma.textContent="⚠️ Uso muy elevado (>5h).";}else if(today>3){ma.style.display="";ma.className="alert alert-warn";ma.textContent="📱 Uso alto (>3h).";}else ma.style.display="none";}
   const da=document.getElementById("movilDoneAlert");
-  if(da)da.innerHTML=dailyActions.phoneDone?`<div class="alert alert-info">✅ Registrado (${today.toFixed(1)}h).</div>`:`<div class="alert alert-danger">🚨 Pendiente: registra antes de medianoche.</div>`;
+  if(da)da.innerHTML=dailyActions.phoneDone?`<div class="alert alert-info">✅ Registrado (${decimalHoursToHM(today)}).</div>`:`<div class="alert alert-danger">🚨 Pendiente: registra antes de medianoche.</div>`;
 }
 
 function renderSleepStats(){
@@ -4901,7 +5420,7 @@ function renderSleepStats(){
   const best=Math.max(...hist.map(h=>h.hours));
   const worst=Math.min(...hist.map(h=>h.hours));
   const goodNights=hist.filter(h=>h.hours>=coreParams.sueno.minOptimo).length;
-  ss.innerHTML=`<div class="stats-row"><div class="stat-card"><div class="stat-val">${avg.toFixed(1)}h</div><div class="stat-lbl">Media</div></div><div class="stat-card"><div class="stat-val">${best}h</div><div class="stat-lbl">Mejor noche</div></div><div class="stat-card"><div class="stat-val">${worst}h</div><div class="stat-lbl">Peor noche</div></div><div class="stat-card"><div class="stat-val">${goodNights}</div><div class="stat-lbl">≥${coreParams.sueno.minOptimo}h</div></div></div>${sleep.lowSleepStreak>0?`<div class="alert alert-warn">⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3} noches con poco sueño.</div>`:""}`;
+  ss.innerHTML=`<div class="stats-row"><div class="stat-card"><div class="stat-val">${decimalHoursToHM(avg)}</div><div class="stat-lbl">Media</div></div><div class="stat-card"><div class="stat-val">${decimalHoursToHM(best)}</div><div class="stat-lbl">Mejor noche</div></div><div class="stat-card"><div class="stat-val">${decimalHoursToHM(worst)}</div><div class="stat-lbl">Peor noche</div></div><div class="stat-card"><div class="stat-val">${goodNights}</div><div class="stat-lbl">≥${decimalHoursToHM(coreParams.sueno.minOptimo)}</div></div></div>${sleep.lowSleepStreak>0?`<div class="alert alert-warn">⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3} noches con poco sueño.</div>`:""}`;
 }
 
 
@@ -5031,6 +5550,7 @@ function renderCustomHabitsCharts(){}
 // AGENDA
 function renderAgenda(){
   generateRecurringForWeek();
+  renderAgendaCatOptions();
   const today=getTodayKey();
   const todayFull=new Date().toLocaleDateString("es-ES",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
   const dl=document.getElementById("agendaDateLabel");if(dl)dl.textContent=todayFull.charAt(0).toUpperCase()+todayFull.slice(1);
@@ -5369,6 +5889,7 @@ function deleteNeedDirect(id){delete needOverrides[id];saveNeedsOverrides();rend
 // RECURRING TASKS
 function openRecurringModal(editId){
   document.getElementById("recurringModal").classList.add("open");
+  renderAgendaCatOptions();
   document.getElementById("recEditId").value=editId||"";
   document.getElementById("recName").value="";
   document.getElementById("recCategory").value="Personal";
@@ -5514,6 +6035,7 @@ function updateTaskTimesInputs(){
 let forest = [];
 let lastAppTouch = Date.now();
 let treeOverlayDismissed = false;
+let corkNotes = [];
 
 
 function triggerMonthlyObjUpdate(key){
@@ -5739,6 +6261,284 @@ function renderForest(){
   }
 }
 
+
+
+// MOTIVACIÓN
+const DAILY_MOTIV_QUOTES=[
+  "Cada pequeño hábito es un voto por la persona que quieres ser.",
+  "No necesitas ser perfecto, solo consistente.",
+  "El progreso, por pequeño que sea, es mejor que la inacción perfecta.",
+  "Tu yo del futuro te va a agradecer lo que hagas hoy.",
+  "La disciplina es elegirte a ti mismo una y otra vez.",
+  "No estás empezando desde cero. Estás empezando con experiencia.",
+  "El cambio no ocurre de golpe. Ocurre en los días en que nadie te ve.",
+  "Cuídate como si quisieras estar bien dentro de diez años.",
+  "La constancia vence al talento cuando el talento no trabaja con constancia.",
+  "No esperes la motivación. Actúa y la motivación te seguirá.",
+];
+
+function getDailyQuote(){
+  const d=new Date();
+  const idx=(d.getDate()+d.getMonth()*31)%DAILY_MOTIV_QUOTES.length;
+  return DAILY_MOTIV_QUOTES[idx];
+}
+
+function renderMotivPage(){
+  // Streak banner
+  const sn=document.getElementById("motivStreakNum");
+  const ss=document.getElementById("motivStreakSub");
+  if(sn)sn.textContent=streak.current||0;
+  if(ss){
+    const s=streak.current||0;
+    if(s===0)ss.textContent="Empieza hoy. El primer día siempre es el más importante.";
+    else if(s<7)ss.textContent="Llevas una semana construyendo tu mejor versión. ¡Sigue!";
+    else if(s<30)ss.textContent="Ya es un hábito real. Tu constancia dice mucho de ti.";
+    else ss.textContent="Esto ya es un estilo de vida. Eres increíble.";
+  }
+
+  // Hero: frase del yo ideal o quote del día
+  const hq=document.getElementById("motivHeroQuote");
+  const hs=document.getElementById("motivHeroSub");
+  if(hq){
+    if(motivData.ideal&&motivData.ideal.trim()){
+      // Mostrar primera frase del yo ideal
+      const firstLine=motivData.ideal.split('\n')[0].slice(0,180);
+      hq.textContent=firstLine;
+      if(hs)hs.textContent="Tu yo ideal · Tú lo escribiste";
+    } else {
+      hq.textContent=getDailyQuote();
+      if(hs)hs.textContent="Frase del día · Escribe tu yo ideal abajo para personalizarlo";
+    }
+  }
+
+  // Yo ideal view
+  const it=document.getElementById("motivIdealText");
+  if(it){
+    if(motivData.ideal&&motivData.ideal.trim()){
+      it.innerHTML=`<span style="font-family:'Lora',serif;font-size:0.95rem;color:var(--text);line-height:1.8;white-space:pre-wrap">${motivData.ideal.replace(/</g,"&lt;")}</span>`;
+    } else {
+      it.innerHTML=`<span class="motiv-ideal-placeholder">Describe a tu yo ideal. ¿Cómo vive? ¿Cómo se cuida? ¿Qué hace cada día? Escríbelo en presente, como si ya fuera real.</span>`;
+    }
+  }
+
+  // Porqués view
+  const wl=document.getElementById("motivWhyList");
+  if(wl){
+    const whys=(motivData.whys||[]).filter(w=>w.trim());
+    if(!whys.length){
+      wl.innerHTML=`<div class="motiv-why-placeholder">Aún no has añadido tus porqués. Pulsa "Editar" para escribir las razones que te mueven.</div>`;
+    } else {
+      wl.innerHTML=whys.map((w,i)=>`
+        <div class="motiv-why-item">
+          <div class="motiv-why-num">${i+1}</div>
+          <div class="motiv-why-text">${w.replace(/</g,"&lt;")}</div>
+        </div>`).join("");
+    }
+  }
+}
+
+function toggleMotivEdit(section){
+  if(section==="ideal"){
+    const sec=document.getElementById("motivIdealSection");
+    const isEditing=sec.classList.contains("editing");
+    if(!isEditing){
+      // Abrir edición
+      document.getElementById("motivIdealInput").value=motivData.ideal||"";
+      sec.classList.add("editing");
+      document.getElementById("motivIdealEditBtn").textContent="Cancelar";
+      setTimeout(()=>document.getElementById("motivIdealInput").focus(),50);
+    } else {
+      cancelMotivEdit("ideal");
+    }
+  } else {
+    const sec=document.getElementById("motivWhySection");
+    const isEditing=sec.classList.contains("editing");
+    if(!isEditing){
+      sec.classList.add("editing");
+      document.getElementById("motivWhyEditBtn").textContent="Cancelar";
+      renderMotivWhyInputs();
+    } else {
+      cancelMotivEdit("why");
+    }
+  }
+}
+
+function cancelMotivEdit(section){
+  if(section==="ideal"){
+    document.getElementById("motivIdealSection").classList.remove("editing");
+    document.getElementById("motivIdealEditBtn").textContent="✏️ Editar";
+  } else {
+    document.getElementById("motivWhySection").classList.remove("editing");
+    document.getElementById("motivWhyEditBtn").textContent="✏️ Editar";
+  }
+}
+
+function saveMotivIdeal(){
+  motivData.ideal=document.getElementById("motivIdealInput").value.trim();
+  cancelMotivEdit("ideal");
+  save();renderMotivPage();
+  toast("✨ Yo ideal guardado");
+}
+
+function renderMotivWhyInputs(){
+  const el=document.getElementById("motivWhyInputList");if(!el)return;
+  const whys=(motivData.whys||[]).filter(w=>w.trim());
+  const items=whys.length?whys:[""];
+  el.innerHTML=items.map((w,i)=>`
+    <div class="motiv-why-input-row">
+      <span style="font-size:0.82rem;color:var(--text3);min-width:22px;font-family:'Lora',serif;font-weight:600">${i+1}.</span>
+      <input type="text" value="${w.replace(/"/g,"&quot;")}" placeholder="Porque quiero..." maxlength="200" id="motivWhyInp_${i}">
+      <button class="btn-icon" onclick="removeMotivWhyInput(${i})" title="Eliminar">🗑️</button>
+    </div>`).join("");
+}
+
+function addMotivWhyInput(){
+  const inputs=document.querySelectorAll("[id^='motivWhyInp_']");
+  const current=[...inputs].map(i=>i.value);
+  motivData.whys=current;
+  motivData.whys.push("");
+  renderMotivWhyInputs();
+  setTimeout(()=>{
+    const last=document.querySelector(`#motivWhyInp_${motivData.whys.length-1}`);
+    if(last)last.focus();
+  },50);
+}
+
+function removeMotivWhyInput(idx){
+  const inputs=document.querySelectorAll("[id^='motivWhyInp_']");
+  const current=[...inputs].map(i=>i.value);
+  current.splice(idx,1);
+  motivData.whys=current;
+  renderMotivWhyInputs();
+}
+
+function saveMotivWhy(){
+  const inputs=document.querySelectorAll("[id^='motivWhyInp_']");
+  motivData.whys=[...inputs].map(i=>i.value.trim()).filter(w=>w);
+  cancelMotivEdit("why");
+  save();renderMotivPage();
+  toast("💬 Porqués guardados");
+}
+
+
+// CORCHO DE NOTAS
+const CORK_COLORS=[
+  {name:"Amarillo",bg:"#fef08a",pin:"#ca8a04"},
+  {name:"Verde",bg:"#bbf7d0",pin:"#16a34a"},
+  {name:"Azul",bg:"#bfdbfe",pin:"#2563eb"},
+  {name:"Rosa",bg:"#fbcfe8",pin:"#db2777"},
+  {name:"Naranja",bg:"#fed7aa",pin:"#ea580c"},
+  {name:"Lila",bg:"#e9d5ff",pin:"#7c3aed"},
+  {name:"Blanco",bg:"#f9fafb",pin:"#6b7280"},
+];
+const CORK_ROTATIONS=[-2.5,-1.5,-0.8,0,0.8,1.5,2,2.5,-2];
+
+let selectedCorkColor=CORK_COLORS[0];
+
+function openCorkNoteModal(editId){
+  const modal=document.getElementById("corkNoteModal");
+  document.getElementById("corkNoteEditId").value=editId||"";
+  document.getElementById("corkNoteModalTitle").textContent=editId?"Editar nota":"Nueva nota";
+  document.getElementById("corkNoteDeleteBtn").style.display=editId?"":"none";
+  if(editId){
+    const n=corkNotes.find(x=>x.id===editId);
+    if(n){
+      document.getElementById("corkNoteTitle").value=n.title||"";
+      document.getElementById("corkNoteBody").value=n.body||"";
+      selectedCorkColor=CORK_COLORS.find(c=>c.bg===n.color)||CORK_COLORS[0];
+    }
+  } else {
+    document.getElementById("corkNoteTitle").value="";
+    document.getElementById("corkNoteBody").value="";
+    selectedCorkColor=CORK_COLORS[Math.floor(Math.random()*CORK_COLORS.length)];
+  }
+  renderCorkColorPicker();
+  modal.classList.add("open");
+  setTimeout(()=>document.getElementById("corkNoteBody").focus(),100);
+}
+
+function closeCorkNoteModal(){
+  document.getElementById("corkNoteModal").classList.remove("open");
+}
+
+function renderCorkColorPicker(){
+  const el=document.getElementById("corkColorPicker");if(!el)return;
+  el.innerHTML=CORK_COLORS.map(c=>`
+    <div onclick="selectCorkColor('${c.bg}')" style="
+      width:28px;height:28px;border-radius:50%;background:${c.bg};cursor:pointer;
+      border:3px solid ${selectedCorkColor.bg===c.bg?c.pin:'transparent'};
+      box-shadow:0 1px 4px rgba(0,0,0,0.2);transition:all 0.12s;
+    " title="${c.name}"></div>`).join("");
+}
+
+function selectCorkColor(bg){
+  selectedCorkColor=CORK_COLORS.find(c=>c.bg===bg)||CORK_COLORS[0];
+  renderCorkColorPicker();
+}
+
+function saveCorkNote(){
+  const body=document.getElementById("corkNoteBody").value.trim();
+  if(!body){toast("Escribe algo en la nota");return;}
+  const editId=document.getElementById("corkNoteEditId").value;
+  const title=document.getElementById("corkNoteTitle").value.trim();
+  if(editId){
+    const n=corkNotes.find(x=>x.id===editId);
+    if(n){n.title=title;n.body=body;n.color=selectedCorkColor.bg;n.pin=selectedCorkColor.pin;}
+  } else {
+    corkNotes.push({
+      id:"cn_"+Date.now(),
+      title,body,
+      color:selectedCorkColor.bg,
+      pin:selectedCorkColor.pin,
+      createdAt:Date.now()
+    });
+  }
+  closeCorkNoteModal();
+  save();renderCorkBoard();
+  toast("📌 Nota clavada");
+}
+
+function deleteCorkNoteFromModal(){
+  const id=document.getElementById("corkNoteEditId").value;
+  if(!id)return;
+  if(!confirm("¿Eliminar esta nota?"))return;
+  corkNotes=corkNotes.filter(n=>n.id!==id);
+  closeCorkNoteModal();save();renderCorkBoard();
+  toast("🗑️ Nota eliminada");
+}
+
+function deleteCorkNote(id){
+  if(!confirm("¿Eliminar esta nota?"))return;
+  corkNotes=corkNotes.filter(n=>n.id!==id);
+  save();renderCorkBoard();toast("🗑️ Nota eliminada");
+}
+
+function renderCorkBoard(){
+  const el=document.getElementById("corkBoard");if(!el)return;
+  if(!corkNotes.length){
+    el.innerHTML=`<div class="cork-board-empty">
+      <div style="font-size:2rem">📌</div>
+      <div style="font-size:0.88rem;font-weight:500">Tu corcho está vacío</div>
+      <div style="font-size:0.74rem">Pulsa "+ Nueva nota" para clavar la primera</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML=corkNotes.map((n,i)=>{
+    const rot=CORK_ROTATIONS[i%CORK_ROTATIONS.length];
+    const date=new Date(n.createdAt).toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+    const bodyPreview=n.body.length>140?n.body.slice(0,137)+"…":n.body;
+    return `<div class="cork-note" style="background:${n.color};transform:rotate(${rot}deg)" onclick="openCorkNoteModal('${n.id}')">
+      <div class="cork-pin" style="background:${n.pin}"></div>
+      ${n.title?`<div class="cork-note-title">${n.title}</div>`:""}
+      <div class="cork-note-body">${bodyPreview.replace(/</g,"&lt;")}</div>
+      <div class="cork-note-date">${date}</div>
+      <div class="cork-note-actions">
+        <button class="cork-note-btn" onclick="event.stopPropagation();openCorkNoteModal('${n.id}')">✏️ Editar</button>
+        <button class="cork-note-btn del" onclick="event.stopPropagation();deleteCorkNote('${n.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join("");
+}
 
 
 // INIT
