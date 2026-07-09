@@ -1669,10 +1669,8 @@ textarea {
   position:relative;
 }
 @media(max-width:700px){
-  .cork-board{ grid-template-columns:repeat(2,1fr); }
-}
-@media(max-width:420px){
-  .cork-board{ grid-template-columns:1fr; }
+  .cork-board{ grid-template-columns:repeat(2,1fr); gap:0.7rem; padding:1rem; }
+  .cork-note{ padding:0.8rem 0.7rem 0.6rem; font-size:0.75rem; min-height:110px; }
 }
 .cork-board-empty{
   grid-column:1/-1;
@@ -2608,13 +2606,13 @@ textarea {
 
   <!-- MÓVIL -->
   <div class="page" id="page-movil">
-    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p>El exceso de pantalla daña tu planta</p></div>
+    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p>El exceso de pantalla daña tu planta · <strong style="color:var(--red)">Obligatorio registrar las horas cada día</strong></p></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="movilHoy">0</div><div class="stat-lbl">Horas hoy</div></div>
       <div class="stat-card"><div class="stat-val" id="movilMedia">0</div><div class="stat-lbl">Media semanal</div></div>
       <div class="stat-card"><div class="stat-val" id="movilMax">0</div><div class="stat-lbl">Máx. semanal</div></div>
     </div>
-    <div class="alert alert-danger" style="margin-bottom:1rem">🚨 Más de 5h con el móvil mata a tu planta.</div>
+    <div class="alert alert-danger" style="margin-bottom:1rem">🚨 <strong>Obligatorio.</strong> Más de 5h con el móvil mata a tu planta.</div>
     <div id="movilDoneAlert" style="margin-bottom:1rem"></div>
     <div id="movilAlert" class="alert" style="display:none;margin-bottom:1rem"></div>
     <div class="card">
