@@ -1690,7 +1690,13 @@ textarea {
   word-break:break-word;
   transition:transform 0.15s,box-shadow 0.15s;
   cursor:default;
+  display:flex;
+  flex-direction:column;
+}
+.cork-note-content{
   overflow:hidden;
+  flex:1;
+  min-height:0;
   display:flex;
   flex-direction:column;
 }
@@ -6702,13 +6708,15 @@ function renderCorkBoard(){
     const bodyText=isExpanded?n.body:(truncated?n.body.slice(0,137)+"…":n.body);
     return `<div class="cork-note${isExpanded?" cork-note-expanded":""}" style="background:${n.color};transform:rotate(${isExpanded?0:rot}deg)">
       <div class="cork-pin" style="background:${n.pin}"></div>
-      ${n.title?`<div class="cork-note-title">${n.title}</div>`:""}
-      <div class="cork-note-body">${bodyText.replace(/</g,"&lt;")}</div>
-      ${truncated?`<div class="cork-note-more" onclick="toggleCorkExpand('${n.id}')">${isExpanded?"Ver menos ▴":"Ver más ▾"}</div>`:""}
-      <div class="cork-note-date">${date}</div>
-      <div class="cork-note-actions">
-        <button class="cork-note-btn" onclick="openCorkNoteModal('${n.id}')">✏️ Editar</button>
-        <button class="cork-note-btn del" onclick="deleteCorkNote('${n.id}')">🗑️</button>
+      <div class="cork-note-content">
+        ${n.title?`<div class="cork-note-title">${n.title}</div>`:""}
+        <div class="cork-note-body">${bodyText.replace(/</g,"&lt;")}</div>
+        ${truncated?`<div class="cork-note-more" onclick="toggleCorkExpand('${n.id}')">${isExpanded?"Ver menos ▴":"Ver más ▾"}</div>`:""}
+        <div class="cork-note-date">${date}</div>
+        <div class="cork-note-actions">
+          <button class="cork-note-btn" onclick="openCorkNoteModal('${n.id}')">✏️ Editar</button>
+          <button class="cork-note-btn del" onclick="deleteCorkNote('${n.id}')">🗑️</button>
+        </div>
       </div>
     </div>`;
   }).join("");
