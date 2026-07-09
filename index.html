@@ -1662,23 +1662,26 @@ textarea {
   min-height:200px;
   box-shadow:inset 0 2px 8px rgba(0,0,0,0.15),0 4px 20px rgba(0,0,0,0.1);
   border:3px solid #8b6035;
-  display:flex;
-  flex-wrap:nowrap;
-  overflow-x:auto;
-  overflow-y:hidden;
-  align-items:flex-start;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  align-items:start;
   gap:1.1rem;
   position:relative;
-  -webkit-overflow-scrolling:touch;
-  scroll-snap-type:x proximity;
+}
+@media(max-width:700px){
+  .cork-board{ grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:420px){
+  .cork-board{ grid-template-columns:1fr; }
 }
 .cork-board-empty{
+  grid-column:1/-1;
   width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:3rem 1rem;color:rgba(80,50,20,0.5);text-align:center;gap:0.5rem;
 }
 .cork-note{
   position:relative;
-  width:148px;
+  width:100%;
   min-height:130px;
   padding:1rem 0.9rem 0.8rem;
   border-radius:3px;
@@ -1689,8 +1692,6 @@ textarea {
   word-break:break-word;
   transition:transform 0.15s,box-shadow 0.15s;
   cursor:default;
-  flex-shrink:0;
-  scroll-snap-align:start;
 }
 .cork-note:hover{
   box-shadow:5px 8px 20px rgba(0,0,0,0.3),0 1px 3px rgba(0,0,0,0.15);
@@ -2607,13 +2608,13 @@ textarea {
 
   <!-- MÓVIL -->
   <div class="page" id="page-movil">
-    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p>El exceso de pantalla daña tu planta · <strong style="color:var(--red)">Obligatorio registrar las horas cada día</strong></p></div>
+    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p>El exceso de pantalla daña tu planta</p></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="movilHoy">0</div><div class="stat-lbl">Horas hoy</div></div>
       <div class="stat-card"><div class="stat-val" id="movilMedia">0</div><div class="stat-lbl">Media semanal</div></div>
       <div class="stat-card"><div class="stat-val" id="movilMax">0</div><div class="stat-lbl">Máx. semanal</div></div>
     </div>
-    <div class="alert alert-danger" style="margin-bottom:1rem">🚨 <strong>Obligatorio.</strong> Más de 5h con el móvil mata a tu planta.</div>
+    <div class="alert alert-danger" style="margin-bottom:1rem">🚨 Más de 5h con el móvil mata a tu planta.</div>
     <div id="movilDoneAlert" style="margin-bottom:1rem"></div>
     <div id="movilAlert" class="alert" style="display:none;margin-bottom:1rem"></div>
     <div class="card">
@@ -2983,7 +2984,7 @@ textarea {
   <div class="page" id="page-notas">
     <div class="page-header">
       <h2>📌 Mi corcho</h2>
-      <p>Desliza el corcho para ver todas tus notas · Pulsa "Ver más" para leer una entera · Usa ✏️ para editarla.</p>
+      <p>Tus notas se organizan en filas de hasta 3 · Pulsa "Ver más" para leer una entera · Usa ✏️ para editarla.</p>
     </div>
     <div style="margin-bottom:1.2rem">
       <button class="btn btn-sm" onclick="openCorkNoteModal()">+ Nueva nota</button>
