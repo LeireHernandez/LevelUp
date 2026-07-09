@@ -1670,7 +1670,7 @@ textarea {
 }
 @media(max-width:700px){
   .cork-board{ grid-template-columns:repeat(2,1fr); gap:0.7rem; padding:1rem; }
-  .cork-note{ padding:0.8rem 0.7rem 0.6rem; font-size:0.75rem; min-height:110px; }
+  .cork-note{ padding:0.8rem 0.7rem 0.6rem; font-size:0.75rem; height:150px; }
 }
 .cork-board-empty{
   grid-column:1/-1;
@@ -1680,7 +1680,7 @@ textarea {
 .cork-note{
   position:relative;
   width:100%;
-  min-height:130px;
+  height:170px;
   padding:1rem 0.9rem 0.8rem;
   border-radius:3px;
   box-shadow:3px 4px 12px rgba(0,0,0,0.22),0 1px 3px rgba(0,0,0,0.15);
@@ -1690,6 +1690,9 @@ textarea {
   word-break:break-word;
   transition:transform 0.15s,box-shadow 0.15s;
   cursor:default;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
 }
 .cork-note:hover{
   box-shadow:5px 8px 20px rgba(0,0,0,0.3),0 1px 3px rgba(0,0,0,0.15);
@@ -1699,6 +1702,7 @@ textarea {
   top:50%;left:50%;
   transform:translate(-50%,-50%) rotate(0deg)!important;
   width:min(320px,86vw)!important;
+  height:auto!important;
   max-height:78vh;
   overflow-y:auto;
   z-index:1000;
@@ -1736,33 +1740,39 @@ textarea {
   color:#1a1208;
   line-height:1.3;
   font-family:'Lora',serif;
+  flex-shrink:0;
 }
 .cork-note-body{
   font-size:0.75rem;
   color:#3a2d1a;
   opacity:0.88;
   white-space:pre-wrap;
+  overflow:hidden;
+  flex:1;
 }
 .cork-note-date{
-  margin-top:0.6rem;
+  margin-top:0.4rem;
   font-size:0.62rem;
   opacity:0.5;
   color:#1a1208;
+  flex-shrink:0;
 }
 .cork-note-more{
-  margin-top:0.35rem;
+  margin-top:0.3rem;
   font-size:0.68rem;
   font-weight:600;
   text-decoration:underline;
   cursor:pointer;
   color:#1a1208;
   opacity:0.8;
+  flex-shrink:0;
 }
 .cork-note-actions{
   display:flex;
   gap:6px;
-  margin-top:0.7rem;
+  margin-top:0.5rem;
   opacity:0.85;
+  flex-shrink:0;
 }
 .cork-note-btn{
   background:rgba(0,0,0,0.1);
