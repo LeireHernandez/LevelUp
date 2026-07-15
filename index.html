@@ -2074,7 +2074,17 @@ textarea {
 <div class="modal-overlay" id="protectorModal">
   <div class="modal">
     <h3>🛡️ Activar protector de racha</h3>
-    <div class="alert alert-warn">⚠️ Pausa <strong>todas las muertes</strong> durante 24h. Coste: <strong>-50 XP</strong> y <strong>-3 días racha</strong>.</div>
+    <div class="form-group-full"><label>Tipo de protección</label>
+      <select id="protectorMode" onchange="toggleProtectorModeFields()">
+        <option value="full">🛡️ Protección total (todas las muertes)</option>
+        <option value="partial">🎯 Proteger solo una necesidad</option>
+      </select>
+    </div>
+    <div class="form-group-full" id="protectorTargetGroup" style="display:none">
+      <label>Necesidad a proteger</label>
+      <select id="protectorTarget"></select>
+    </div>
+    <div class="alert alert-warn" id="protectorCostAlert">⚠️ Pausa <strong>todas las muertes</strong> durante 24h. Coste: <strong>-50 XP</strong> y <strong>-5 días racha</strong>.</div>
     <div class="form-group-full"><label>Motivo *</label>
       <select id="protectorReason"><option value="">-- Selecciona --</option><option value="Vacaciones">🏖️ Vacaciones</option><option value="Enfermedad">🤒 Enfermedad</option><option value="Evento familiar">👨‍👩‍👧 Evento familiar</option><option value="Viaje de trabajo">✈️ Viaje de trabajo</option><option value="Emergencia">🚨 Emergencia</option><option value="Otro">📝 Otro</option></select>
     </div>
@@ -2541,7 +2551,7 @@ textarea {
 
   <!-- ORDEN -->
   <div class="page" id="page-orden">
-    <div class="page-header"><h2>🍃 Test del Orden</h2><p>El orden mantiene la tranquilidad de tu planta· <strong style="color:var(--red)">Obligatorio hacerlo cada día</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openOrderQuestModal()">✏️ Editar preguntas</button></p></div>
+    <div class="page-header"><h2>🍃 Test del Orden</h2><p>El orden mantiene la tranquilidad de tu planta· <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openOrderQuestModal()">✏️ Editar preguntas</button></p></div>
     <div id="ordenDoneAlert" style="margin-bottom:1rem"></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="ordenMedia">0.0</div><div class="stat-lbl">Media semanal</div></div>
@@ -2622,7 +2632,7 @@ textarea {
 
   <!-- MÓVIL -->
   <div class="page" id="page-movil">
-    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p>El exceso de pantalla daña tu planta · <strong style="color:var(--red)">Obligatorio registrar las horas cada día</strong></p></div>
+    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p>El exceso de pantalla daña tu planta</p></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="movilHoy">0</div><div class="stat-lbl">Horas hoy</div></div>
       <div class="stat-card"><div class="stat-val" id="movilMedia">0</div><div class="stat-lbl">Media semanal</div></div>
@@ -3092,6 +3102,8 @@ let coreParams = {
 
 // HELPERS
 function todayStr(){ return new Date().toDateString(); }
+function isPlantNewToday(){
+  return plant.createdAt && todayStr()===new Date(plant.createdAt).toDateString();}
 function getTodayKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function formatDate(d){ if(!d)return"";return new Date(d).toLocaleDateString('es-ES',{day:'numeric',month:'short'}); }
 function stars(n){ return '⭐'.repeat(parseInt(n)); }
@@ -3135,7 +3147,7 @@ function getCurrentCustomNeedLevel(habit){
   if(systemLevels[needId]) return systemLevels[needId]();
 
   // Necesidad custom compartida: calcular decay desde el último log de cualquier hábito que comparta este needId
-  if(!plant.alive || isProtectorActive()){
+  if(!plant.alive || isNeedProtected(needId)){
     return customNeedStates[needId] ?? 100;
   }
 
@@ -3221,42 +3233,42 @@ coreParams={agua:{target:1.2},pasos:{objetivo:10000,minimo:7000},sueno:{minFatal
 
 // LEVEL CALCULATIONS (solo para los del sistema)
 function getCurrentHydrationLevel(){
-  if(!plant.alive||isProtectorActive())return isProtectorActive()?hydration.level:0;
+  if(!plant.alive)return 0;
+  if(isNeedProtected('hydration'))return hydration.level;
   const todayKey=getTodayKey();
   if(hydration.lastResetDate!==todayKey){hydration.lastResetDate=todayKey;hydration.extraHydration=0;hydration.loggedToday=0;}
   const now=new Date(),h=now.getHours()+now.getMinutes()/60;
   return Math.min(100,Math.max(0,Math.max(0,100-(h*100/24))+hydration.extraHydration));
 }
-
 function getCurrentCalmnessLevel(){
-  if(!plant.alive||isProtectorActive()) return isProtectorActive()?needsState.calmness.value:0;
+  if(!plant.alive)return 0;
+  if(isNeedProtected('calmness'))return needsState.calmness.value;
   const todayKey=getTodayKey();
   if(!needsState.calmness.lastResetDate||needsState.calmness.lastResetDate!==todayKey){
-    needsState.calmness.lastResetDate=todayKey;
-    needsState.calmness.extraCalmness=0;
+    needsState.calmness.lastResetDate=todayKey;needsState.calmness.extraCalmness=0;
   }
   const now=new Date(),h=now.getHours()+now.getMinutes()/60;
-  return Math.min(100,Math.max(0,Math.max(0,100-(h*100/24))+( needsState.calmness.extraCalmness||0)));
+  return Math.min(100,Math.max(0,Math.max(0,100-(h*100/24))+(needsState.calmness.extraCalmness||0)));
 }
-
 function getCurrentFlexibilityLevel(){
-  if(!plant.alive||isProtectorActive())return isProtectorActive()?flexibility.level:0;
+  if(!plant.alive)return 0;
+  if(isNeedProtected('flexibility'))return flexibility.level;
   const todayKey=getTodayKey();
   if(flexibility.lastResetDate!==todayKey){flexibility.lastResetDate=todayKey;flexibility.extraFlexibility=0;flexibility.doneToday=false;}
   const now=new Date(),h=now.getHours()+now.getMinutes()/60;
   return Math.min(100,Math.max(0,Math.max(0,100-(h*100/24))+flexibility.extraFlexibility));
 }
-
 function getCurrentEnergyLevel(){
-  if(!plant.alive||isProtectorActive())return isProtectorActive()?energy.level:0;
+  if(!plant.alive)return 0;
+  if(isNeedProtected('energy'))return energy.level;
   const todayKey=getTodayKey();
   if(energy.lastResetDate!==todayKey){energy.lastResetDate=todayKey;energy.extraEnergy=0;energy.stepsToday=0;energy.doneToday=false;}
   const now=new Date(),h=now.getHours()+now.getMinutes()/60;
   return Math.min(100,Math.max(0,Math.max(0,100-(h*100/24))+energy.extraEnergy));
 }
-
 function getCurrentSleepLevel(){
-  if(!plant.alive||isProtectorActive())return isProtectorActive()?sleep.level:0;
+  if(!plant.alive)return 0;
+  if(isNeedProtected('vitality'))return sleep.level;
   const todayKey=getTodayKey();
   if(sleep.lastResetDate!==todayKey){sleep.lastResetDate=todayKey;sleep.hoursToday=null;sleep.doneToday=false;}
   if(!sleep.doneToday){const now=new Date(),h=now.getHours()+now.getMinutes()/60;return Math.max(0,100-(h*100/24));}
@@ -3308,20 +3320,33 @@ function isProtectorActive(){
   return true;
 }
 
+function isNeedProtected(needId){
+  if(!isProtectorActive())return false;
+  if(protector.mode!=="partial")return true;
+  return protector.targetNeedId===needId;
+}
+function isPhoneProtected(){
+  if(!isProtectorActive())return false;
+  if(protector.mode!=="partial")return true;
+  return protector.targetNeedId==="__phone";
+}
+
 // RESETEO DIARIO
 function checkDailyObligatory(){
   if(!plant.alive)return;
   const today=todayStr();
   if(dailyActions.date===today)return;
-  if(!isProtectorActive()){
-    if(!isDisabledCore('agua')&&hydration.loggedToday<hydration.target){killPlant("deshidratación — no bebiste suficiente agua ayer");return;}
-    if(!dailyActions.phoneDone){killPlant("no registraste las horas de móvil ayer");return;}
-    if(!isDisabledCore('orden')&&!dailyActions.orderDone){killPlant("no hiciste el test de orden ayer");return;}
-    if(!isDisabledCore('sueno')&&!dailyActions.suenoDone){killPlant("no registraste las horas de sueño ayer");return;}
-    if(energy.doneToday&&energy.stepsToday<coreParams.pasos.minimo){killPlant("sedentarismo — pocos pasos ayer");return;}
-    if(sleep.lowSleepStreak>=(coreParams.sueno.maxLowSleepStreak||3)){killPlant(`agotamiento crónico — ${coreParams.sueno.maxLowSleepStreak||3} noches con poco sueño`);return;}
+  const isFirstDay = plant.createdAt && dailyActions.date===new Date(plant.createdAt).toDateString();
+  if(!isFirstDay){
+    if(!isDisabledCore('agua')&&!isNeedProtected('hydration')&&hydration.loggedToday<hydration.target){killPlant("deshidratación — no bebiste suficiente agua ayer");return;}
+    if(!dailyActions.phoneDone&&!isPhoneProtected()){killPlant("no registraste las horas de móvil ayer");return;}
+    if(!isDisabledCore('orden')&&!isNeedProtected('calmness')&&!dailyActions.orderDone){killPlant("no hiciste el test de orden ayer");return;}
+    if(!isDisabledCore('sueno')&&!isNeedProtected('vitality')&&!dailyActions.suenoDone){killPlant("no registraste las horas de sueño ayer");return;}
+    if(!isNeedProtected('energy')&&energy.doneToday&&energy.stepsToday<coreParams.pasos.minimo){killPlant("sedentarismo — pocos pasos ayer");return;}
+    if(!isNeedProtected('vitality')&&sleep.lowSleepStreak>=(coreParams.sueno.maxLowSleepStreak||3)){killPlant(`agotamiento crónico — ${coreParams.sueno.maxLowSleepStreak||3} noches con poco sueño`);return;}
+    if(!isNeedProtected('vitality')&&sleep.highSleepStreak>=(coreParams.sueno.maxHighSleepStreak||3)){killPlant(`exceso de sueño — ${coreParams.sueno.maxHighSleepStreak||3} noches durmiendo demasiado`);return;}
     for(const h of customHabits){
-      if(h.obligatory&&!dailyActions["custom_"+h.id]){killPlant(`no hiciste tu hábito obligatorio: "${h.name}"`);return;}
+      if(h.obligatory&&!dailyActions["custom_"+h.id]&&!isNeedProtected(getHabitNeedId(h))){killPlant(`no hiciste tu hábito obligatorio: "${h.name}"`);return;}
     }
   }
   dailyActions.orderDone=false;dailyActions.phoneDone=false;dailyActions.suenoDone=false;
@@ -3374,6 +3399,7 @@ function load(){
     habitLogs=s.habitLogs||{};
     habitStreaks=s.habitStreaks||{};
     protector=s.protector||{active:false,expiresAt:null,reason:""};
+    if(protector.mode===undefined){protector.mode="full";protector.targetNeedId=null;protector.targetLabel="";}
     agendaTasks=s.agendaTasks||[];books=s.books||[];recurringTasks=s.recurringTasks||[];
     longGoals=s.longGoals||[];
     monthlyObjs=s.monthlyObjs||[];
@@ -3403,8 +3429,11 @@ function load(){
     if(!coreParams.agua)coreParams.agua={target:1.2};
     if(!coreParams.pasos)coreParams.pasos={objetivo:10000,minimo:7000};
     if(!coreParams.sueno)coreParams.sueno={minFatal:5,minOptimo:7,lowSleepThreshold:6.5,maxLowSleepStreak:3};
-if(coreParams.sueno&&!coreParams.sueno.maxLowSleepStreak)coreParams.sueno.maxLowSleepStreak=3;
-if(coreParams.sueno&&coreParams.sueno.lowSleepThreshold===undefined)coreParams.sueno.lowSleepThreshold=6.5;
+    if(coreParams.sueno&&!coreParams.sueno.maxLowSleepStreak)coreParams.sueno.maxLowSleepStreak=3;
+    if(coreParams.sueno&&coreParams.sueno.lowSleepThreshold===undefined)coreParams.sueno.lowSleepThreshold=6.5;
+    if(coreParams.sueno&&coreParams.sueno.highSleepThreshold===undefined)coreParams.sueno.highSleepThreshold=10;
+    if(coreParams.sueno&&!coreParams.sueno.maxHighSleepStreak)coreParams.sueno.maxHighSleepStreak=3;
+    if(sleep.highSleepStreak===undefined)sleep.highSleepStreak=0;
     if(!coreParams.deporte)coreParams.deporte={diasMaxSinHacer:7};
     if(!coreParams.aleman)coreParams.aleman={diasMaxSinHacer:3,horasObjetivo:660};
     if(!sportCats.length)sportCats=[{id:"sc_run",name:"Running",emoji:"🏃",hasKm:true,required:false}];
@@ -3429,36 +3458,33 @@ checkForestBurn(savedLastTouch);
 // DECAY — Para las necesidades del sistema 
 function applyDecay(){
   if(!plant.alive)return;
-  if(isProtectorActive())return;
   const now=Date.now();
   const hoursPassed=Math.min((now-lastDecayTs)/3600000,72);
   if(hoursPassed<0.016)return;
-  
-  // Decaimiento de necesidades del sistema (no custom, porque custom ya se calcula por hora)
   const DECAY_PER_HOUR = { strength:100/(coreParams.deporte.diasMaxSinHacer*24), intelligence:100/(coreParams.aleman.diasMaxSinHacer*24), entertainment:100/((coreParams.lectura?.diasMaxSinHacer||2)*24) };
-
   Object.keys(DECAY_PER_HOUR).forEach(id=>{
-    if(needsState[id]&&!isDisabledCore(id))
+    if(needsState[id]&&!isDisabledCore(id)&&!isNeedProtected(id))
       needsState[id].value=Math.max(0,needsState[id].value-DECAY_PER_HOUR[id]*hoursPassed);
   });
-  
   lastDecayTs=now;
   checkDeath();
 }
 
 function checkDeath(){
-  if(!plant.alive||isProtectorActive())return;
+  if(!plant.alive)return;
   updateAllLevels();
-  if(!isDisabledCore('estiramientos')&&flexibility.level<=0){killPlant("rigidez total");return;}
-  if(!isDisabledCore('pasos')&&energy.level<=0){killPlant("sedentarismo — energía agotada");return;}
+  if(!isDisabledCore('estiramientos')&&!isNeedProtected('flexibility')&&flexibility.level<=0){killPlant("rigidez total");return;}
+  if(!isDisabledCore('pasos')&&!isNeedProtected('energy')&&energy.level<=0){killPlant("sedentarismo — energía agotada");return;}
   for(const id of Object.keys(needsState)){
     if(isDisabledCore(id))continue;
+    if(isNeedProtected(id))continue;
     if((needsState[id]?.value||0)<=0){
       const lbl={strength:"falta de ejercicio",intelligence:"falta de estudio",calmness:"estrés y desorden",entertainment:"falta de lectura"}[id]||id;
       killPlant(lbl);return;
     }
   }
   for(const h of customHabits){
+    if(isNeedProtected(getHabitNeedId(h)))continue;
     const currentLevel = getCurrentCustomNeedLevel(h);
     if(currentLevel <= 0){killPlant(`${h.name} descuidado`);return;}
   }
@@ -3686,38 +3712,43 @@ function doSueno(){
   doSuenoVal(h);
   if(hEl)hEl.value="";if(mEl)mEl.value="";
 }
+
+
 function doSuenoVal(hours){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
 if(dailyActions.suenoDone){
-  if(!confirm(`Ya registraste ${sleep.hoursToday}h. ¿Editar el valor?`))return;
-  // Revertir el XP anterior
+  if(!confirm(`Ya registraste ${sleep.hoursToday.toFixed(2)}h. ¿Editar el valor?`))return;
   plant.xp=Math.max(0,plant.xp-(sleep.hoursToday>=coreParams.sueno.minOptimo?8:3));
-  // Revertir lowSleepStreak si fue mal
   const lowThreshPrev=coreParams.sueno.lowSleepThreshold!==undefined?coreParams.sueno.lowSleepThreshold:6.5;
+  const highThreshPrev=coreParams.sueno.highSleepThreshold!==undefined?coreParams.sueno.highSleepThreshold:10;
   if(sleep.hoursToday<lowThreshPrev&&sleep.lowSleepStreak>0)sleep.lowSleepStreak--;
-  // Revertir en historial
+  if(sleep.hoursToday>highThreshPrev&&sleep.highSleepStreak>0)sleep.highSleepStreak--;
   sleep.history=sleep.history.filter(h=>h.date!==todayStr());
   dailyActions.suenoDone=false;
 }
-  if(!isProtectorActive()&&hours<coreParams.sueno.minFatal){killPlant(`menos de ${decimalHoursToHM(coreParams.sueno.minFatal)} de sueño`);return;}
+  if(!isNeedProtected('vitality')&&!isPlantNewToday()&&hours<coreParams.sueno.minFatal){killPlant(`menos de ${decimalHoursToHM(coreParams.sueno.minFatal)} de sueño`);return;}
   sleep.hoursToday=hours;sleep.doneToday=true;dailyActions.suenoDone=true;
   let sleepLvl;
   const lowThresh=coreParams.sueno.lowSleepThreshold!==undefined?coreParams.sueno.lowSleepThreshold:6.5;
+  const highThresh=coreParams.sueno.highSleepThreshold!==undefined?coreParams.sueno.highSleepThreshold:10;
   if(hours>=coreParams.sueno.minOptimo){sleepLvl=100;}
   else{sleepLvl=Math.round((hours/coreParams.sueno.minOptimo)*100);}
-  if(hours<lowThresh){
+if(hours<lowThresh){
     sleep.lowSleepStreak=(sleep.lowSleepStreak||0)+1;
     const maxStreak=coreParams.sueno.maxLowSleepStreak||3;
-    if(!isProtectorActive()&&sleep.lowSleepStreak>=maxStreak){killPlant(`agotamiento crónico — ${maxStreak} noches durmiendo menos de ${lowThresh}h`);return;}
-  } else {
-    sleep.lowSleepStreak=0;
-  }
+    if(!isNeedProtected('vitality')&&!isPlantNewToday()&&sleep.lowSleepStreak>=maxStreak){killPlant(`agotamiento crónico — ${maxStreak} noches durmiendo menos de ${decimalHoursToHM(lowThresh)}`);return;}
+  } else { sleep.lowSleepStreak=0; }
+  if(hours>highThresh){
+    sleep.highSleepStreak=(sleep.highSleepStreak||0)+1;
+    const maxHighStreak=coreParams.sueno.maxHighSleepStreak||3;
+    if(!isNeedProtected('vitality')&&!isPlantNewToday()&&sleep.highSleepStreak>=maxHighStreak){killPlant(`exceso de sueño — ${maxHighStreak} noches durmiendo más de ${decimalHoursToHM(highThresh)}`);return;}
+  } else { sleep.highSleepStreak=0; }
   sleep.level=sleepLvl;needsState.vitality={value:sleepLvl,lastFulfilled:Date.now()};
   sleep.history.push({date:todayStr(),hours,level:sleepLvl});
   if(sleep.history.length>30)sleep.history.shift();
   plant.xp+=hours>=coreParams.sueno.minOptimo?8:3;checkLevelUp();
   triggerMonthlyObjUpdate('__sueno');
-  toast(`😴 ${hours}h · Energía ${sleepLvl}%`);save();renderAll();renderSleepChart();
+  toast(`😴 ${hours.toFixed(2)}h · Energía ${sleepLvl}%`);save();renderAll();renderSleepChart();
 }
 
 function submitOrderTest(){
@@ -3803,7 +3834,7 @@ if(dailyActions.phoneDone){
   if(phoneUsage.length>14)phoneUsage.shift();
   dailyActions.phoneDone=true;
   triggerMonthlyObjUpdate('__movil');
-  if(!isProtectorActive()&&h>5){killPlant(`adicción al móvil — ${decimalHoursToHM(h)} de pantalla`);return;}
+  if(!isPhoneProtected()&&!isPlantNewToday()&&h>5){killPlant(`adicción al móvil — ${decimalHoursToHM(h)} de pantalla`);return;}
   if(h>2){const dmg=(h-2)*12;if(needsState.calmness){needsState.calmness.value=Math.max(0,needsState.calmness.value-dmg);needsState.calmness.extraCalmness=Math.max(0,(needsState.calmness.extraCalmness||0)-dmg);}}
   else toast(`📱 ${decimalHoursToHM(h)} · Sin penalización`);
   if(hEl)hEl.value="";if(mEl)mEl.value="";
@@ -4336,6 +4367,8 @@ function openEditCore(which){
     const optH=Math.floor(p.sueno.minOptimo),optM=Math.round((p.sueno.minOptimo-optH)*60);
     const threshVal=p.sueno.lowSleepThreshold!==undefined?p.sueno.lowSleepThreshold:6.5;
     const threshH=Math.floor(threshVal),threshM=Math.round((threshVal-threshH)*60);
+    const highVal=p.sueno.highSleepThreshold!==undefined?p.sueno.highSleepThreshold:10;
+    const highH=Math.floor(highVal),highM=Math.round((highVal-highH)*60);
     html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">😴 Sueño</h4>
     <div class="form-row" style="align-items:end">
       <div class="form-group" style="margin:0"><label>Horas mínimas fatales (h)</label><input type="number" id="ep_sueno_fatal_h" step="1" min="0" max="6" value="${fatalH}"></div>
@@ -4349,7 +4382,14 @@ function openEditCore(which){
       <div class="form-group" style="margin:0"><label>Umbral "poco sueño" (h)</label><input type="number" id="ep_sueno_thresh_h" step="1" min="3" max="9" value="${threshH}"></div>
       <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_thresh_m" step="5" min="0" max="59" value="${threshM}"></div>
     </div>
-    <div class="form-row"><div class="form-group"><label>Noches seguidas con poco sueño → muerte</label><input type="number" id="ep_sueno_streak" step="1" min="2" max="14" value="${p.sueno.maxLowSleepStreak||3}"></div></div>`;
+    <div class="form-row" style="align-items:end">
+      <div class="form-group" style="margin:0"><label>Umbral "exceso de sueño" (h)</label><input type="number" id="ep_sueno_high_h" step="1" min="6" max="16" value="${highH}"></div>
+      <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_high_m" step="5" min="0" max="59" value="${highM}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Noches seguidas con poco sueño → muerte</label><input type="number" id="ep_sueno_streak" step="1" min="2" max="14" value="${p.sueno.maxLowSleepStreak||3}"></div>
+      <div class="form-group"><label>Noches seguidas con exceso → muerte</label><input type="number" id="ep_sueno_high_streak" step="1" min="2" max="14" value="${p.sueno.maxHighSleepStreak||3}"></div>
+    </div>`;
   }
   if(which==="aleman"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">🧠 Alemán</h4><div class="form-row"><div class="form-group"><label>Días sin estudiar → muerte</label><input type="number" id="ep_aleman_dias" step="0.5" min="0.5" max="30" value="${p.aleman.diasMaxSinHacer}"></div><div class="form-group"><label>Horas objetivo C2</label><input type="number" id="ep_aleman_horas" step="10" min="50" max="3000" value="${p.aleman.horasObjetivo}"></div></div>
   <div class="form-row"><div class="form-group"><label>Nivel de partida</label><select id="ep_aleman_start"><option value="0" ${(p.aleman.startHours||0)===0?"selected":""}>A1 (0h)</option><option value="200" ${(p.aleman.startHours||0)===200?"selected":""}>A2 (200h)</option><option value="400" ${(p.aleman.startHours||0)===400?"selected":""}>B1 (400h)</option><option value="660" ${(p.aleman.startHours||0)===660?"selected":""}>B2 (660h)</option></select></div><div class="form-group"><label>Horas ya acumuladas</label><input type="number" id="ep_aleman_current" step="1" min="0" max="3000" value="${Math.round(goals.german.hours)}"></div></div>`;}
@@ -4365,23 +4405,26 @@ function saveCoreEdit(){
   if(which==="agua"||which==="all"){const v=get("ep_agua_target");if(v>0){coreParams.agua.target=v;hydration.target=v;}}
   if(which==="pasos"||which==="all"){const o=get("ep_pasos_obj"),m=get("ep_pasos_min");if(o>0)coreParams.pasos.objetivo=o;if(m>=0)coreParams.pasos.minimo=m;}
   if(which==="sueno"||which==="all"){
-  const f=hmToDecimalHours(get("ep_sueno_fatal_h"),get("ep_sueno_fatal_m"));
-  const o=hmToDecimalHours(get("ep_sueno_opt_h"),get("ep_sueno_opt_m"));
-  const t=hmToDecimalHours(get("ep_sueno_thresh_h"),get("ep_sueno_thresh_m"));
-  const s=get("ep_sueno_streak");
-  if(f>0)coreParams.sueno.minFatal=f;
-  if(o>0)coreParams.sueno.minOptimo=o;
-  if(t>=0)coreParams.sueno.lowSleepThreshold=t;
-  if(s>0)coreParams.sueno.maxLowSleepStreak=s;
-  // Recalcular la racha de noches malas con el nuevo umbral, usando el historial real
-  const newThresh=coreParams.sueno.lowSleepThreshold;
-  let recalculated=0;
-  for(let i=sleep.history.length-1;i>=0;i--){
-    if(sleep.history[i].hours<newThresh)recalculated++;
-    else break;
+    const f=hmToDecimalHours(get("ep_sueno_fatal_h"),get("ep_sueno_fatal_m"));
+    const o=hmToDecimalHours(get("ep_sueno_opt_h"),get("ep_sueno_opt_m"));
+    const t=hmToDecimalHours(get("ep_sueno_thresh_h"),get("ep_sueno_thresh_m"));
+    const hi=hmToDecimalHours(get("ep_sueno_high_h"),get("ep_sueno_high_m"));
+    const s=get("ep_sueno_streak"), hs=get("ep_sueno_high_streak");
+    if(f>0)coreParams.sueno.minFatal=f;
+    if(o>0)coreParams.sueno.minOptimo=o;
+    if(t>=0)coreParams.sueno.lowSleepThreshold=t;
+    if(hi>0)coreParams.sueno.highSleepThreshold=hi;
+    if(s>0)coreParams.sueno.maxLowSleepStreak=s;
+    if(hs>0)coreParams.sueno.maxHighSleepStreak=hs;
+    const newThresh=coreParams.sueno.lowSleepThreshold;
+    let recalculatedLow=0;
+    for(let i=sleep.history.length-1;i>=0;i--){if(sleep.history[i].hours<newThresh)recalculatedLow++;else break;}
+    sleep.lowSleepStreak=recalculatedLow;
+    const newHighThresh=coreParams.sueno.highSleepThreshold;
+    let recalculatedHigh=0;
+    for(let i=sleep.history.length-1;i>=0;i--){if(sleep.history[i].hours>newHighThresh)recalculatedHigh++;else break;}
+    sleep.highSleepStreak=recalculatedHigh;
   }
-  sleep.lowSleepStreak=recalculated;
-}
 if(which==="aleman"||which==="all"){
     const d=get("ep_aleman_dias"),h=get("ep_aleman_horas");
     if(d>0)coreParams.aleman.diasMaxSinHacer=d;
@@ -4610,21 +4653,66 @@ function toggleMonthlyObj(id){
 
 
 // PROTECTOR
+const PROTECTOR_COSTS={full:{xp:50,days:5},partial:{xp:10,days:2}};
+
+function toggleProtectorModeFields(){
+  const mode=document.getElementById("protectorMode").value;
+  const tg=document.getElementById("protectorTargetGroup");
+  const alertEl=document.getElementById("protectorCostAlert");
+  if(mode==="partial"){
+    tg.style.display="";
+    renderProtectorTargetOptions();
+    alertEl.innerHTML=`⚠️ Pausa las muertes de <strong>una sola necesidad</strong> durante 24h. Coste: <strong>-10 XP</strong> y <strong>-2 días racha</strong>.`;
+  } else {
+    tg.style.display="none";
+    alertEl.innerHTML=`⚠️ Pausa <strong>todas las muertes</strong> durante 24h. Coste: <strong>-50 XP</strong> y <strong>-5 días racha</strong>.`;
+  }
+}
+
+function renderProtectorTargetOptions(){
+  const sel=document.getElementById("protectorTarget");if(!sel)return;
+  const needs=getAllNeeds();
+  let html=needs.map(n=>{
+    const habit=n.customId?customHabits.find(h=>h.id===n.customId):null;
+    const val=habit?getHabitNeedId(habit):n.id;
+    return `<option value="${val}">${n.icon} ${n.name}</option>`;
+  }).join("");
+  html+=`<option value="__phone">📱 Horas de móvil</option>`;
+  sel.innerHTML=html;
+}
+
 function openProtectorModal(){
   if(isProtectorActive()){toast("🛡️ Protector ya activo");return;}
+  document.getElementById("protectorMode").value="full";
+  toggleProtectorModeFields();
   document.getElementById("protectorModal").classList.add("open");
 }
-function closeProtectorModal(){document.getElementById("protectorModal").classList.remove("open");}
+
 function activateProtector(){
   const reason=document.getElementById("protectorReason").value;
   if(!reason){toast("Selecciona un motivo");return;}
-  if(plant.xp<20){toast("Necesitas al menos 20 XP");return;}
+  const mode=document.getElementById("protectorMode").value;
+  const cost=PROTECTOR_COSTS[mode];
+  if(plant.xp<cost.xp||streak.current<cost.days){toast(`Necesitas al menos ${cost.xp} XP y ${cost.days} días de racha`);return;}
+  let targetNeedId=null,targetLabel="";
+  if(mode==="partial"){
+    const sel=document.getElementById("protectorTarget");
+    targetNeedId=sel.value;
+    if(!targetNeedId){toast("Selecciona una necesidad");return;}
+    targetLabel=sel.selectedOptions[0]?.textContent||"";
+  }
   protector.active=true;protector.expiresAt=Date.now()+24*60*60*1000;
+  protector.mode=mode;protector.targetNeedId=targetNeedId;protector.targetLabel=targetLabel;
   protector.reason=reason+(document.getElementById("protectorNotes").value.trim()?" — "+document.getElementById("protectorNotes").value.trim():"");
-  plant.xp=Math.max(0,plant.xp-20);
-  streak.current=Math.max(0,streak.current-3);
-  closeProtectorModal();save();renderAll();toast(`🛡️ Protector activado 24h · Todas las muertes pausadas`);
+  plant.xp=Math.max(0,plant.xp-cost.xp);
+  streak.current=Math.max(0,streak.current-cost.days);
+  closeProtectorModal();save();renderAll();
+  toast(mode==="full"?`🛡️ Protector total activado 24h`:`🎯 Protección parcial activada 24h`);
 }
+
+function closeProtectorModal(){document.getElementById("protectorModal").classList.remove("open");}
+
+
 
 
 
@@ -4741,6 +4829,7 @@ function saveTask(){
     timesPerDay,
     timesCompleted:existingTask?.timesCompleted||0,
     multiTimes,
+    xpEarned:existingTask?.xpEarned||0,
     unitLabel
   };
   if(editId){const idx=agendaTasks.findIndex(x=>x.id===editId);if(idx>=0)agendaTasks[idx]=task;}
@@ -4748,11 +4837,14 @@ function saveTask(){
   closeTaskModal();save();renderAgenda();toast("📅 Tarea guardada");
 }
 
+
+
 function incrementMultiTask(id){
   const t=agendaTasks.find(x=>x.id===id);if(!t)return;
   if(t.done){toast("✅ Ya completada todas las veces");return;}
   t.timesCompleted=(t.timesCompleted||0)+1;
   plant.xp+=1;checkLevelUp();
+  t.xpEarned=(t.xpEarned||0)+1;
   if(t.timesCompleted>=t.timesPerDay){
     t.done=true;
     toast(`✅ ¡Completada las ${t.timesPerDay} veces! · +1 XP`);
@@ -4762,18 +4854,74 @@ function incrementMultiTask(id){
   save();renderAgenda();renderNav();
 }
 
+function decrementMultiTask(id){
+  const t=agendaTasks.find(x=>x.id===id);if(!t)return;
+  if(!t.timesCompleted)return;
+  t.timesCompleted=Math.max(0,t.timesCompleted-1);
+  plant.xp=Math.max(0,plant.xp-1);
+  t.xpEarned=(t.xpEarned||0)-1;
+  if(t.done&&t.timesCompleted<t.timesPerDay){t.done=false;}
+  toast(`↩️ ${t.timesCompleted}/${t.timesPerDay} · -1 XP`);
+  save();renderAgenda();renderNav();
+}
+
+function markTaskDone(id){
+  const t=agendaTasks.find(x=>x.id===id);if(!t)return;
+  if(t.done){
+    t.done=false;
+    plant.xp=Math.max(0,plant.xp-1);
+    t.xpEarned=(t.xpEarned||0)-1;
+    toast("↩️ Desmarcada · -1 XP");
+  } else {
+    if(t.failed){plant.xp+=1;t.xpEarned=(t.xpEarned||0)+1;t.failed=false;}
+    t.done=true;
+    plant.xp+=1;t.xpEarned=(t.xpEarned||0)+1;checkLevelUp();
+    toast("✅ +1 XP");
+  }
+  save();renderAgenda();renderNav();
+}
+
+function markTaskFailed(id){
+  const t=agendaTasks.find(x=>x.id===id);if(!t)return;
+  const isMulti=t.timesPerDay&&t.timesPerDay>1;
+  if(isMulti){
+    if(t.failed){
+      const restored=Math.max(0,(t.timesPerDay||1)-(t.timesCompleted||0));
+      plant.xp+=restored;checkLevelUp();
+      t.xpEarned=(t.xpEarned||0)+restored;
+      t.failed=false;
+      toast(`↩️ Desmarcada · +${restored} XP`);
+    } else {
+      const penalty=Math.max(0,(t.timesPerDay||1)-(t.timesCompleted||0));
+      plant.xp=Math.max(0,plant.xp-penalty);
+      t.xpEarned=(t.xpEarned||0)-penalty;
+      t.failed=true;
+      toast(`❌ -${penalty} XP`);
+    }
+  } else {
+    if(t.failed){
+      t.failed=false;
+      plant.xp+=1;checkLevelUp();
+      t.xpEarned=(t.xpEarned||0)+1;
+      toast("↩️ Desmarcada · +1 XP");
+    } else {
+      if(t.done){plant.xp=Math.max(0,plant.xp-1);t.done=false;t.xpEarned=(t.xpEarned||0)-1;}
+      t.failed=true;
+      plant.xp=Math.max(0,plant.xp-1);
+      t.xpEarned=(t.xpEarned||0)-1;
+      toast("❌ -1 XP");
+    }
+  }
+  save();renderAgenda();renderNav();
+}
+
 function deleteTask(id){
   const t=agendaTasks.find(x=>x.id===id);
   if(t){
-    const timesPerDay=t.timesPerDay||1;
-    const timesCompleted=t.done?timesPerDay:(t.timesCompleted||0);
-    const remaining=Math.max(0,timesPerDay-timesCompleted);
-    if(remaining>0){
-      plant.xp=Math.max(0,plant.xp-remaining);
-      toast(`🗑️ Tarea eliminada · -${remaining}XP`);
-    } else {
-      toast("🗑️ Tarea eliminada");
-    }
+    const earned=t.xpEarned!==undefined?t.xpEarned:(t.done?(t.timesPerDay||1):(t.failed?-1:(t.timesCompleted||0)));
+    if(earned>0){plant.xp=Math.max(0,plant.xp-earned);toast(`🗑️ Tarea eliminada · -${earned}XP`);}
+    else if(earned<0){plant.xp+=(-earned);toast(`🗑️ Tarea eliminada · +${-earned}XP`);}
+    else toast("🗑️ Tarea eliminada");
   }
   agendaTasks=agendaTasks.filter(x=>x.id!==id);save();renderAgenda();renderAll();
 }
@@ -4816,6 +4964,7 @@ function fullResetGame(){
   flexibility.doneToday=false;flexibility.extraFlexibility=0;flexibility.lastResetDate=todayKey;
   energy.doneToday=false;energy.stepsToday=0;energy.extraEnergy=0;energy.lastResetDate=todayKey;
   sleep.doneToday=false;sleep.hoursToday=null;sleep.lowSleepStreak=0;sleep.lastResetDate=todayKey;
+  sleep.highSleepStreak=0;
   Object.keys(needsState).forEach(k=>{
     needsState[k].value=100;
     if("extraCalmness" in needsState[k])needsState[k].extraCalmness=0;
@@ -4826,7 +4975,7 @@ function fullResetGame(){
     customNeedStates[h.id]=100;
     dailyActions["custom_"+h.id]=false;
   });
-  protector={active:false,expiresAt:null,reason:""};
+  protector={active:false,expiresAt:null,reason:"",mode:"full",targetNeedId:null,targetLabel:""};
 
   save();renderAll();renderNav();renderPhoneChart();renderSleepChart();startDecay();
   toast("🌱 Planta reiniciada · Racha, XP y nivel a cero · Tus registros se conservan");
@@ -4999,10 +5148,11 @@ function renderHome(){
   const ps=document.getElementById("protectorStatus"),pBtn=document.getElementById("protectorActivateBtn");
   if(isProtectorActive()){
     const rem=Math.ceil((protector.expiresAt-Date.now())/3600000);
-    ps.innerHTML=`<div class="alert alert-purple" style="margin-bottom:0.8rem">🛡️ Activo · ~${rem}h restantes · Todas las muertes pausadas · ${protector.reason}</div>`;
+    const modeLbl=protector.mode==="partial"?`🎯 Protegido: ${protector.targetLabel}`:"🛡️ Protección total";
+    ps.innerHTML=`<div class="alert alert-purple" style="margin-bottom:0.8rem">${modeLbl} · ~${rem}h restantes · ${protector.reason}</div>`;
     pBtn.style.display="none";
   } else {
-    ps.innerHTML=`<p style="font-size:0.82rem;color:var(--text3);margin-bottom:0.8rem">Pausa todas las muertes 24h. Cuesta -50 XP y -3 días racha.</p>`;
+    ps.innerHTML=`<p style="font-size:0.82rem;color:var(--text3);margin-bottom:0.8rem">Protección total: -50 XP y -5 días racha. Proteger solo una necesidad: -10 XP y -2 días racha.</p>`;
     pBtn.style.display="";
   }
 
@@ -5515,8 +5665,8 @@ if(ls2)ls2.innerHTML=`Leer mantiene a tu planta entretenida · Sin leer <strong>
   if(sm){const hist=sleep.history.slice(-7);sm.textContent=hist.length?decimalHoursToHM(hist.reduce((a,b)=>a+b.hours,0)/hist.length):"—";}
   const shd=document.getElementById("suenoHorasDisplay");if(shd)shd.textContent=sleep.hoursToday!=null?`Última noche: ${decimalHoursToHM(sleep.hoursToday)}`:"Última noche: —";
   const sda=document.getElementById("suenoDoneAlert");
-  if(sda)sda.innerHTML=dailyActions.suenoDone?`<div class="alert alert-info">✅ Registrado (${decimalHoursToHM(sleep.hoursToday)})${sleep.lowSleepStreak>0?` · ⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3}`:""}</div>`:`<div class="alert alert-danger">🚨 Pendiente: registra antes de medianoche.</div>`;
-  renderSleepStats();
+ if(sda)sda.innerHTML=dailyActions.suenoDone?`<div class="alert alert-info">✅ Registrado (${decimalHoursToHM(sleep.hoursToday)})${sleep.lowSleepStreak>0?` · ⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3} poco`:""}${sleep.highSleepStreak>0?` · ⚠️ ${sleep.highSleepStreak}/${coreParams.sueno.maxHighSleepStreak||3} exceso`:""}</div>`:`<div class="alert alert-danger">🚨 Pendiente: registra antes de medianoche.</div>`;
+ renderSleepStats();
 
   // MÓVIL
   renderMovilStats();
@@ -5587,7 +5737,16 @@ function renderSleepStats(){
   const best=Math.max(...hist.map(h=>h.hours));
   const worst=Math.min(...hist.map(h=>h.hours));
   const goodNights=hist.filter(h=>h.hours>=coreParams.sueno.minOptimo).length;
-  ss.innerHTML=`<div class="stats-row"><div class="stat-card"><div class="stat-val">${decimalHoursToHM(avg)}</div><div class="stat-lbl">Media</div></div><div class="stat-card"><div class="stat-val">${decimalHoursToHM(best)}</div><div class="stat-lbl">Mejor noche</div></div><div class="stat-card"><div class="stat-val">${decimalHoursToHM(worst)}</div><div class="stat-lbl">Peor noche</div></div><div class="stat-card"><div class="stat-val">${goodNights}</div><div class="stat-lbl">≥${decimalHoursToHM(coreParams.sueno.minOptimo)}</div></div></div>${sleep.lowSleepStreak>0?`<div class="alert alert-warn">⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3} noches con poco sueño.</div>`:""}`;
+  ss.innerHTML=`
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val">${decimalHoursToHM(avg)}</div><div class="stat-lbl">Media</div></div>
+      <div class="stat-card"><div class="stat-val">${decimalHoursToHM(best)}</div><div class="stat-lbl">Mejor noche</div></div>
+      <div class="stat-card"><div class="stat-val">${decimalHoursToHM(worst)}</div><div class="stat-lbl">Peor noche</div></div>
+      <div class="stat-card"><div class="stat-val">${goodNights}</div><div class="stat-lbl">≥${decimalHoursToHM(coreParams.sueno.minOptimo)}</div></div>
+    </div>
+    ${sleep.lowSleepStreak>0?`<div class="alert alert-warn">⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3} noches con poco sueño.</div>`:""}
+    ${sleep.highSleepStreak>0?`<div class="alert alert-warn">⚠️ ${sleep.highSleepStreak}/${coreParams.sueno.maxHighSleepStreak||3} noches con exceso de sueño.</div>`:""}
+  `;
 }
 
 
@@ -5806,49 +5965,10 @@ ${t.recurringId
   </div>`;
 }
 
-function decrementMultiTask(id){
-  const t=agendaTasks.find(x=>x.id===id);if(!t)return;
-  if(!t.timesCompleted)return;
-  t.timesCompleted=Math.max(0,t.timesCompleted-1);
-  plant.xp=Math.max(0,plant.xp-1);
-  if(t.done&&t.timesCompleted<t.timesPerDay){t.done=false;}
-  toast(`↩️ ${t.timesCompleted}/${t.timesPerDay} · -1 XP`);
-  save();renderAgenda();renderNav();
-}
 
-function markTaskDone(id){
-  const t=agendaTasks.find(x=>x.id===id);if(!t)return;
-  if(t.done){
-    // Desmarcar: devolver el XP que se dio
-    t.done=false;
-    plant.xp=Math.max(0,plant.xp-1);
-    toast("↩️ Desmarcada · -1 XP");
-  } else {
-    // Si estaba como fallada, primero devolver el -1 que se restó
-    if(t.failed){plant.xp+=1;t.failed=false;}
-    t.done=true;
-    plant.xp+=1;checkLevelUp();
-    toast("✅ +1 XP");
-  }
-  save();renderAgenda();renderNav();
-}
 
-function markTaskFailed(id){
-  const t=agendaTasks.find(x=>x.id===id);if(!t)return;
-  if(t.failed){
-    // Desmarcar: devolver el XP que se quitó
-    t.failed=false;
-    plant.xp+=1;checkLevelUp();
-    toast("↩️ Desmarcada · +1 XP");
-  } else {
-    // Si estaba como completada, primero devolver el +1 que se sumó
-    if(t.done){plant.xp=Math.max(0,plant.xp-1);t.done=false;}
-    t.failed=true;
-    plant.xp=Math.max(0,plant.xp-1);
-    toast("❌ -1 XP");
-  }
-  save();renderAgenda();renderNav();
-}
+
+
 
 
 
@@ -6164,6 +6284,7 @@ function generateRecurringForWeek(){
           agendaTasks.push({
             id:"rt_"+r.id+"_"+dateStr,
             name:r.name,
+            xpEarned:0,
             time:r.times?.[dayNum]||"",
             priority:r.priority||"mid",
             category:r.category||"Personal",
@@ -6433,16 +6554,31 @@ function renderForest(){
 
 // MOTIVACIÓN
 const DAILY_MOTIV_QUOTES=[
-  "Cada pequeño hábito es un voto por la persona que quieres ser.",
-  "No necesitas ser perfecto, solo consistente.",
-  "El progreso, por pequeño que sea, es mejor que la inacción perfecta.",
-  "Tu yo del futuro te va a agradecer lo que hagas hoy.",
-  "La disciplina es elegirte a ti mismo una y otra vez.",
-  "No estás empezando desde cero. Estás empezando con experiencia.",
-  "El cambio no ocurre de golpe. Ocurre en los días en que nadie te ve.",
-  "Cuídate como si quisieras estar bien dentro de diez años.",
-  "La constancia vence al talento cuando el talento no trabaja con constancia.",
-  "No esperes la motivación. Actúa y la motivación te seguirá.",
+  "Sé tu mejor versión... pero duerme primero. Un héroe con sueño es solo alguien de mal humor",
+  "Tú puedes con todo. Bueno, con todo no... pero con bastante más de lo que crees.",
+  "Sé la persona que tu perro cree que eres.",
+  "Haz algo hoy de lo que tu yo de mañana no tenga que quejarse.",
+  "La disciplina es hacer lo que dijiste que harías, incluso cuando tu cama o móvil presentan argumentos muy convincentes...",
+  "La constancia vence al talento. Sobre todo cuando el talento se queda viendo TikTok hasta las 2 de la mañana.",
+  "No esperes la motivación. Esa diva aparece cuando ya terminaste todo el trabajo.",
+  "La mejor versión de ti existe. Solo está atrapada debajo de veinte excusas y un 'cinco minutos más'.",
+  "Recuerda: tu potencial no se desbloquea desde el sofá. Lo he comprobado varias veces.",
+  "No dejes para mañana lo que puedes procrastinar hoy… espera, ese no era el mensaje.",
+  "Tu yo del futuro está deseando que dejes de darle trabajo extra.",
+  "¿Qué haría el tú que quieres ser?",
+  "No necesitas ser perfecto, solo consistente. Para perfecta ya está la pizza con piña.",
+  "Tu yo del futuro te agradecerá lo que hagas hoy. A no ser que sea quedarte hasta las 4 de la mañana jugando al Minecraft. ¿De verdad se te cayó el hacha de diamante a la lava?",
+  "El cambio no ocurre de golpe. Ocurre los días que utilizas LevelUp.",
+  "No tienes falta de tiempo. Tienes exceso de 'un vídeo más'.",
+  "Cuídate como lo haría tu abuela.",
+  "No eres una planta. Levántate del sofá.",
+  "No necesitas otro vídeo de 'cómo ser productivo'. Necesitas cerrar YouTube.",
+  "Tu yo del futuro no necesita más problemas. Ya tiene que pagar impuestos.",
+  "Si las excusas dieran dinero, ya habrías alcanzado la libertad financiera.",
+  "Nadie va a hacer las flexiones por ti. Qué falta de compañerismo...",
+  "El progreso, por pequeño que sea, sigue siendo más impresionante que mirar vídeos de gatitos durante tres horas.",
+  "Hazlo aunque no tengas ganas. Las ganas tienen un historial de puntualidad terrible.",
+  "Tu mejor versión está llamando a la puerta y tú llevas años fingiendo que no estás en casa."
 ];
 
 function getDailyQuote(){
@@ -6550,8 +6686,7 @@ function saveMotivIdeal(){
 
 function renderMotivWhyInputs(){
   const el=document.getElementById("motivWhyInputList");if(!el)return;
-  const whys=(motivData.whys||[]).filter(w=>w.trim());
-  const items=whys.length?whys:[""];
+  const items=motivData.whys&&motivData.whys.length?motivData.whys:[""];
   el.innerHTML=items.map((w,i)=>`
     <div class="motiv-why-input-row">
       <span style="font-size:0.82rem;color:var(--text3);min-width:22px;font-family:'Lora',serif;font-weight:600">${i+1}.</span>
