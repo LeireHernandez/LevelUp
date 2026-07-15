@@ -1898,13 +1898,12 @@ textarea {
     </select>
   </div>
 </div>
-      <div class="form-row">
-        <div class="form-group"><label>Obligatorio (muere si no lo haces)</label>
-          <select id="hObligatory"><option value="no">No</option><option value="yes">Sí ⚠️</option></select>
-        </div>
-         <div class="form-group"><label>XP por registro</label><input type="number" id="hXpReward" min="1" max="50" step="1" value="6" placeholder="Ej: 6"></div>
-        <div class="form-group"><label>Recordatorio</label><input type="time" id="hReminder"></div>
-      </div>
+     <div class="form-row">
+  <div class="form-group"><label>Obligatorio (muere si no lo haces)</label>
+    <select id="hObligatory"><option value="no">No</option><option value="yes">Sí ⚠️</option></select>
+  </div>
+   <div class="form-group"><label>XP por registro</label><input type="number" id="hXpReward" min="1" max="50" step="1" value="6" placeholder="Ej: 6"></div>
+</div>
       <div class="form-row">
         <div class="form-group"><label>Mostrar en navegador lateral</label>
           <select id="hShowNav"><option value="no">No</option><option value="yes">Sí</option></select>
@@ -1917,7 +1916,15 @@ textarea {
     </div>
     <div class="modal-tab-content" id="htab-features">
       <p style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem">Activa las funciones para este hábito.</p>
-      <div class="feature-grid" id="featureGrid"></div>
+     <div class="feature-grid" id="featureGrid"></div>
+<div class="form-group-full" id="hPbDirGroup" style="display:none;margin-top:0.8rem">
+  <label>¿Qué valor cuenta como récord?</label>
+  <select id="hPbDirection">
+    <option value="max">📈 El más alto (ej. km corridos)</option>
+    <option value="min">📉 El más bajo (ej. minutos en hacer algo)</option>
+  </select>
+</div>
+      
     </div>
     <div class="modal-tab-content" id="htab-goals">
       <div class="form-row">
@@ -2495,9 +2502,12 @@ textarea {
       </div>
     </div>
     <div class="card">
-      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
         <span>📊 Historial (14 días)</span>
-        <button class="btn btn-secondary btn-xs" onclick="openEditCore('sueno')">⚙️ Editar parámetros</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary btn-xs" onclick="clearSleepChart()">🗑️ Limpiar</button>
+          <button class="btn btn-secondary btn-xs" onclick="openEditCore('sueno')">⚙️ Editar parámetros</button>
+        </div>
       </div>
       <div class="chart-wrap"><canvas id="suenoChart" height="200"></canvas></div>
       <div id="suenoStats" style="margin-top:1rem"></div>
@@ -2650,7 +2660,10 @@ textarea {
       </div>
     </div>
     <div class="card">
-      <div class="card-title">📊 Últimos 7 días</div>
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>📊 Últimos 7 días</span>
+        <button class="btn btn-secondary btn-xs" onclick="clearPhoneChart()">🗑️ Limpiar</button>
+      </div>
       <div class="chart-wrap"><canvas id="phoneChart" height="200"></canvas></div>
     </div>
   </div>
@@ -3063,7 +3076,6 @@ const FEATURES_DEF = [
   { id:"chart", icon:"📊", name:"Gráfico", desc:"Historial visual" },
   { id:"stats", icon:"📈", name:"Estadísticas", desc:"Media, máx, total" },
   { id:"notes", icon:"📝", name:"Notas", desc:"Anotaciones libres" },
-  { id:"goal", icon:"🎯", name:"Meta", desc:"Progreso hacia un objetivo" },
   { id:"pb", icon:"🏅", name:"Récord", desc:"Marca personal" },
 ];
 
@@ -3849,33 +3861,31 @@ function openLogModal(habitId){
   logHabitId=habitId;
   document.getElementById("logHabitTitle").textContent=`${h.icon} ${h.name}`;
   let html="";
-  if(h.unit==="done"){html=`<p style="font-size:0.85rem;color:var(--text2)">Marca este hábito como completado hoy.</p>`;}
-  else{
-    const unitLabel={minutes:"Minutos",hours:"Horas",km:"Kilómetros",count:"Cantidad",pages:"Páginas",custom:h.customUnit||"Unidades"}[h.unit]||"Cantidad";
+  if(h.unit==="done"){
+    html=`<p style="font-size:0.85rem;color:var(--text2)">Marca este hábito como completado hoy.</p>`;
+  } else if(h.unit==="hours"){
+    html=`<div style="display:flex;gap:8px">
+      <div class="form-group" style="flex:1;margin:0"><label>Horas</label><input type="number" id="logHabitHoras" step="1" min="0" max="24" placeholder="0"></div>
+      <div class="form-group" style="flex:1;margin:0"><label>Minutos</label><input type="number" id="logHabitMinutos" step="5" min="0" max="59" placeholder="0"></div>
+    </div>`;
+  } else {
+    const unitLabel={minutes:"Minutos",km:"Kilómetros",count:"Cantidad",pages:"Páginas",custom:h.customUnit||"Unidades"}[h.unit]||"Cantidad";
     html=`<div class="form-group-full"><label>${unitLabel}</label><input type="number" id="logHabitVal" step="0.5" min="0" placeholder="Ingresa el valor..."></div>`;
-    if(h.features&&h.features.includes("notes"))
-      html+=`<div class="form-group-full"><label>Nota (opcional)</label><input type="text" id="logHabitNote" placeholder="Ej: Bien, pero cansado..."></div>`;
   }
   document.getElementById("logHabitContent").innerHTML=html;
   document.getElementById("logHabitModal").classList.add("open");
 }
+
+function closeLogModal(){document.getElementById("logHabitModal").classList.remove("open");logHabitId=null;}
+
 function closeLogModal()
 {document.getElementById("logHabitModal").classList.remove("open");logHabitId=null;}
 
-function confirmLogHabit(){
-  if(!logHabitId)return;
-  const h=customHabits.find(x=>x.id===logHabitId);if(!h)return;
-  let val=1,note="";
-  if(h.unit!=="done"){
-    val=parseFloat(document.getElementById("logHabitVal")?.value)||0;
-    if(val<=0){toast("Ingresa un valor válido");return;}
-    note=document.getElementById("logHabitNote")?.value||"";
-  }
+function applyHabitLog(h, val, note){
   if(!habitLogs[h.id])habitLogs[h.id]=[];
   habitLogs[h.id].push({date:getTodayKey(),val,note,ts:Date.now()});
   if(habitLogs[h.id].length>90)habitLogs[h.id].shift();
 
- // Aplicar efecto sobre la necesidad compartida
   const eff = h.effect || { type: "fill100" };
   const needId = getHabitNeedId(h);
 
@@ -3884,13 +3894,9 @@ function confirmLogHabit(){
       if(eff.type==="fill100"){ hydration.extraHydration=100; }
       else if(eff.type==="fillCustom"){
         const add=(eff.value||50);
-        hydration.extraHydration=eff.accumulate
-          ? Math.min(100, hydration.extraHydration+add)
-          : Math.min(100, add);
+        hydration.extraHydration=eff.accumulate ? Math.min(100, hydration.extraHydration+add) : Math.min(100, add);
       }
-      else if(eff.type==="damage"){
-        hydration.extraHydration=Math.max(-100, hydration.extraHydration-(eff.damage||10));
-      }
+      else if(eff.type==="damage"){ hydration.extraHydration=Math.max(-100, hydration.extraHydration-(eff.damage||10)); }
       updateAllLevels();
     },
     strength: (eff) => {
@@ -3911,13 +3917,11 @@ function confirmLogHabit(){
       else if(eff.type==="fillCustom") needsState.entertainment.value=eff.accumulate?Math.min(100,needsState.entertainment.value+(eff.value||50)):Math.min(100,eff.value||50);
       else if(eff.type==="damage") needsState.entertainment.value=Math.max(0,needsState.entertainment.value-(eff.damage||10));
     },
-    vitality: (eff) => { /* el sueño no se modifica directamente */ },
+    vitality: (eff) => {},
     calmness: (eff) => {
       if(eff.type==="fill100"){ needsState.calmness.extraCalmness=100; needsState.calmness.value=100; }
       else if(eff.type==="fillCustom"){
-        needsState.calmness.extraCalmness=eff.accumulate
-          ? Math.min(100,(needsState.calmness.extraCalmness||0)+(eff.value||50))
-          : Math.min(100,eff.value||50);
+        needsState.calmness.extraCalmness=eff.accumulate ? Math.min(100,(needsState.calmness.extraCalmness||0)+(eff.value||50)) : Math.min(100,eff.value||50);
       }
       else if(eff.type==="damage"){
         needsState.calmness.extraCalmness=Math.max(-100,(needsState.calmness.extraCalmness||0)-(eff.damage||10));
@@ -3926,92 +3930,132 @@ function confirmLogHabit(){
     },
     energy: (eff) => {
       if(eff.type==="fill100"){ energy.extraEnergy=100; }
-      else if(eff.type==="fillCustom"){
-        energy.extraEnergy=eff.accumulate?Math.min(100,energy.extraEnergy+(eff.value||50)):Math.min(100,eff.value||50);
-      }
-      else if(eff.type==="damage"){
-        energy.extraEnergy=Math.max(-100,energy.extraEnergy-(eff.damage||10));
-      }
+      else if(eff.type==="fillCustom"){ energy.extraEnergy=eff.accumulate?Math.min(100,energy.extraEnergy+(eff.value||50)):Math.min(100,eff.value||50); }
+      else if(eff.type==="damage"){ energy.extraEnergy=Math.max(-100,energy.extraEnergy-(eff.damage||10)); }
       updateAllLevels();
     },
     flexibility: (eff) => {
       if(eff.type==="fill100"){ flexibility.extraFlexibility=100; }
-      else if(eff.type==="fillCustom"){
-        flexibility.extraFlexibility=eff.accumulate?Math.min(100,flexibility.extraFlexibility+(eff.value||50)):Math.min(100,eff.value||50);
-      }
-      else if(eff.type==="damage"){
-        flexibility.extraFlexibility=Math.max(-100,flexibility.extraFlexibility-(eff.damage||10));
-      }
+      else if(eff.type==="fillCustom"){ flexibility.extraFlexibility=eff.accumulate?Math.min(100,flexibility.extraFlexibility+(eff.value||50)):Math.min(100,eff.value||50); }
+      else if(eff.type==="damage"){ flexibility.extraFlexibility=Math.max(-100,flexibility.extraFlexibility-(eff.damage||10)); }
       updateAllLevels();
     },
   };
 
+  let killed=false;
   if(systemApply[needId]){
     systemApply[needId](eff);
-
-    // Comprobar muerte por daño en necesidades del sistema
-    if(eff.type==="damage" && !isProtectorActive()){
-      checkDeath();
-    }
+    if(eff.type==="damage" && !isProtectorActive()){ checkDeath(); }
   } else {
-
-    // Necesidad custom compartida
     const currentLevel = customNeedStates[needId] ?? 100;
     if(eff.type==="fill100"){
       customNeedStates[needId]=100;
       habitLogs[h.id][habitLogs[h.id].length-1].ts=Date.now();
     } else if(eff.type==="fillCustom"){
-      customNeedStates[needId]=eff.accumulate
-        ? Math.min(100,currentLevel+(eff.value||50))
-        : Math.min(100,eff.value||50);
+      customNeedStates[needId]=eff.accumulate ? Math.min(100,currentLevel+(eff.value||50)) : Math.min(100,eff.value||50);
       habitLogs[h.id][habitLogs[h.id].length-1].ts=Date.now();
     } else if(eff.type==="damage"){
       customNeedStates[needId]=Math.max(0,currentLevel-(eff.damage||10));
       if(eff.damageKill && customNeedStates[needId]<=0){
         killPlant(`${h.name} — daño acumulado`);
-        closeLogModal();save();renderAll();return;
+        killed=true;
       }
     }
   }
 
-  updateAllLevels();
-  // Para los efectos fill, también resetear el timestamp de decay
-  if(eff.type === "fill100" || eff.type === "fillCustom"){
+  if(killed){ save();renderAll(); return true; }
 
-    // Al registrar, actualizamos createdAt del log para que el decay parta de ahora
+  updateAllLevels();
+  if(eff.type === "fill100" || eff.type === "fillCustom"){
     habitLogs[h.id][habitLogs[h.id].length-1].ts = Date.now();
   }
 
-  if(h.features&&h.features.includes("goal")&&h.goal&&h.unit!=="done"){
+  if(h.goal&&h.unit!=="done"){
     h.goal.progress=(h.goal.progress||0)+val;
   }
   updateHabitStreak(h.id);
   if(h.obligatory)dailyActions["custom_"+h.id]=true;
-  if(h.features&&h.features.includes("pb")&&h.unit!=="done"){if(!h.pb||val>h.pb)h.pb=val;}
+
+  let newRecordMsg="";
+if(h.features&&h.features.includes("pb")&&h.unit!=="done"){
+    const dir=h.pbDirection||"max";
+    const isRecord = h.pb===undefined || (dir==="max" ? val>h.pb : val<h.pb);
+    if(isRecord){h.pb=val;newRecordMsg=" · 🏆 ¡Nuevo récord!";}
+  }
   plant.xp+=(h.xpReward||6);checkLevelUp();
 
   const effectMsg = eff.type==="fill100"?"→ Necesidad al 100%":
                     eff.type==="fillCustom"?`→ Necesidad ${eff.accumulate?"+"+eff.value:eff.value}%`:
                     eff.type==="damage"?`→ Necesidad -${eff.damage}%`:
                     "→ Registrado";
-  toast(`${h.icon} ${h.name} registrado · ${effectMsg}`);
+  toast(`${h.icon} ${h.name} registrado · ${effectMsg}${newRecordMsg}`);
 
-  // Actualizar objetivos mensuales vinculados a este hábito
-const now2=new Date();
+  const nowM=new Date();
+  const thisMonthM=`${nowM.getFullYear()}-${String(nowM.getMonth()+1).padStart(2,'0')}`;
+  monthlyObjs.filter(o=>o.linkedHabit===h.id&&(!o.month||o.month===thisMonthM)&&!o.done).forEach(o=>{
+    o.progress=(o.progress||0)+1;
+    if(o.target&&o.progress>=o.target){o.done=true;toast(`🎯 ¡Objetivo "${o.name}" completado!`);}
+  });
+  save();
+  return false;
+}
 
+function confirmLogHabit(){
+  if(!logHabitId)return;
+  const h=customHabits.find(x=>x.id===logHabitId);if(!h)return;
+  let val=1,note="";
+  if(h.unit==="hours"){
+    const hh=document.getElementById("logHabitHoras")?.value;
+    const mm=document.getElementById("logHabitMinutos")?.value;
+    if((hh===""||hh===undefined)&&(mm===""||mm===undefined)){toast("Ingresa las horas");return;}
+    val=hmToDecimalHours(hh,mm);
+    if(val<=0){toast("Ingresa un valor válido");return;}
+    note=document.getElementById("logHabitNote")?.value||"";
+  } else if(h.unit!=="done"){
+    val=parseFloat(document.getElementById("logHabitVal")?.value)||0;
+    if(val<=0){toast("Ingresa un valor válido");return;}
+    note=document.getElementById("logHabitNote")?.value||"";
+  }
+  applyHabitLog(h,val,note);
+  closeLogModal();renderAll();renderCustomHabitsCharts();
+}
 
-// Sincronizar objetivos mensuales vinculados
-const nowM=new Date();
-const thisMonthM=`${nowM.getFullYear()}-${String(nowM.getMonth()+1).padStart(2,'0')}`;
-monthlyObjs.filter(o=>o.linkedHabit===h.id&&(!o.month||o.month===thisMonthM)&&!o.done).forEach(o=>{
-  o.progress=(o.progress||0)+1;
-  if(o.target&&o.progress>=o.target){o.done=true;toast(`🎯 ¡Objetivo "${o.name}" completado!`);}
-});
-  closeLogModal();save();renderAll();renderCustomHabitsCharts();
+function submitInlineHabitLog(habitId){
+  const h=customHabits.find(x=>x.id===habitId);if(!h)return;
+  let val=1,note="";
+  if(h.unit==="hours"){
+    const hh=document.getElementById("inlineHoras_"+habitId)?.value;
+    const mm=document.getElementById("inlineMinutos_"+habitId)?.value;
+    if((hh===""||hh===undefined)&&(mm===""||mm===undefined)){toast("Ingresa las horas");return;}
+    val=hmToDecimalHours(hh,mm);
+    if(val<=0){toast("Ingresa un valor válido");return;}
+    note=document.getElementById("inlineNote_"+habitId)?.value||"";
+  } else if(h.unit!=="done"){
+    val=parseFloat(document.getElementById("inlineVal_"+habitId)?.value)||0;
+    if(val<=0){toast("Ingresa un valor válido");return;}
+    note=document.getElementById("inlineNote_"+habitId)?.value||"";
+  }
+  applyHabitLog(h,val,note);
+  renderAll();renderCustomHabitDetail(habitId);
 }
 
 function getUnitLabel(h){
   return {minutes:"min",hours:"h",km:"km",count:"",pages:"pág",custom:h.customUnit||""}[h.unit]||"";
+}
+
+function formatHabitVal(h,v){
+  if(h.unit==="hours") return decimalHoursToHM(v);
+  const lbl=getUnitLabel(h);
+  return lbl?`${Math.round(v*100)/100} ${lbl}`:`${Math.round(v*100)/100}`;
+}
+
+function getUnitLabel(h){
+  return {minutes:"min",hours:"h",km:"km",count:"",pages:"pág",custom:h.customUnit||""}[h.unit]||"";
+}
+
+function formatHabitVal(h,v){
+  if(h.unit==="hours") return decimalHoursToHM(v);
+  return `${Math.round(v*100)/100} ${getUnitLabel(h)}`.trim();
 }
 
 function updateHabitStreak(id){
@@ -4056,6 +4100,8 @@ function openHabitModal(editId){
     const h=customHabits.find(x=>x.id===editId);
     if(h){
       document.getElementById("hName").value=h.name||"";
+      document.getElementById("hPbDirection").value=h.pbDirection||"max";
+
       document.getElementById("hIcon").value=h.icon||"⭐";
       selectedHabitEmoji=h.icon||"⭐";
       document.getElementById("hAffects").value=h.affects||"calmness";
@@ -4063,7 +4109,6 @@ function openHabitModal(editId){
       document.getElementById("hDays").value=h.daysToKill||3;
       document.getElementById("hFreq").value=h.freq||"daily";
       document.getElementById("hObligatory").value=h.obligatory?"yes":"no";
-      document.getElementById("hReminder").value=h.reminder||"";
       document.getElementById("hDesc").value=h.desc||"";
       document.getElementById("hCustomNeedName").value=h.customNeedName||"";
       document.getElementById("hCustomNeedIcon").value=h.customNeedIcon||"";
@@ -4092,11 +4137,13 @@ function openHabitModal(editId){
     }
 
   } else {
-    ["hName","hDays","hDesc","hCustomNeedName","hCustomNeedIcon","hCustomUnit","hGoalTarget","hGoalUnit","hGoalDesc","hGoalDeadline","hReminder"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+    ["hName","hDays","hDesc","hCustomNeedName","hCustomNeedIcon","hCustomUnit","hGoalTarget","hGoalUnit","hGoalDesc","hGoalDeadline"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
     document.getElementById("hIcon").value="⭐";
+
     document.getElementById("hAffects").value="calmness";
     document.getElementById("hUnit").value="done";
     document.getElementById("hFreq").value="daily";
+    document.getElementById("hPbDirection").value="max";
     document.getElementById("hObligatory").value="no";
     document.getElementById("hGoalProgress").value=0;
     document.getElementById("hGoalColor").value="green";
@@ -4174,22 +4221,30 @@ function renderFeatureGrid(){
       </div>
       <div class="toggle-switch"></div>
     </div>`).join("");
+    updateFeatureDependentFields();
 }
+
 function toggleFeature(id,el){
   if(activeHabitFeatures.has(id))activeHabitFeatures.delete(id);
   else activeHabitFeatures.add(id);
   el.classList.toggle("on");
+  updateFeatureDependentFields();
+}
+
+function updateFeatureDependentFields(){
+  const g=document.getElementById("hPbDirGroup");
+  if(g)g.style.display=activeHabitFeatures.has("pb")?"":"none";
 }
 
 function saveHabit(){
   const name=document.getElementById("hName").value.trim();
+  const pbDirection=document.getElementById("hPbDirection").value;
   const icon=document.getElementById("hIcon").value.trim()||selectedHabitEmoji||"⭐";
   const affects=document.getElementById("hAffects").value;
   const unit=document.getElementById("hUnit").value;
   const days=parseFloat(document.getElementById("hDays").value)||3;
   const freq=document.getElementById("hFreq").value;
-  const obligatory=document.getElementById("hObligatory").value==="yes";
-  const reminder=document.getElementById("hReminder").value;
+  const obligatory=document.getElementById("hObligatory").value==="yes"
   const desc=document.getElementById("hDesc").value.trim();
   const customNeedName=document.getElementById("hCustomNeedName").value.trim();
   const customNeedIcon=document.getElementById("hCustomNeedIcon").value.trim();
@@ -4197,6 +4252,7 @@ function saveHabit(){
   const showNav=document.getElementById("hShowNav").value==="yes";
   const navSection=document.getElementById("hNavSection").value;
   const xpReward=parseInt(document.getElementById("hXpReward")?.value)||6;
+
   const effectType=document.getElementById("hEffectType").value;
   const effectValue=parseInt(document.getElementById("hEffectValue")?.value)||50;
   const effectAccumulate=document.getElementById("hEffectAccumulate")?.value==="yes";
@@ -4211,12 +4267,18 @@ function saveHabit(){
   if(gt){goal={target:parseFloat(gt)||0,unit:document.getElementById("hGoalUnit").value,desc:document.getElementById("hGoalDesc").value,progress:parseFloat(document.getElementById("hGoalProgress").value)||0,color:document.getElementById("hGoalColor").value,deadline:document.getElementById("hGoalDeadline").value,countdown:document.getElementById("hGoalCountdown").value==="yes"};}
   const features=Array.from(activeHabitFeatures);
   if(editId){
+    const idxCheck=customHabits.findIndex(x=>x.id===editId);
+    if(idxCheck>=0 && customHabits[idxCheck].pbDirection!==pbDirection){
+      delete customHabits[idxCheck].pb; // la dirección cambió: el récord anterior ya no es válido
+    }
+  }
+  if(editId){
     const idx=customHabits.findIndex(x=>x.id===editId);
-    if(idx>=0)customHabits[idx]={...customHabits[idx],name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customNeedIcon,customUnit,features,goal,showNav,navSection,effect,xpReward};
+    if(idx>=0)customHabits[idx]={...customHabits[idx],name,pbDirection,icon,affects,unit,daysToKill:days,freq,obligatory,desc,customNeedName,customNeedIcon,customUnit,features,goal,showNav,navSection,effect,xpReward};
 
   } else {
     const id="ch_"+Date.now();
-    customHabits.push({id,name,icon,affects,unit,daysToKill:days,freq,obligatory,reminder,desc,customNeedName,customNeedIcon,customUnit,features,goal,showNav,navSection,effect,xpReward,createdAt:Date.now()});
+    customHabits.push({id,name,icon,pbDirection,affects,unit,daysToKill:days,freq,obligatory,desc,customNeedName,customNeedIcon,customUnit,features,goal,showNav,navSection,effect,xpReward,createdAt:Date.now()});
     customNeedStates[id]=100;
     if(!habitLogs[id])habitLogs[id]=[];
     habitStreaks[id]={current:0,last:null};
@@ -5770,7 +5832,7 @@ function renderCustomHabitsPage(){
             <div class="habit-need-bar"><div class="habit-need-fill" style="width:${v}%;background:${cls2==="ok"?"var(--green-lt)":cls2==="warn"?"#d4a017":"var(--red)"}"></div></div>
             <div class="habit-item-tags">
               ${h.features?.includes("streak")?`<span class="habit-tag">🔥 ${strk}d</span>`:""}
-              ${h.features?.includes("goal")&&h.goal?`<span class="habit-tag">🎯 ${(h.goal.progress||0).toFixed(0)}/${h.goal.target}</span>`:""}
+              ${h.goal&&h.goal.target?`<span class="habit-tag">🎯 ${(h.goal.progress||0).toFixed(0)}/${h.goal.target}</span>`:""}
             </div>
           </div>
           <div class="habit-item-actions">
@@ -5803,31 +5865,52 @@ function renderCustomHabitDetail(habitId){
   const logs=habitLogs[h.id]||[];
   const strk=habitStreaks[h.id]?.current||0;
   const todayLog=logs.find(l=>l.date===getTodayKey());
+
+  let baseStats=`<div class="stat-card"><div class="stat-val">${v}%</div><div class="stat-lbl">Nivel necesidad</div></div>`;
+  if(h.features?.includes("streak")) baseStats+=`<div class="stat-card"><div class="stat-val">${strk}</div><div class="stat-lbl">Racha (días)</div></div>`;
+  baseStats+=`<div class="stat-card"><div class="stat-val">${logs.length}</div><div class="stat-lbl">Registros totales</div></div>`;
+  if(h.features?.includes("pb")&&h.pb!==undefined) baseStats+=`<div class="stat-card"><div class="stat-val">${formatHabitVal(h,h.pb)}</div><div class="stat-lbl">🏅 Récord</div></div>`;
+
   let html=`<div class="page-header">
     <h2>${h.icon} ${h.name}</h2>
     <p>${h.desc||"Hábito personalizado"} · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openHabitModal('${h.id}')">✏️ Editar</button></p>
   </div>
-  <div class="stats-row">
-    <div class="stat-card"><div class="stat-val">${v}%</div><div class="stat-lbl">Nivel necesidad</div></div>
-    <div class="stat-card"><div class="stat-val">${strk}</div><div class="stat-lbl">Racha (días)</div></div>
-    <div class="stat-card"><div class="stat-val">${logs.length}</div><div class="stat-lbl">Registros totales</div></div>
-  </div>`;
+  <div class="stats-row">${baseStats}</div>`;
+
   if(h.features?.includes("stats")&&logs.length>0&&h.unit!=="done"){
-    const vals=logs.map(l=>l.val).filter(v=>v>0);
-    const avg=(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
-    const max=Math.max(...vals).toFixed(1);
-    const total=vals.reduce((a,b)=>a+b,0).toFixed(1);
-    const unit=getUnitLabel(h);
+    const vals=logs.map(l=>l.val).filter(vv=>vv>0);
+    const avgVal=vals.reduce((a,b)=>a+b,0)/vals.length;
+    const maxVal=Math.max(...vals);
+    const minVal=Math.min(...vals);
     html+=`<div class="stats-row">
-      <div class="stat-card"><div class="stat-val">${avg}${unit}</div><div class="stat-lbl">Media</div></div>
-      <div class="stat-card"><div class="stat-val">${max}${unit}</div><div class="stat-lbl">Máximo</div></div>
-      <div class="stat-card"><div class="stat-val">${total}${unit}</div><div class="stat-lbl">Total acumulado</div></div>
+      <div class="stat-card"><div class="stat-val">${formatHabitVal(h,avgVal)}</div><div class="stat-lbl">Media</div></div>
+      <div class="stat-card"><div class="stat-val">${formatHabitVal(h,maxVal)}</div><div class="stat-lbl">Máximo</div></div>
+      <div class="stat-card"><div class="stat-val">${formatHabitVal(h,minVal)}</div><div class="stat-lbl">Mínimo</div></div>
     </div>`;
   }
+
+let registerFieldsHtml="";
+  if(h.unit==="done"){
+    registerFieldsHtml=`<button class="btn" onclick="submitInlineHabitLog('${h.id}')">✅ Marcar como hecho</button>`;
+  } else if(h.unit==="hours"){
+    registerFieldsHtml=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:10px">
+      <div class="form-group" style="flex:1;min-width:100px;margin:0"><label>Horas</label><input type="number" id="inlineHoras_${h.id}" step="1" min="0" max="24" placeholder="0"></div>
+      <div class="form-group" style="flex:1;min-width:100px;margin:0"><label>Minutos</label><input type="number" id="inlineMinutos_${h.id}" step="5" min="0" max="59" placeholder="0"></div>
+      <button class="btn" onclick="submitInlineHabitLog('${h.id}')">✅ Registrar</button>
+    </div>`;
+  } else {
+    const unitLabel={minutes:"Minutos",km:"Kilómetros",count:"Cantidad",pages:"Páginas",custom:h.customUnit||"Unidades"}[h.unit]||"Cantidad";
+    registerFieldsHtml=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <input type="number" id="inlineVal_${h.id}" step="0.5" min="0" placeholder="${unitLabel}" style="flex:1;min-width:140px">
+      <button class="btn" onclick="submitInlineHabitLog('${h.id}')">✅ Registrar</button>
+    </div>`;
+  }
+
   html+=`<div class="card">
     <div class="card-title">✅ Registrar hoy ${todayLog?`<span style="font-size:0.72rem;color:var(--green-md);font-weight:400">(ya registrado)</span>`:""}</div>
-    <button class="btn" onclick="openLogModal('${h.id}')">✅ Registrar ahora</button>
+    ${registerFieldsHtml}
   </div>`;
+
   if(h.goal&&h.goal.target){
     const prog=h.goal.progress||0;
     const pct=Math.min(100,(prog/h.goal.target)*100);
@@ -5844,29 +5927,148 @@ function renderCustomHabitDetail(habitId){
       ${h.goal.deadline?`<p style="font-size:0.72rem;color:var(--text3);margin-top:0.5rem">📅 Fecha límite: ${formatDate(h.goal.deadline)}</p>`:""}
     </div>`;
   }
-  if(h.features?.includes("chart")&&logs.length>1){
-    html+=`<div class="card"><div class="card-title">📊 Historial (14 días)</div><div class="chart-wrap"><canvas id="dhchart_${h.id}" height="180"></canvas></div></div>`;
+
+  if(h.features?.includes("notes")){
+    const notesView=(h.notes&&h.notes.length)
+      ? h.notes.map((n,i)=>`<div class="motiv-why-item"><div class="motiv-why-num">${i+1}</div><div class="motiv-why-text">${n.replace(/</g,"&lt;")}</div></div>`).join("")
+      : `<div class="motiv-why-placeholder">Aún no has añadido notas.</div>`;
+    html+=`<div class="motiv-section" id="habitNotesSection_${h.id}" style="margin-bottom:1.1rem">
+      <div class="motiv-section-header">
+        <div class="motiv-section-title">📝 Notas</div>
+        <button class="btn btn-secondary btn-xs" onclick="toggleHabitNotesEdit('${h.id}')">✏️ Editar</button>
+      </div>
+      <div class="motiv-view"><div class="motiv-why-list">${notesView}</div></div>
+      <div class="motiv-edit">
+        <div id="habitNotesInputList_${h.id}"></div>
+        <button class="btn btn-secondary btn-sm" onclick="addHabitNoteInput('${h.id}')" style="margin-top:0.4rem">+ Añadir nota</button>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem">
+          <button class="btn btn-secondary btn-sm" onclick="toggleHabitNotesEdit('${h.id}')">Cancelar</button>
+          <button class="btn btn-sm" onclick="saveHabitNotes('${h.id}')">💾 Guardar</button>
+        </div>
+      </div>
+    </div>`;
   }
+
+if(h.features?.includes("chart")&&logs.length>1){
+    const ct=h.chartType||"bar";
+    html+=`<div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <span>📊 Historial (14 días)</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary btn-xs${ct==="bar"?" active-filter":""}" onclick="setHabitChartType('${h.id}','bar')">📊 Barras</button>
+          <button class="btn btn-secondary btn-xs${ct==="line"?" active-filter":""}" onclick="setHabitChartType('${h.id}','line')">📈 Líneas</button>
+          <button class="btn btn-secondary btn-xs" onclick="clearHabitChart('${h.id}')">🗑️ Limpiar</button>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="dhchart_${h.id}" height="180"></canvas></div>
+    </div>`;
+  }
+
   if(logs.length>0){
     html+=`<div class="card"><div class="card-title">📋 Últimos registros</div>`;
     html+=logs.slice().reverse().slice(0,10).map(l=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem">
       <span style="color:var(--text3)">${l.date}</span>
-      <span style="font-weight:500;color:var(--green-md)">${h.unit==="done"?"✅ Hecho":`${l.val} ${getUnitLabel(h)}`}</span>
+      <span style="font-weight:500;color:var(--green-md)">${h.unit==="done"?"✅ Hecho":formatHabitVal(h,l.val)}</span>
       ${l.note?`<span style="font-size:0.7rem;color:var(--text3);font-style:italic">${l.note}</span>`:""}
     </div>`).join("");
     html+=`</div>`;
   }
+
   container.innerHTML=html;
-  if(h.features?.includes("chart")&&logs.length>1){
+
+ if(h.features?.includes("chart")&&logs.length>1){
     setTimeout(()=>{
       const canvas=document.getElementById("dhchart_"+h.id);if(!canvas)return;
       if(customChartInsts["dh_"+h.id])customChartInsts["dh_"+h.id].destroy();
       const last14=[];
       for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=d.toISOString().split('T')[0];const e=logs.filter(l=>l.date===key);last14.push(e.length?e.reduce((s,l)=>s+l.val,0):null);}
       const labels=Array.from({length:14},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(13-i));return d.toLocaleDateString("es-ES",{day:"numeric",month:"short"});});
-      customChartInsts["dh_"+h.id]=new Chart(canvas.getContext("2d"),{type:"bar",data:{labels,datasets:[{label:h.name,data:last14,backgroundColor:"rgba(74,124,47,0.55)",borderColor:"#4a7c2f",borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{size:9}}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});
+      const type=h.chartType||"bar";
+      const isLine=type==="line";
+      customChartInsts["dh_"+h.id]=new Chart(canvas.getContext("2d"),{
+        type,
+        data:{labels,datasets:[{
+          label:h.name,
+          data:last14,
+          backgroundColor:isLine?"rgba(74,124,47,0.12)":"rgba(74,124,47,0.55)",
+          borderColor:"#4a7c2f",
+          borderWidth:1.5,
+          borderRadius:isLine?0:5,
+          tension:0.3,
+          fill:isLine,
+          spanGaps:true,
+          pointRadius:isLine?3:0
+        }]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{size:9}}},x:{grid:{display:false},ticks:{font:{size:9}}}}}
+      });
     },100);
   }
+}
+function setHabitChartType(habitId,type){
+  const h=customHabits.find(x=>x.id===habitId);if(!h)return;
+  h.chartType=type;
+  save();renderCustomHabitDetail(habitId);
+}
+
+function renderCustomHabitsCharts(){}
+
+
+
+function clearHabitChart(habitId){
+  if(!confirm("¿Borrar los registros de días anteriores de este hábito? Se conservará el de hoy si existe."))return;
+  const todayK=getTodayKey();
+  habitLogs[habitId]=(habitLogs[habitId]||[]).filter(l=>l.date===todayK);
+  save();renderCustomHabitDetail(habitId);
+  toast("🗑️ Historial borrado");
+}
+
+function toggleHabitNotesEdit(habitId){
+  const sec=document.getElementById("habitNotesSection_"+habitId);
+  if(!sec)return;
+  const editing=sec.classList.contains("editing");
+  if(!editing){
+    sec.classList.add("editing");
+    renderHabitNotesInputs(habitId);
+  } else {
+    sec.classList.remove("editing");
+  }
+}
+
+function renderHabitNotesInputs(habitId){
+  const h=customHabits.find(x=>x.id===habitId);if(!h)return;
+  const el=document.getElementById("habitNotesInputList_"+habitId);if(!el)return;
+  const items=h.notes&&h.notes.length?h.notes:[""];
+  el.innerHTML=items.map((n,i)=>`
+    <div class="motiv-why-input-row">
+      <input type="text" value="${n.replace(/"/g,"&quot;")}" placeholder="Escribe una nota..." maxlength="200" id="habitNoteInp_${habitId}_${i}">
+      <button class="btn-icon" onclick="removeHabitNoteInput('${habitId}',${i})" title="Eliminar">🗑️</button>
+    </div>`).join("");
+}
+
+function addHabitNoteInput(habitId){
+  const h=customHabits.find(x=>x.id===habitId);if(!h)return;
+  const inputs=document.querySelectorAll(`[id^='habitNoteInp_${habitId}_']`);
+  h.notes=[...inputs].map(i=>i.value);
+  h.notes.push("");
+  renderHabitNotesInputs(habitId);
+}
+
+function removeHabitNoteInput(habitId,idx){
+  const h=customHabits.find(x=>x.id===habitId);if(!h)return;
+  const inputs=document.querySelectorAll(`[id^='habitNoteInp_${habitId}_']`);
+  const current=[...inputs].map(i=>i.value);
+  current.splice(idx,1);
+  h.notes=current;
+  renderHabitNotesInputs(habitId);
+}
+
+function saveHabitNotes(habitId){
+  const h=customHabits.find(x=>x.id===habitId);if(!h)return;
+  const inputs=document.querySelectorAll(`[id^='habitNoteInp_${habitId}_']`);
+  h.notes=[...inputs].map(i=>i.value.trim()).filter(n=>n);
+  toggleHabitNotesEdit(habitId);
+  save();renderCustomHabitDetail(habitId);
+  toast("📝 Notas guardadas");
 }
 
 function renderCustomHabitsCharts(){}
@@ -5980,6 +6182,84 @@ function renderPhoneChart(){
   if(phoneChartInst)phoneChartInst.destroy();
   phoneChartInst=new Chart(canvas.getContext("2d"),{type:"bar",data:{labels,datasets:[{label:"Horas",data,backgroundColor:data.map(v=>v>5?"rgba(139,46,26,0.7)":v>3?"rgba(184,115,51,0.7)":"rgba(74,124,47,0.7)"),borderColor:data.map(v=>v>5?"#8b2e1a":v>3?"#b87333":"#4a7c2f"),borderWidth:1.5,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:8,grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
 }
+
+function clearSleepChart(){
+  if(!confirm("¿Borrar el historial de sueño de días anteriores? Se conservará el de hoy si ya lo registraste."))return;
+  const todayD=todayStr();
+  sleep.history=sleep.history.filter(h=>h.date===todayD);
+  sleep.lowSleepStreak=(dailyActions.suenoDone&&sleep.hoursToday<(coreParams.sueno.lowSleepThreshold??6.5))?1:0;
+  sleep.highSleepStreak=(dailyActions.suenoDone&&sleep.hoursToday>(coreParams.sueno.highSleepThreshold??10))?1:0;
+  save();renderSleepChart();renderSleepStats();
+  toast("🗑️ Historial de sueño borrado");
+}
+
+function clearPhoneChart(){
+  if(!confirm("¿Borrar el historial de móvil de días anteriores? Se conservará el de hoy si ya lo registraste."))return;
+  const todayD=todayStr();
+  phoneUsage=phoneUsage.filter(p=>p.date===todayD);
+  save();renderPhoneChart();
+  toast("🗑️ Historial de móvil borrado");
+}
+
+function clearHabitChart(habitId){
+  if(!confirm("¿Borrar los registros de días anteriores de este hábito? Se conservará el de hoy si existe."))return;
+  const todayK=getTodayKey();
+  habitLogs[habitId]=(habitLogs[habitId]||[]).filter(l=>l.date===todayK);
+  save();renderCustomHabitDetail(habitId);
+  toast("🗑️ Historial borrado");
+}
+
+
+
+function toggleHabitNotesEdit(habitId){
+  const sec=document.getElementById("habitNotesSection_"+habitId);
+  if(!sec)return;
+  const editing=sec.classList.contains("editing");
+  if(!editing){
+    sec.classList.add("editing");
+    renderHabitNotesInputs(habitId);
+  } else {
+    sec.classList.remove("editing");
+  }
+}
+
+function renderHabitNotesInputs(habitId){
+  const h=customHabits.find(x=>x.id===habitId);if(!h)return;
+  const el=document.getElementById("habitNotesInputList_"+habitId);if(!el)return;
+  const items=h.notes&&h.notes.length?h.notes:[""];
+  el.innerHTML=items.map((n,i)=>`
+    <div class="motiv-why-input-row">
+      <input type="text" value="${n.replace(/"/g,"&quot;")}" placeholder="Escribe una nota..." maxlength="200" id="habitNoteInp_${habitId}_${i}">
+      <button class="btn-icon" onclick="removeHabitNoteInput('${habitId}',${i})" title="Eliminar">🗑️</button>
+    </div>`).join("");
+}
+
+function addHabitNoteInput(habitId){
+  const h=customHabits.find(x=>x.id===habitId);if(!h)return;
+  const inputs=document.querySelectorAll(`[id^='habitNoteInp_${habitId}_']`);
+  h.notes=[...inputs].map(i=>i.value);
+  h.notes.push("");
+  renderHabitNotesInputs(habitId);
+}
+
+function removeHabitNoteInput(habitId,idx){
+  const h=customHabits.find(x=>x.id===habitId);if(!h)return;
+  const inputs=document.querySelectorAll(`[id^='habitNoteInp_${habitId}_']`);
+  const current=[...inputs].map(i=>i.value);
+  current.splice(idx,1);
+  h.notes=current;
+  renderHabitNotesInputs(habitId);
+}
+
+function saveHabitNotes(habitId){
+  const h=customHabits.find(x=>x.id===habitId);if(!h)return;
+  const inputs=document.querySelectorAll(`[id^='habitNoteInp_${habitId}_']`);
+  h.notes=[...inputs].map(i=>i.value.trim()).filter(n=>n);
+  toggleHabitNotesEdit(habitId);
+  save();renderCustomHabitDetail(habitId);
+  toast("📝 Notas guardadas");
+}
+
 
 function renderSleepChart(){
   const canvas=document.getElementById("suenoChart");if(!canvas)return;
@@ -6600,19 +6880,12 @@ function renderMotivPage(){
     else ss.textContent="Esto ya es un estilo de vida. Eres increíble.";
   }
 
-  // Hero: frase del yo ideal o quote del día
-  const hq=document.getElementById("motivHeroQuote");
+  // Hero: quote del día
+const hq=document.getElementById("motivHeroQuote");
   const hs=document.getElementById("motivHeroSub");
   if(hq){
-    if(motivData.ideal&&motivData.ideal.trim()){
-      // Mostrar primera frase del yo ideal
-      const firstLine=motivData.ideal.split('\n')[0].slice(0,180);
-      hq.textContent=firstLine;
-      if(hs)hs.textContent="Tu yo ideal · Tú lo escribiste";
-    } else {
-      hq.textContent=getDailyQuote();
-      if(hs)hs.textContent="Frase del día · Escribe tu yo ideal abajo para personalizarlo";
-    }
+    hq.textContent=getDailyQuote();
+    if(hs)hs.textContent="Frase del día";
   }
 
   // Yo ideal view
