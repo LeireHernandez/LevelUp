@@ -746,6 +746,19 @@ textarea {
   margin-top:6px;
 }
 
+.wizard-choice-btn{
+  flex:1;padding:14px;border:2px solid var(--border2);border-radius:var(--radius-sm);
+  background:var(--card2);cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-size:0.86rem;font-weight:500;color:var(--text2);transition:all 0.15s;
+}
+.wizard-choice-btn:hover{border-color:var(--green-lt);background:var(--green-mist);}
+.wizard-choice-btn.selected{border-color:var(--green-md);background:var(--green-pale);color:var(--green-dk);}
+.habit-wizard-progress{font-size:0.72rem;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;}
+.habit-wizard-progress-bar{height:4px;background:rgba(0,0,0,0.08);border-radius:4px;margin-top:6px;overflow:hidden;}
+.habit-wizard-progress-fill{height:100%;background:var(--green-lt);border-radius:4px;transition:width 0.25s ease;}
+.wizard-step-label{font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.7rem;font-weight:500;}
+.habit-step{display:none;}
+
 .emoji-opt {
   font-size:1.4rem;
   cursor:pointer;
@@ -1807,37 +1820,40 @@ textarea {
 <div class="modal-overlay" id="habitModal">
   <div class="modal">
     <h3 id="habitModalTitle">Nuevo hábito</h3>
-    <div class="modal-tabs">
-      <button class="modal-tab active" onclick="switchHabitTab('basic',this)">📋 Básico</button>
-      <button class="modal-tab" onclick="switchHabitTab('features',this)">⚙️ Funciones</button>
-      <button class="modal-tab" onclick="switchHabitTab('goals',this)">🎯 Meta</button>
-    </div>
-    <div class="modal-tab-content active" id="htab-basic">
-      <div class="form-row">
-        <div class="form-group"><label>Nombre *</label><input type="text" id="hName" placeholder="Ej: Meditación" maxlength="30"></div>
-        <div class="form-group"><label>Emoji</label><input type="text" id="hIcon" placeholder="🌟" maxlength="2" style="font-size:1.3rem;text-align:center"></div>
-      </div>
-      <div class="form-group" style="margin-bottom:10px">
-        <label>Emojis rápidos</label>
-        <div class="emoji-picker-row" id="hEmojiPicker"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Necesidad asociada</label>
-          <select id="hAffects">
-            <option value="calmness">🍃 Tranquilidad</option>
-            <option value="strength">💪 Fuerza</option>
-            <option value="intelligence">🧠 Inteligencia</option>
-            <option value="entertainment">📖 Entretenimiento</option>
-            <option value="vitality">😴 Energía</option>
-            <option value="hydration">💧 Hidratación</option>
-            <option value="energy">⚡ Salud</option>
-            <option value="flexibility">🧘 Elasticidad</option>
-            <option value="custom">✨ Nueva necesidad</option>
-          </select>
+    <div class="habit-wizard-progress" id="habitWizardProgressLabel">Paso 1 de 10</div>
+    <div class="habit-wizard-progress-bar"><div class="habit-wizard-progress-fill" id="habitWizardProgressFill" style="width:10%"></div></div>
+
+    <div id="habitWizardBody" style="margin-top:1rem">
+
+      <div class="habit-step" data-step="identity">
+        <p class="wizard-step-label">¿Cómo se llama tu hábito?</p>
+        <div class="form-row">
+          <div class="form-group"><label>Nombre *</label><input type="text" id="hName" placeholder="Ej: Meditación" maxlength="30"></div>
+          <div class="form-group"><label>Emoji</label><input type="text" id="hIcon" placeholder="🌟" maxlength="2" style="font-size:1.3rem;text-align:center"></div>
         </div>
-        <div class="form-group">
-          <label>Unidad de registro</label>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Emojis rápidos</label>
+          <div class="emoji-picker-row" id="hEmojiPicker"></div>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="language">
+        <p class="wizard-step-label">¿Es un hábito de idioma?</p>
+        <p style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem">Si lo es, se registrará en horas y verás una hoja de ruta A1→C2.</p>
+        <div style="display:flex;gap:10px" id="hLangChoiceRow">
+          <button type="button" class="wizard-choice-btn" onclick="chooseLanguage(true,this)">🌍 Sí, es de idioma</button>
+          <button type="button" class="wizard-choice-btn" onclick="chooseLanguage(false,this)">📋 No</button>
+        </div>
+        <input type="checkbox" id="hIsLanguage" style="display:none">
+        <div class="form-row" id="hLangFieldsGroup" style="display:none;margin-top:1rem">
+          <div class="form-group"><label>Horas ya acumuladas</label><input type="number" id="hLangStart" min="0" step="1" value="0"></div>
+          <div class="form-group"><label>Horas objetivo (C2)</label><input type="number" id="hLangTarget" min="50" step="10" value="1200"></div>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="unit">
+        <p class="wizard-step-label">¿Cómo vas a registrarlo?</p>
+        <div class="form-group-full">
           <select id="hUnit">
             <option value="done">✅ Hecho / No hecho</option>
             <option value="minutes">⏱️ Minutos</option>
@@ -1848,108 +1864,133 @@ textarea {
             <option value="custom">🔤 Personalizado</option>
           </select>
         </div>
-      </div>
-      <div class="form-row" id="hCustomNeedGroup" style="display:none">
-  <div class="form-group"><label>Nombre de la nueva necesidad</label><input type="text" id="hCustomNeedName" placeholder="Ej: Creatividad" maxlength="20"></div>
-  <div class="form-group"><label>Icono de la necesidad</label><input type="text" id="hCustomNeedIcon" placeholder="🎨" maxlength="2" style="font-size:1.3rem;text-align:center"></div>
-</div>
-      <div class="form-group" style="margin-bottom:10px" id="hCustomUnitGroup">
-        <label>Nombre de tu unidad</label>
-        <input type="text" id="hCustomUnit" placeholder="Ej: vasos, repeticiones..." maxlength="20">
-      </div>
-<div class="form-row">
-  <div class="form-group"><label>Cantidad de días sin hacer que hace que muera la planta</label><input type="number" id="hDays" min="0.25" max="30" step="0.25" placeholder="Ej: 3"></div>
-  <div class="form-group"><label>Frecuencia</label>
-    <select id="hFreq"><option value="daily">📅 Diario</option><option value="weekly">📆 Semanal</option></select>
-  </div>
-</div>
-<div class="form-group" style="margin-bottom:10px">
-  <label>¿Cómo afecta al completar el hábito?</label>
-  <select id="hEffectType" onchange="toggleEffectFields()">
-    <option value="fill100">✅ Sube la necesidad al 100%</option>
-    <option value="fillCustom">📈 Sube la necesidad un % concreto</option>
-    <option value="damage">📉 Baja la necesidad un % concreto</option>
-    <option value="none">➖ Solo registra, no afecta a la necesidad</option>
-  </select>
-</div>
-<div id="hEffectCustomGroup" style="display:none" class="form-row">
-  <div class="form-group">
-    <label>Porcentaje que sube al completar</label>
-    <input type="number" id="hEffectValue" min="1" max="100" step="1" placeholder="Ej: 50">
-  </div>
-  <div class="form-group">
-    <label>¿Se acumula sobre el nivel actual?</label>
-    <select id="hEffectAccumulate">
-      <option value="yes">Sí (suma al % actual)</option>
-      <option value="no">No (fija el % exacto)</option>
-    </select>
-  </div>
-</div>
-<div id="hEffectDamageGroup" style="display:none" class="form-row">
-  <div class="form-group">
-    <label>Porcentaje que baja al registrar</label>
-    <input type="number" id="hEffectDamage" min="1" max="100" step="1" placeholder="Ej: 20">
-  </div>
-  <div class="form-group">
-    <label>¿Matar a la planta si llega a 0%?</label>
-    <select id="hEffectDamageKill">
-      <option value="yes">Sí ☠️</option>
-      <option value="no">No</option>
-    </select>
-  </div>
-</div>
-     <div class="form-row">
-  <div class="form-group"><label>Obligatorio (muere si no lo haces)</label>
-    <select id="hObligatory"><option value="no">No</option><option value="yes">Sí ⚠️</option></select>
-  </div>
-   <div class="form-group"><label>XP por registro</label><input type="number" id="hXpReward" min="1" max="50" step="1" value="6" placeholder="Ej: 6"></div>
-</div>
-      <div class="form-row">
-        <div class="form-group"><label>Mostrar en navegador lateral</label>
-          <select id="hShowNav"><option value="no">No</option><option value="yes">Sí</option></select>
-        </div>
-        <div class="form-group"><label>Sección del navegador</label>
-          <select id="hNavSection"><option value="core">Hábitos core</option><option value="tracking">Seguimiento</option></select>
+        <div class="form-group-full" id="hCustomUnitGroup" style="margin-top:10px">
+          <label>Nombre de tu unidad</label>
+          <input type="text" id="hCustomUnit" placeholder="Ej: vasos, repeticiones...">
         </div>
       </div>
-      <div class="form-group-full"><label>Descripción / notas</label><textarea id="hDesc" placeholder="Con este hábito quiero lograr..." rows="2"></textarea></div>
+
+      <div class="habit-step" data-step="need">
+        <p class="wizard-step-label">¿Qué necesidad de tu planta alimenta?</p>
+        <select id="hAffects">
+          <option value="calmness">🍃 Tranquilidad</option>
+          <option value="strength">💪 Fuerza</option>
+          <option value="intelligence">🧠 Inteligencia</option>
+          <option value="entertainment">📖 Entretenimiento</option>
+          <option value="vitality">😴 Energía</option>
+          <option value="hydration">💧 Hidratación</option>
+          <option value="energy">⚡ Salud</option>
+          <option value="flexibility">🧘 Elasticidad</option>
+          <option value="custom">✨ Nueva necesidad</option>
+        </select>
+        <div class="form-row" id="hCustomNeedGroup" style="display:none;margin-top:10px">
+          <div class="form-group"><label>Nombre de la nueva necesidad</label><input type="text" id="hCustomNeedName" placeholder="Ej: Creatividad" maxlength="20"></div>
+          <div class="form-group"><label>Icono</label><input type="text" id="hCustomNeedIcon" placeholder="🎨" maxlength="2" style="font-size:1.3rem;text-align:center"></div>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="schedule">
+        <p class="wizard-step-label">¿Con qué frecuencia y cuándo muere la planta?</p>
+        <div class="form-row">
+          <div class="form-group"><label>Frecuencia</label>
+            <select id="hFreq"><option value="daily">📅 Diario</option><option value="weekly">📆 Semanal</option></select>
+          </div>
+          <div class="form-group"><label>Días sin hacerlo → muere la planta</label><input type="number" id="hDays" min="0.25" max="30" step="0.25" placeholder="Ej: 3"></div>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="effect">
+        <p class="wizard-step-label">¿Cómo afecta al completar el hábito?</p>
+        <select id="hEffectType">
+          <option value="fill100">✅ Sube la necesidad al 100%</option>
+          <option value="fillCustom">📈 Sube la necesidad un % concreto</option>
+          <option value="damage">📉 Baja la necesidad un % concreto</option>
+          <option value="none">➖ Solo registra, no afecta a la necesidad</option>
+        </select>
+        <div id="hEffectCustomGroup" style="display:none" class="form-row">
+          <div class="form-group"><label>Porcentaje que sube al completar</label><input type="number" id="hEffectValue" min="1" max="100" step="1" placeholder="Ej: 50"></div>
+          <div class="form-group"><label>¿Se acumula sobre el nivel actual?</label>
+            <select id="hEffectAccumulate"><option value="yes">Sí (suma al % actual)</option><option value="no">No (fija el % exacto)</option></select>
+          </div>
+        </div>
+        <div id="hEffectDamageGroup" style="display:none" class="form-row">
+          <div class="form-group"><label>Porcentaje que baja al registrar</label><input type="number" id="hEffectDamage" min="1" max="100" step="1" placeholder="Ej: 20"></div>
+          <div class="form-group"><label>¿Matar a la planta si llega a 0%?</label>
+            <select id="hEffectDamageKill"><option value="yes">Sí ☠️</option><option value="no">No</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="rules">
+        <p class="wizard-step-label">Importancia y visibilidad</p>
+        <div class="form-row">
+          <div class="form-group"><label>Obligatorio (muere si no lo haces)</label>
+            <select id="hObligatory"><option value="no">No</option><option value="yes">Sí ⚠️</option></select>
+          </div>
+          <div class="form-group"><label>XP por registro</label><input type="number" id="hXpReward" min="1" max="50" step="1" value="6"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Mostrar en navegador lateral</label>
+            <select id="hShowNav" onchange="toggleShowNavField()"><option value="no">No</option><option value="yes">Sí</option></select>
+          </div>
+          <div class="form-group" id="hNavSectionGroup" style="display:none"><label>Sección del navegador</label>
+            <select id="hNavSection"><option value="core">Hábitos core</option><option value="tracking">Seguimiento</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="features">
+        <p class="wizard-step-label">Funciones extra (opcional)</p>
+        <div class="feature-grid" id="featureGrid"></div>
+        <div class="form-group-full" id="hPbDirGroup" style="display:none;margin-top:0.8rem">
+          <label>¿Qué valor cuenta como récord?</label>
+          <select id="hPbDirection">
+            <option value="max">📈 El más alto (ej. km corridos)</option>
+            <option value="min">📉 El más bajo (ej. minutos en hacer algo)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="goal">
+        <p class="wizard-step-label">Meta numérica (opcional)</p>
+        <p style="font-size:0.76rem;color:var(--text3);margin-bottom:0.8rem">Déjalo vacío si no quieres una meta a largo plazo para este hábito.</p>
+        <div class="form-row">
+          <div class="form-group"><label>Meta numérica</label><input type="number" id="hGoalTarget" step="1" min="1" placeholder="Ej: 100"></div>
+          <div class="form-group"><label>Unidad</label><input type="text" id="hGoalUnit" placeholder="Ej: km, horas..."></div>
+        </div>
+        <div class="form-group-full"><label>Descripción de la meta</label><input type="text" id="hGoalDesc" placeholder="Ej: Correr 500km en total"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Progreso actual</label><input type="number" id="hGoalProgress" step="0.1" min="0" value="0"></div>
+          <div class="form-group"><label>Color</label>
+            <select id="hGoalColor"><option value="green">🟢 Verde</option><option value="blue">🔵 Azul</option><option value="purple">🟣 Morado</option><option value="amber">🟡 Amarillo</option><option value="red">🔴 Rojo</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Fecha límite (opcional)</label><input type="date" id="hGoalDeadline"></div>
+          <div class="form-group"><label>Cuenta atrás activa</label>
+            <select id="hGoalCountdown"><option value="no">No</option><option value="yes">Sí</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="notes">
+        <p class="wizard-step-label">Notas finales</p>
+        <div class="form-group-full"><label>Descripción / notas</label><textarea id="hDesc" placeholder="Con este hábito quiero lograr..." rows="3"></textarea></div>
+      </div>
+
     </div>
-    <div class="modal-tab-content" id="htab-features">
-      <p style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem">Activa las funciones para este hábito.</p>
-     <div class="feature-grid" id="featureGrid"></div>
-<div class="form-group-full" id="hPbDirGroup" style="display:none;margin-top:0.8rem">
-  <label>¿Qué valor cuenta como récord?</label>
-  <select id="hPbDirection">
-    <option value="max">📈 El más alto (ej. km corridos)</option>
-    <option value="min">📉 El más bajo (ej. minutos en hacer algo)</option>
-  </select>
-</div>
-      
-    </div>
-    <div class="modal-tab-content" id="htab-goals">
-      <div class="form-row">
-        <div class="form-group"><label>Meta numérica</label><input type="number" id="hGoalTarget" step="1" min="1" placeholder="Ej: 100"></div>
-        <div class="form-group"><label>Unidad</label><input type="text" id="hGoalUnit" placeholder="Ej: km, horas..."></div>
-      </div>
-      <div class="form-group-full"><label>Descripción de la meta</label><input type="text" id="hGoalDesc" placeholder="Ej: Correr 500km en total"></div>
-      <div class="form-row">
-        <div class="form-group"><label>Progreso actual</label><input type="number" id="hGoalProgress" step="0.1" min="0" value="0"></div>
-        <div class="form-group"><label>Color</label>
-          <select id="hGoalColor"><option value="green">🟢 Verde</option><option value="blue">🔵 Azul</option><option value="purple">🟣 Morado</option><option value="amber">🟡 Amarillo</option><option value="red">🔴 Rojo</option></select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>Fecha límite (opcional)</label><input type="date" id="hGoalDeadline"></div>
-        <div class="form-group"><label>Cuenta atrás activa</label>
-          <select id="hGoalCountdown"><option value="no">No</option><option value="yes">Sí</option></select>
-        </div>
-      </div>
-    </div>
+
     <input type="hidden" id="hEditId">
-    <div class="modal-footer">
-      <button class="btn btn-secondary btn-sm" onclick="closeHabitModal()">Cancelar</button>
-      <button class="btn btn-danger btn-sm" id="hDeleteBtn" style="display:none" onclick="deleteHabitFromModal()">🗑️ Eliminar</button>
-      <button class="btn btn-sm" onclick="saveHabit()">💾 Guardar</button>
+    <div class="modal-footer" style="justify-content:space-between">
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" onclick="closeHabitModal()">Cancelar</button>
+        <button class="btn btn-danger btn-sm" id="hDeleteBtn" style="display:none" onclick="deleteHabitFromModal()">🗑️ Eliminar</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" id="hWizardBackBtn" onclick="habitWizardBack()">← Atrás</button>
+        <button class="btn btn-sm" id="hWizardNextBtn" onclick="habitWizardNext()">Siguiente →</button>
+        <button class="btn btn-sm" onclick="saveHabit()">💾 Guardar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2536,6 +2577,10 @@ textarea {
       <div class="card-title">🗺️ Hoja de ruta A1 → C2</div>
       <div id="alemanRoadmap"></div>
     </div>
+    <div class="card">
+  <div class="card-title">📋 Historial reciente</div>
+  <div id="alemanHistContent"></div>
+</div>
   </div>
 
   <!-- PASOS -->
@@ -2556,6 +2601,10 @@ textarea {
         <button class="btn" onclick="doPasos()">👣 Registrar</button>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap" id="pasosShortcuts"></div>
+      <div class="card">
+  <div class="card-title">📋 Registros de hoy</div>
+  <div id="pasosHistContent"></div>
+</div>
     </div>
   </div>
 
@@ -2575,6 +2624,7 @@ textarea {
         <div style="font-size:0.78rem;color:var(--text3)">Puntuación de hoy</div>
         <div class="order-score-big" id="orderScoreBig">0/10</div>
       </div>
+      <button class="btn btn-secondary btn-sm" id="orderRedoBtn" style="display:none;margin-top:0.6rem" onclick="undoOrderTest()">✏️ Rehacer test de hoy</button>
       <div style="margin-top:1rem">
         <button class="btn" onclick="submitOrderTest()">✅ Enviar test</button>
       </div>
@@ -2600,6 +2650,7 @@ textarea {
         <button class="btn" onclick="doEstiramientos()">🧘 Registrar + Completar</button>
       </div>
       <button class="btn btn-secondary btn-sm" onclick="doEstiramientosNoMedida()">✅ Solo marcar como hecho</button>
+      <button class="btn btn-secondary btn-sm" onclick="undoEstiramientos()" id="estirUndoBtn" style="display:none;margin-left:8px">↩️ Deshacer hoy</button>
     </div>
   </div>
 
@@ -2652,7 +2703,7 @@ textarea {
     <div id="movilDoneAlert" style="margin-bottom:1rem"></div>
     <div id="movilAlert" class="alert" style="display:none;margin-bottom:1rem"></div>
     <div class="card">
-      <div class="card-title">📲 Registrar uso de hoy</div>
+      <div class="card-title">📲 Registrar uso de ayer</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
         <div class="form-group" style="flex:1;min-width:110px;margin:0"><label>Horas</label><input type="number" id="phoneHorasInput" step="1" min="0" max="24" placeholder="0"></div>
         <div class="form-group" style="flex:1;min-width:110px;margin:0"><label>Minutos</label><input type="number" id="phoneMinutosInput" step="5" min="0" max="59" placeholder="0"></div>
@@ -2945,10 +2996,29 @@ textarea {
     </ul>
   </div>
 
+  <div class="card">
+  <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">✏️ Corregir registros por error</h3>
+  <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Si te equivocas al registrar algo, puedes corregirlo o eliminarlo — tanto en hábitos del sistema como en los personalizados:</p>
+  <ul style="font-size:0.84rem;color:var(--text2);line-height:2;padding-left:1.2rem;margin-top:0.4rem">
+    <li><strong>💧 Agua:</strong> usa los botones "-1 vaso" / "-500ml" para restar litros mal registrados.</li>
+    <li><strong>💪 Deporte:</strong> en el historial, pulsa 🗑️ junto a cualquier sesión para eliminarla (devuelve el XP).</li>
+    <li><strong>😴 Sueño y 📱 Móvil:</strong> si ya registraste el valor de hoy, vuelve a introducirlo: la app te preguntará si quieres editarlo y revertirá el XP anterior.</li>
+    <li><strong>🧠 Alemán:</strong> cada registro de horas queda en el historial reciente de la página; pulsa 🗑️ para eliminarlo (resta horas y XP).</li>
+    <li><strong>⚡ Pasos:</strong> cada registro del día aparece en "Registros de hoy"; puedes eliminar cualquiera con 🗑️.</li>
+    <li><strong>🍃 Test de orden:</strong> si ya lo completaste hoy, pulsa "✏️ Rehacer test de hoy" para deshacerlo y volver a rellenarlo.</li>
+    <li><strong>🧘 Estiramientos:</strong> pulsa "↩️ Deshacer hoy" para anular el registro del día.</li>
+    <li><strong>📖 Lectura:</strong> en "Últimas sesiones", pulsa 🗑️ junto a cualquier entrada para eliminarla.</li>
+    <li><strong>✨ Hábitos personalizados:</strong> en "Últimos registros" de cada hábito, el 🗑️ del registro más reciente lo elimina y devuelve el XP.</li>
+  </ul>
+  <p style="font-size:0.78rem;color:var(--text3);margin-top:0.6rem">Nota: eliminar un registro resta el XP que ganaste con él, para que tu nivel refleje solo lo realmente hecho.</p>
+</div>
+
 <div class="card">
   <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500"> 🧡 Última nota de la autora</h3>
   <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Esta web no es perfecta, hay muchas formas de hacer trampa. El objetivo es que utilizando esta web podamos convertirnos en adultos funcionales (que ya es hora) y llegar a parecernos un poquito más cada día a nuestro yo ideal. Creé esta web porque nada me funcionaba, siempre acababa volviendo al punto de partida, y esto de alguna forma me está ayudando. Hacer trampa solo te afecta a ti y marea a tu planta. Y nadie quiere una planta mareada. ¡Cuidala bien y crece con ella!</p>
 </div>
+
+
 
 </div>
 
@@ -3015,6 +3085,27 @@ textarea {
         </div>
       </div>
     </div>
+    <!-- Pasos a seguir -->
+<div class="motiv-section" id="motivStepsSection">
+  <div class="motiv-section-header">
+    <div class="motiv-section-title">🪜 Pasos a seguir</div>
+    <button class="btn btn-secondary btn-xs" id="motivStepsEditBtn" onclick="toggleMotivEdit('steps')">✏️ Editar</button>
+  </div>
+  <div class="motiv-view" id="motivStepsView">
+    <div class="motiv-why-list" id="motivStepsList">
+      <div class="motiv-why-placeholder">Aún no has añadido pasos. Pulsa "Editar" para escribir cómo llegar a ser tu yo ideal.</div>
+    </div>
+  </div>
+  <div class="motiv-edit" id="motivStepsEdit">
+    <p style="font-size:0.78rem;color:var(--text3);margin-bottom:0.9rem">¿Qué pasos concretos vas a seguir para convertirte en tu mejor versión?</p>
+    <div id="motivStepsInputList"></div>
+    <button class="btn btn-secondary btn-sm" onclick="addMotivStepInput()" style="margin-top:0.4rem">+ Añadir paso</button>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem">
+      <button class="btn btn-secondary btn-sm" onclick="cancelMotivEdit('steps')">Cancelar</button>
+      <button class="btn btn-sm" onclick="saveMotivSteps()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
   </div>
 
   <!-- NOTAS (CORCHO) -->
@@ -3129,6 +3220,30 @@ function daysUntil(dateStr){
   return Math.ceil((target-today)/(1000*60*60*24));
 }
 
+function undoOrderTest(){
+  if(!dailyActions.orderDone){toast("No hay test registrado hoy");return;}
+  if(!confirm("¿Deshacer el test de hoy? Se restarán 8 XP y podrás rellenarlo de nuevo."))return;
+  const today=todayStr();
+  const idx=goals.order.scores.findIndex(s=>s.date===today);
+  if(idx>=0)goals.order.scores.splice(idx,1);
+  goals.order.avg=goals.order.scores.length?goals.order.scores.reduce((a,b)=>a+b.score,0)/goals.order.scores.length:0;
+  dailyActions.orderDone=false;
+  plant.xp=Math.max(0,plant.xp-8);
+  if(needsState.calmness){needsState.calmness.extraCalmness=0;needsState.calmness.value=getCurrentCalmnessLevel();}
+  save();renderAll();renderOrderPage();
+  toast("↩️ Test deshecho · -8 XP");
+}
+
+function undoEstiramientos(){
+  if(!flexibility.doneToday){toast("No hay registro de hoy");return;}
+  if(!confirm("¿Deshacer el registro de estiramientos de hoy? Se restarán 8 XP."))return;
+  flexibility.doneToday=false;
+  flexibility.extraFlexibility=0;
+  plant.xp=Math.max(0,plant.xp-8);
+  updateAllLevels();save();renderAll();
+  toast("↩️ Estiramientos deshechos · -8 XP");
+}
+
 function countdownBadge(dateStr,done){
   if(!dateStr)return"";
   if(done)return`<span class="countdown-badge done">✅ Completado</span>`;
@@ -3200,9 +3315,9 @@ function defaultState(){
   needsState={strength:{value:100,lastFulfilled:now},intelligence:{value:100,lastFulfilled:now},calmness:{value:100,extraCalmness:0,lastResetDate:getTodayKey()},entertainment:{value:100,lastFulfilled:now},vitality:{value:100,lastFulfilled:now}};
   hydration={level:100,extraHydration:0,loggedToday:0,target:1.2,lastResetDate:getTodayKey()};
   flexibility={level:100,extraFlexibility:0,doneToday:false,lastResetDate:getTodayKey()};
-  energy={level:100,extraEnergy:0,stepsToday:0,doneToday:false,lastResetDate:getTodayKey()};
+  energy={level:100,extraEnergy:0,stepsToday:0,doneToday:false,lastResetDate:getTodayKey(),todayEntries:[]};
   sleep={level:100,hoursToday:null,doneToday:false,lastResetDate:getTodayKey(),lowSleepStreak:0,history:[]};
-  goals={german:{hours:0,target:660},spagatt:{cmToGround:32},order:{scores:[],avg:0},running:{maxKm:0,target:20},reading:{entries:[]},sport:{sessions:[]}};
+  goals={german:{hours:0,target:660,entries:[]},spagatt:{cmToGround:32},order:{scores:[],avg:0},running:{maxKm:0,target:20},reading:{entries:[]},sport:{sessions:[]}};
   phoneUsage=[];
   dailyActions={orderDone:false,phoneDone:false,suenoDone:false,aguaObjReached:false,pasosObjReached:false,date:todayStr()};
   streak={current:0,lastAliveDay:null};
@@ -3433,6 +3548,10 @@ function load(){
     if(!sleep.history)sleep.history=[];
     if(sleep.lowSleepStreak===undefined)sleep.lowSleepStreak=0;
     if(!goals.reading)goals.reading={entries:[]};
+    if(!goals.german.entries)goals.german.entries=[];
+if(!energy.todayEntries)energy.todayEntries=[];
+(goals.sport.sessions||[]).forEach((s,i)=>{if(!s.id)s.id="sp_legacy_"+i;});
+(goals.reading.entries||[]).forEach((e,i)=>{if(!e.id)e.id="rd_legacy_"+i;});
     if(!goals.order)goals.order={scores:[],avg:0};
     if(!goals.sport)goals.sport={sessions:[]};
     if(!needsState.vitality)needsState.vitality={value:100,lastFulfilled:Date.now()};
@@ -3452,7 +3571,8 @@ function load(){
     forest=s.forest||[];
 lastAppTouch=s.lastAppTouch||Date.now();
 corkNotes=s.corkNotes||[];
-motivData=s.motivData||{ideal:"",whys:[]};
+motivData=s.motivData||{ideal:"",whys:[],steps:[]};
+if(!motivData.steps)motivData.steps=[];
 if(!coreParams.lectura)coreParams.lectura={diasMaxSinHacer:2};
 if(dailyActions.aguaObjReached===undefined)dailyActions.aguaObjReached=false;
 if(dailyActions.pasosObjReached===undefined)dailyActions.pasosObjReached=false;
@@ -3649,7 +3769,6 @@ function doSport(){
   const intensity=document.getElementById("sportIntensity")?.value||"mid";
   const notes=document.getElementById("sportNotes")?.value||"";
   if(mins<5&&km<=0){toast("Ingresa la duración o distancia");return;}
-  const session={date:getTodayKey(),catId:cat.id,catName:cat.name,catEmoji:cat.emoji,mins,km,ritmo,intensity,notes};
   goals.sport.sessions.push(session);
   if(goals.sport.sessions.length>120)goals.sport.sessions.shift();
   if(km>goals.running.maxKm)goals.running.maxKm=km;
@@ -3657,7 +3776,7 @@ function doSport(){
   selectedSportCat=null;
   if(needsState.strength){needsState.strength.value=100;needsState.strength.lastFulfilled=Date.now();}
   plant.xp+=12;checkLevelUp();
-
+const session={id:"sp_"+Date.now(),date:getTodayKey(),catId:cat.id,catName:cat.name,catEmoji:cat.emoji,mins,km,ritmo,intensity,notes};
   const nowD=new Date();
 const thisMonthD=`${nowD.getFullYear()}-${String(nowD.getMonth()+1).padStart(2,'0')}`;
 triggerMonthlyObjUpdate('__deporte');
@@ -3676,12 +3795,38 @@ function doAleman(){
   const h=parseFloat(document.getElementById("germanHoursInput")?.value);
   if(isNaN(h)||h<=0){toast("Ingresa las horas");return;}
   goals.german.hours=Math.min(coreParams.aleman.horasObjetivo,goals.german.hours+h);
+  if(!goals.german.entries)goals.german.entries=[];
+  const xpGained=Math.max(1,Math.round(h*8));
+  goals.german.entries.push({id:"al_"+Date.now(),date:todayStr(),hours:h,xp:xpGained});
   document.getElementById("germanHoursInput").value="";
   if(needsState.intelligence){needsState.intelligence.value=100;needsState.intelligence.lastFulfilled=Date.now();}
-  const xpGained=Math.max(1,Math.round(h*8));
   plant.xp+=xpGained;checkLevelUp();
   triggerMonthlyObjUpdate('__aleman');
   toast(`📖 +${h}h de alemán · +${xpGained} XP`);save();renderAll();
+}
+
+function deleteGermanEntry(id){
+  if(!goals.german.entries)return;
+  const idx=goals.german.entries.findIndex(e=>e.id===id);
+  if(idx<0)return;
+  const e=goals.german.entries[idx];
+  if(!confirm(`¿Eliminar este registro de ${e.hours}h? Se restarán las horas y el XP.`))return;
+  goals.german.entries.splice(idx,1);
+  goals.german.hours=Math.max(0,goals.german.hours-e.hours);
+  plant.xp=Math.max(0,plant.xp-e.xp);
+  save();renderAll();
+  toast("🗑️ Registro de alemán eliminado");
+}
+
+function renderAlemanHist(){
+  const el=document.getElementById("alemanHistContent");if(!el)return;
+  const entries=(goals.german.entries||[]).slice().reverse().slice(0,10);
+  if(!entries.length){el.innerHTML=`<p style="font-size:0.82rem;color:var(--text3)">Sin registros aún (los añadidos antes de esta actualización no aparecen aquí, pero las horas siguen contando).</p>`;return;}
+  el.innerHTML=entries.map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem">
+    <span style="color:var(--text3)">${e.date}</span>
+    <span style="font-weight:500;color:var(--green-md)">+${e.hours}h</span>
+    <button class="btn-icon" onclick="deleteGermanEntry('${e.id}')" title="Eliminar">🗑️</button>
+  </div>`).join("");
 }
 
 function doPasos(){
@@ -3693,7 +3838,10 @@ function doPasosVal(steps){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
   const todayKey=getTodayKey();
   if(energy.lastResetDate!==todayKey){energy.lastResetDate=todayKey;energy.extraEnergy=0;energy.stepsToday=0;energy.doneToday=false;}
+  energy.todayEntries=[];
   energy.stepsToday+=steps;energy.doneToday=true;
+  if(!energy.todayEntries)energy.todayEntries=[];
+energy.todayEntries.push({id:"pa_"+Date.now(),steps});
   const targetEnergy=Math.min(100,(energy.stepsToday/coreParams.pasos.objetivo)*100);
   const now=new Date(),base=Math.max(0,100-((now.getHours()+now.getMinutes()/60)*100/24));
   energy.extraEnergy=Math.max(0,targetEnergy-base);
@@ -3703,6 +3851,33 @@ function doPasosVal(steps){
   triggerMonthlyObjUpdate('__pasos');
 }
   toast(`👣 ${energy.stepsToday.toLocaleString()} pasos`);save();renderAll();
+}
+
+function deleteStepsEntry(id){
+  if(!energy.todayEntries)return;
+  const idx=energy.todayEntries.findIndex(e=>e.id===id);
+  if(idx<0)return;
+  const e=energy.todayEntries[idx];
+  if(!confirm(`¿Eliminar este registro de ${e.steps} pasos?`))return;
+  energy.todayEntries.splice(idx,1);
+  energy.stepsToday=Math.max(0,energy.stepsToday-e.steps);
+  plant.xp=Math.max(0,plant.xp-Math.floor(e.steps/500));
+  if(energy.stepsToday<coreParams.pasos.objetivo)dailyActions.pasosObjReached=false;
+  const now=new Date(),base=Math.max(0,100-((now.getHours()+now.getMinutes()/60)*100/24));
+  energy.extraEnergy=Math.max(0,Math.min(100,(energy.stepsToday/coreParams.pasos.objetivo)*100)-base);
+  if(!energy.todayEntries.length)energy.doneToday=false;
+  updateAllLevels();save();renderAll();
+  toast("🗑️ Registro de pasos eliminado");
+}
+
+function renderPasosHist(){
+  const el=document.getElementById("pasosHistContent");if(!el)return;
+  const entries=energy.todayEntries||[];
+  if(!entries.length){el.innerHTML=`<p style="font-size:0.82rem;color:var(--text3)">Sin registros hoy.</p>`;return;}
+  el.innerHTML=entries.slice().reverse().map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem">
+    <span style="font-weight:500;color:var(--green-md)">+${e.steps.toLocaleString()} pasos</span>
+    <button class="btn-icon" onclick="deleteStepsEntry('${e.id}')" title="Eliminar">🗑️</button>
+  </div>`).join("");
 }
 
 function hmToDecimalHours(h,m){
@@ -3813,7 +3988,7 @@ function doLectura(){
 }
 function doLecturaVal(mins){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
-  goals.reading.entries.push({date:todayStr(),minutes:mins});
+  goals.reading.entries.push({id:"rd_"+Date.now(),date:todayStr(),minutes:mins});
   if(goals.reading.entries.length>60)goals.reading.entries.shift();
   if(needsState.entertainment){needsState.entertainment.value=100;needsState.entertainment.lastFulfilled=Date.now();}
   plant.xp+=Math.floor(mins/15);checkLevelUp();
@@ -4095,7 +4270,8 @@ function openHabitModal(editId){
   document.getElementById("hEditId").value=editId||"";
   document.getElementById("habitModalTitle").textContent=editId?"Editar hábito":"Nuevo hábito";
   document.getElementById("hDeleteBtn").style.display=editId?"":"none";
-  switchHabitTab('basic',modal.querySelector('.modal-tab'));
+habitWizardStep = 0;
+document.querySelectorAll("#hLangChoiceRow .wizard-choice-btn").forEach(b=>b.classList.remove("selected"));
   if(editId){
     const h=customHabits.find(x=>x.id===editId);
     if(h){
@@ -4125,6 +4301,9 @@ function openHabitModal(editId){
         document.getElementById("hGoalCountdown").value=h.goal.countdown?"yes":"no";
       }
       activeHabitFeatures=new Set(h.features||["streak","stats"]);
+      document.getElementById("hIsLanguage").checked=!!h.isLanguage;
+document.getElementById("hLangStart").value=h.langStart||0;
+document.getElementById("hLangTarget").value=h.langTarget||1200;
 
       // Cargar efecto al editar
       const eff = h.effect || {};
@@ -4153,6 +4332,9 @@ function openHabitModal(editId){
     document.getElementById("hXpReward").value=6;
     selectedHabitEmoji="⭐";
     activeHabitFeatures=new Set(["streak","stats"]);
+    document.getElementById("hIsLanguage").checked=false;
+document.getElementById("hLangStart").value=0;
+document.getElementById("hLangTarget").value=1200;
     document.getElementById("hEffectType").value = "fill100";
     document.getElementById("hEffectValue").value = 50;
     document.getElementById("hEffectAccumulate").value = "yes";
@@ -4161,9 +4343,15 @@ function openHabitModal(editId){
     document.getElementById("hXpReward").value=6;
     toggleEffectFields();
   }
-  toggleCustomNeedField();toggleCustomUnitField();
+  toggleCustomNeedField();toggleCustomUnitField();toggleLanguageFields();
   renderEmojiPicker("hEmojiPicker",HABIT_EMOJIS,null,selectedHabitEmoji);
   renderFeatureGrid();
+  toggleShowNavField();
+document.querySelectorAll("#hLangChoiceRow .wizard-choice-btn").forEach((b,i)=>{
+  const isLang=document.getElementById("hIsLanguage").checked;
+  if((i===0&&isLang)||(i===1&&!isLang)) b.classList.add("selected");
+});
+renderHabitWizard();
   modal.classList.add("open");
 }
 
@@ -4238,10 +4426,13 @@ function updateFeatureDependentFields(){
 
 function saveHabit(){
   const name=document.getElementById("hName").value.trim();
+  const isLanguage=document.getElementById("hIsLanguage").checked;
   const pbDirection=document.getElementById("hPbDirection").value;
   const icon=document.getElementById("hIcon").value.trim()||selectedHabitEmoji||"⭐";
   const affects=document.getElementById("hAffects").value;
-  const unit=document.getElementById("hUnit").value;
+  const unit = isLanguage ? "hours" : document.getElementById("hUnit").value;
+  const langStart=parseFloat(document.getElementById("hLangStart")?.value)||0;
+const langTarget=parseFloat(document.getElementById("hLangTarget")?.value)||1200;
   const days=parseFloat(document.getElementById("hDays").value)||3;
   const freq=document.getElementById("hFreq").value;
   const obligatory=document.getElementById("hObligatory").value==="yes"
@@ -4274,11 +4465,11 @@ function saveHabit(){
   }
   if(editId){
     const idx=customHabits.findIndex(x=>x.id===editId);
-    if(idx>=0)customHabits[idx]={...customHabits[idx],name,pbDirection,icon,affects,unit,daysToKill:days,freq,obligatory,desc,customNeedName,customNeedIcon,customUnit,features,goal,showNav,navSection,effect,xpReward};
+    if(idx>=0)customHabits[idx]={...customHabits[idx],name,pbDirection,isLanguage,langStart,langTarget,icon,affects,unit,daysToKill:days,freq,obligatory,desc,customNeedName,customNeedIcon,customUnit,features,goal,showNav,navSection,effect,xpReward};
 
   } else {
     const id="ch_"+Date.now();
-    customHabits.push({id,name,icon,pbDirection,affects,unit,daysToKill:days,freq,obligatory,desc,customNeedName,customNeedIcon,customUnit,features,goal,showNav,navSection,effect,xpReward,createdAt:Date.now()});
+    customHabits.push({id,name,icon,pbDirection,isLanguage,langStart,langTarget,affects,unit,daysToKill:days,freq,obligatory,desc,customNeedName,customNeedIcon,customUnit,features,goal,showNav,navSection,effect,xpReward,createdAt:Date.now()});
     customNeedStates[id]=100;
     if(!habitLogs[id])habitLogs[id]=[];
     habitStreaks[id]={current:0,last:null};
@@ -4287,6 +4478,32 @@ function saveHabit(){
   }
   closeHabitModal();save();renderAll();renderNav();
   toast(`✅ "${name}" guardado`);
+}
+
+function getLangLevelName(hours,target){
+  target=target||1200;
+  if(hours>=target)return"C2";
+  if(hours>=900)return"C1";
+  if(hours>=660)return"B2";
+  if(hours>=400)return"B1";
+  if(hours>=200)return"A2";
+  return"A1";
+}
+
+function renderLangRoadmap(hours,target){
+  const levels=[{name:"A1",hours:0},{name:"A2",hours:200},{name:"B1",hours:400},{name:"B2",hours:660},{name:"C1",hours:900},{name:"C2",hours:target||1200}];
+  return levels.map((lv,i)=>{
+    const next=levels[i+1],done=next&&hours>=next.hours,current=!done&&(i===0||hours>=lv.hours);
+    const pct=next?Math.min(100,((hours-lv.hours)/(next.hours-lv.hours))*100):100;
+    return `<div class="goal-row">
+      <div class="goal-icon" style="font-size:1rem">${done?"✅":current?"🎯":"⬜"}</div>
+      <div class="goal-info">
+        <div class="goal-name">${lv.name}${next?" → "+next.name:""}</div>
+        <div class="goal-sub">${done?"Completado":current?`${Math.round(hours-lv.hours)}/${next.hours-lv.hours}h`:`Desde ${lv.hours}h`}</div>
+        ${next?`<div class="progress-bar"><div class="progress-fill" style="width:${current?pct:done?100:0}%;background:var(--green-lt)"></div></div>`:""}
+      </div>
+    </div>`;
+  }).join("");
 }
 
 function deleteHabitFromModal(){
@@ -5278,6 +5495,17 @@ function buildAllGoalsData(){
   return built;
 }
 
+function toggleLanguageFields(){
+  const checked=document.getElementById("hIsLanguage")?.checked;
+  const g=document.getElementById("hLangFieldsGroup");if(g)g.style.display=checked?"grid":"none";
+  const unitSel=document.getElementById("hUnit");
+  if(unitSel){
+    if(checked){unitSel.value="hours";unitSel.disabled=true;}
+    else unitSel.disabled=false;
+    toggleCustomUnitField();
+  }
+}
+
 function renderGoalRow(g){
   const pct=Math.min(100,g.pct||0);
   const deadlineHtml=g.deadline&&g.countdown?countdownBadge(g.deadline,pct>=100):"";
@@ -5440,7 +5668,7 @@ function renderEditPage(){
       <div class="edit-item-icon">${h.icon}</div>
       <div class="edit-item-info">
         <div class="edit-item-name">${h.name} ${h.showNav?"<span style='font-size:0.65rem;color:var(--blue)'>📌 en nav</span>":""}</div>
-        <div class="edit-item-sub">${h.daysToKill}d · ${h.obligatory?"⚠️ Obligatorio":"Opcional"} · ${h.affects}</div>
+        <div class="edit-item-sub">${h.daysToKill}d · ${h.obligatory?"⚠️ Obligatorio":"Opcional"} · ${h.affects} </div>
       </div>
       <div class="edit-item-actions">
         <button class="btn btn-secondary btn-xs" onclick="openHabitModal('${h.id}')">✏️ Editar</button>
@@ -5573,18 +5801,31 @@ function renderSportPage(){
   const kmSec=document.getElementById("sportKmSection");if(kmSec)kmSec.style.display=catObj&&catObj.hasKm?"grid":"none";
   const dh=document.getElementById("deporteHistContent");
   if(dh){
-    const recent=(goals.sport.sessions||[]).slice(-8).reverse();
-    if(!recent.length)dh.innerHTML=`<p style="font-size:0.82rem;color:var(--text3)">Sin sesiones aún.</p>`;
-    else dh.innerHTML=recent.map(s=>`<div class="session-card">
-      <div class="session-emoji">${s.catEmoji||"💪"}</div>
-      <div class="session-info">
-        <div class="session-name">${s.catName||"Deporte"}${s.km>0?" · "+s.km+"km":""}</div>
-        <div class="session-meta">${s.mins?s.mins+"min":""} ${s.km>0&&s.ritmo>0?`· ${s.ritmo.toFixed(1)} min/km`:""} ${s.intensity?`· ${{low:"🟢",mid:"🟡",high:"🔴"}[s.intensity]}`:""} ${s.notes?`· ${s.notes}`:""}</div>
-      </div>
+  const recent=(goals.sport.sessions||[]).slice(-8).reverse();
+  if(!recent.length)dh.innerHTML=`<p style="font-size:0.82rem;color:var(--text3)">Sin sesiones aún.</p>`;
+  else dh.innerHTML=recent.map(s=>`<div class="session-card">
+    <div class="session-emoji">${s.catEmoji||"💪"}</div>
+    <div class="session-info">
+      <div class="session-name">${s.catName||"Deporte"}${s.km>0?" · "+s.km+"km":""}</div>
+      <div class="session-meta">${s.mins?s.mins+"min":""} ${s.km>0&&s.ritmo>0?`· ${s.ritmo.toFixed(1)} min/km`:""} ${s.intensity?`· ${{low:"🟢",mid:"🟡",high:"🔴"}[s.intensity]}`:""} ${s.notes?`· ${s.notes}`:""}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
       <div style="font-size:0.7rem;color:var(--text3)">${s.date||""}</div>
-    </div>`).join("");
-  }
+      <button class="btn-icon" onclick="deleteSportSession('${s.id}')" title="Eliminar · -12XP">🗑️</button>
+    </div>
+  </div>`).join("");
+}
   renderSportChart();
+}
+function deleteSportSession(id){
+  const idx=goals.sport.sessions.findIndex(s=>s.id===id);
+  if(idx<0)return;
+  if(!confirm("¿Eliminar esta sesión de deporte? Se restarán 12 XP."))return;
+  goals.sport.sessions.splice(idx,1);
+  plant.xp=Math.max(0,plant.xp-12);
+  goals.running.maxKm=Math.max(0,...goals.sport.sessions.map(s=>s.km||0),0);
+  save();renderAll();
+  toast("🗑️ Sesión eliminada · -12 XP");
 }
 
 function setSportChartMode(mode){
@@ -5684,6 +5925,7 @@ if(als) als.innerHTML = `Estudiar alemán mantiene la inteligencia de tu planta 
   if(pt)pt.textContent=`${energy.stepsToday.toLocaleString()} / ${coreParams.pasos.objetivo.toLocaleString()} pasos`;
   const sc2=document.getElementById("pasosShortcuts");
   if(sc2){const min=coreParams.pasos.minimo,obj=coreParams.pasos.objetivo;sc2.innerHTML=`<button class="btn btn-secondary btn-sm" onclick="doPasosVal(${min})">${(min/1000).toFixed(1)}k mín</button><button class="btn btn-secondary btn-sm" onclick="doPasosVal(${obj})">✅ ${(obj/1000).toFixed(0)}k</button>`;}
+renderPasosHist();
 
   // ORDEN
   const on2=Math.round(needValue("calmness"));
@@ -5698,6 +5940,7 @@ if(als) als.innerHTML = `Estudiar alemán mantiene la inteligencia de tu planta 
   const fc=document.getElementById("estirCm");if(fc)fc.textContent=goals.spagatt.cmToGround.toFixed(1);
   const fpct=Math.max(0,((32-goals.spagatt.cmToGround)/32)*100);
   const fpr=document.getElementById("estirProg");if(fpr)fpr.textContent=fpct.toFixed(0)+"%";
+  const eub=document.getElementById("estirUndoBtn");if(eub)eub.style.display=flexibility.doneToday?"":"none";
 
   // ALEMÁN
   const an=Math.round(needValue("intelligence"));
@@ -5707,6 +5950,7 @@ if(als) als.innerHTML = `Estudiar alemán mantiene la inteligencia de tu planta 
   const apb=document.getElementById("alemanProgressBar");if(apb)apb.style.width=((goals.german.hours/(goals.german.target||660))*100).toFixed(1)+"%";
   const apt=document.getElementById("alemanProgressText");if(apt)apt.textContent=`${Math.round(goals.german.hours)}/${goals.german.target||660}h hacia B2`;
   renderAlemanRoadmap();
+  renderAlemanHist();
 
   // LECTURA
   const ln=Math.round(needValue("entertainment"));
@@ -5761,13 +6005,30 @@ function renderOrderPage(){
   if(da)da.innerHTML=dailyActions.orderDone?`<div class="alert alert-info">✅ Test completado · ${goals.order.scores.slice(-1)[0]?.score?.toFixed(1)||"?"}/10</div>`:`<div class="alert alert-danger">🚨 Pendiente: completa el test hoy.</div>`;
   const hist=document.getElementById("ordenHistContent");
   if(hist)hist.innerHTML=goals.order.scores.length?goals.order.scores.slice().reverse().map(s=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem"><span style="color:var(--text3)">${s.date}</span><span style="font-weight:500;color:${s.score>=7?"var(--green-md)":s.score>=5?"var(--amber)":"var(--red)"}">${s.score.toFixed(1)}/10</span></div>`).join(""):`<p style="font-size:0.8rem;color:var(--text3)">Sin tests aún.</p>`;
+const orb=document.getElementById("orderRedoBtn");if(orb)orb.style.display=dailyActions.orderDone?"":"none";
 }
 
 function renderReadingHist(){
   const hist=document.getElementById("lecturaHistContent");if(!hist)return;
   if(!goals.reading.entries.length){hist.innerHTML=`<p style="font-size:0.8rem;color:var(--text3)">Sin sesiones aún.</p>`;return;}
-  hist.innerHTML=goals.reading.entries.slice().reverse().slice(0,10).map(e=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem"><span style="color:var(--text3)">${e.date}</span><span style="font-weight:500;color:var(--green-md)">${e.minutes} min</span></div>`).join("");
+  hist.innerHTML=goals.reading.entries.slice().reverse().slice(0,10).map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem">
+    <span style="color:var(--text3)">${e.date}</span>
+    <span style="font-weight:500;color:var(--green-md)">${e.minutes} min</span>
+    <button class="btn-icon" onclick="deleteReadingEntry('${e.id}')" title="Eliminar y devolver XP">🗑️</button>
+  </div>`).join("");
 }
+
+function deleteReadingEntry(id){
+  const idx=goals.reading.entries.findIndex(e=>e.id===id);
+  if(idx<0)return;
+  const e=goals.reading.entries[idx];
+  if(!confirm(`¿Eliminar esta sesión de ${e.minutes} min? Se restará el XP ganado.`))return;
+  goals.reading.entries.splice(idx,1);
+  plant.xp=Math.max(0,plant.xp-Math.floor(e.minutes/15));
+  save();renderAll();
+  toast("🗑️ Sesión de lectura eliminada");
+}
+
 function renderBooksSection(){
   const bl=document.getElementById("booksListContent");if(!bl)return;
   const filtered=booksFilter==="all"?books:books.filter(b=>b.genre===booksFilter);
@@ -5871,11 +6132,23 @@ function renderCustomHabitDetail(habitId){
   baseStats+=`<div class="stat-card"><div class="stat-val">${logs.length}</div><div class="stat-lbl">Registros totales</div></div>`;
   if(h.features?.includes("pb")&&h.pb!==undefined) baseStats+=`<div class="stat-card"><div class="stat-val">${formatHabitVal(h,h.pb)}</div><div class="stat-lbl">🏅 Récord</div></div>`;
 
-  let html=`<div class="page-header">
+let html=`<div class="page-header">
     <h2>${h.icon} ${h.name}</h2>
     <p>${h.desc||"Hábito personalizado"} · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openHabitModal('${h.id}')">✏️ Editar</button></p>
   </div>
   <div class="stats-row">${baseStats}</div>`;
+
+  if(h.isLanguage){
+    const totalHours=(h.langStart||0)+logs.reduce((s,l)=>s+(l.val||0),0);
+    html+=`<div class="stats-row">
+      <div class="stat-card"><div class="stat-val">${Math.round(totalHours)}</div><div class="stat-lbl">Horas totales</div></div>
+      <div class="stat-card"><div class="stat-val">${getLangLevelName(totalHours,h.langTarget)}</div><div class="stat-lbl">Nivel estimado</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🗺️ Hoja de ruta A1 → C2</div>
+      ${renderLangRoadmap(totalHours,h.langTarget)}
+    </div>`;
+  }
 
   if(h.features?.includes("stats")&&logs.length>0&&h.unit!=="done"){
     const vals=logs.map(l=>l.val).filter(vv=>vv>0);
@@ -5949,7 +6222,7 @@ let registerFieldsHtml="";
     </div>`;
   }
 
-if(h.features?.includes("chart")&&logs.length>1){
+if(h.features?.includes("chart")&&logs.length>0){
     const ct=h.chartType||"bar";
     html+=`<div class="card">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
@@ -5964,19 +6237,21 @@ if(h.features?.includes("chart")&&logs.length>1){
     </div>`;
   }
 
-  if(logs.length>0){
+if(logs.length>0){
+    const reversedLogs=logs.slice().reverse().slice(0,10);
     html+=`<div class="card"><div class="card-title">📋 Últimos registros</div>`;
-    html+=logs.slice().reverse().slice(0,10).map(l=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem">
+    html+=reversedLogs.map((l,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem">
       <span style="color:var(--text3)">${l.date}</span>
       <span style="font-weight:500;color:var(--green-md)">${h.unit==="done"?"✅ Hecho":formatHabitVal(h,l.val)}</span>
       ${l.note?`<span style="font-size:0.7rem;color:var(--text3);font-style:italic">${l.note}</span>`:""}
+      ${idx===0?`<button class="btn-icon" onclick="deleteLastHabitLog('${h.id}')" title="Eliminar y devolver XP">🗑️</button>`:""}
     </div>`).join("");
     html+=`</div>`;
   }
 
   container.innerHTML=html;
 
- if(h.features?.includes("chart")&&logs.length>1){
+ if(h.features?.includes("chart")&&logs.length>0){
     setTimeout(()=>{
       const canvas=document.getElementById("dhchart_"+h.id);if(!canvas)return;
       if(customChartInsts["dh_"+h.id])customChartInsts["dh_"+h.id].destroy();
@@ -6008,6 +6283,44 @@ function setHabitChartType(habitId,type){
   const h=customHabits.find(x=>x.id===habitId);if(!h)return;
   h.chartType=type;
   save();renderCustomHabitDetail(habitId);
+}
+
+function deleteLastHabitLog(habitId){
+  const h=customHabits.find(x=>x.id===habitId);if(!h)return;
+  const logs=habitLogs[habitId]||[];
+  if(!logs.length)return;
+  if(!confirm("¿Eliminar el último registro? Se devolverá el XP ganado."))return;
+  const log=logs.pop();
+
+  plant.xp=Math.max(0,plant.xp-(h.xpReward||6));
+
+  if(h.goal&&h.unit!=="done"){
+    h.goal.progress=Math.max(0,(h.goal.progress||0)-log.val);
+  }
+
+  const todayKey=getTodayKey();
+  if(log.date===todayKey&&habitStreaks[habitId]){
+    habitStreaks[habitId].current=Math.max(0,(habitStreaks[habitId].current||0)-1);
+    habitStreaks[habitId].last=logs.length?logs[logs.length-1].date:null;
+  }
+
+  if(h.features?.includes("pb")&&h.unit!=="done"){
+    const vals=logs.map(l=>l.val).filter(v=>v>0);
+    if(vals.length){
+      h.pb=(h.pbDirection||"max")==="max"?Math.max(...vals):Math.min(...vals);
+    } else {
+      delete h.pb;
+    }
+  }
+
+  if(h.obligatory&&log.date===todayKey){
+    const stillHasToday=logs.some(l=>l.date===todayKey);
+    if(!stillHasToday) dailyActions["custom_"+h.id]=false;
+  }
+
+  updateAllLevels();
+  save();renderAll();renderCustomHabitDetail(habitId);
+  toast("🗑️ Último registro eliminado · XP devuelto");
 }
 
 function renderCustomHabitsCharts(){}
@@ -6073,6 +6386,66 @@ function saveHabitNotes(habitId){
 
 function renderCustomHabitsCharts(){}
 
+const HABIT_WIZARD_STEPS = ["identity","language","unit","need","schedule","effect","rules","features","goal","notes"];
+let habitWizardStep = 0;
+
+function getActiveHabitWizardSteps(){
+  const isLang = document.getElementById("hIsLanguage")?.checked;
+  return HABIT_WIZARD_STEPS.filter(s => !(s==="unit" && isLang));
+}
+
+function renderHabitWizard(){
+  const steps = getActiveHabitWizardSteps();
+  if(habitWizardStep >= steps.length) habitWizardStep = steps.length-1;
+  if(habitWizardStep < 0) habitWizardStep = 0;
+  const activeKey = steps[habitWizardStep];
+  document.querySelectorAll("#habitWizardBody .habit-step").forEach(el=>{
+    el.style.display = el.dataset.step===activeKey ? "block" : "none";
+  });
+  const lbl=document.getElementById("habitWizardProgressLabel");
+  if(lbl) lbl.textContent = `Paso ${habitWizardStep+1} de ${steps.length}`;
+  const fill=document.getElementById("habitWizardProgressFill");
+  if(fill) fill.style.width = `${((habitWizardStep+1)/steps.length)*100}%`;
+  const backBtn=document.getElementById("hWizardBackBtn");
+  const nextBtn=document.getElementById("hWizardNextBtn");
+  if(backBtn) backBtn.style.display = habitWizardStep===0 ? "none" : "";
+  if(nextBtn) nextBtn.style.display = habitWizardStep===steps.length-1 ? "none" : "";
+}
+
+function habitWizardNext(){
+  const steps=getActiveHabitWizardSteps();
+  const cur=steps[habitWizardStep];
+  if(cur==="identity" && !document.getElementById("hName").value.trim()){
+    toast("Escribe un nombre para continuar");return;
+  }
+  if(cur==="need"){
+    const affects=document.getElementById("hAffects").value;
+    if(affects==="custom" && !document.getElementById("hCustomNeedName").value.trim()){
+      toast("Escribe el nombre de tu nueva necesidad");return;
+    }
+  }
+  habitWizardStep=Math.min(habitWizardStep+1, steps.length-1);
+  renderHabitWizard();
+}
+
+function habitWizardBack(){
+  habitWizardStep=Math.max(habitWizardStep-1,0);
+  renderHabitWizard();
+}
+
+function chooseLanguage(isLang,btn){
+  document.getElementById("hIsLanguage").checked = isLang;
+  toggleLanguageFields();
+  document.querySelectorAll("#hLangChoiceRow .wizard-choice-btn").forEach(b=>b.classList.remove("selected"));
+  if(btn) btn.classList.add("selected");
+  renderHabitWizard();
+}
+
+function toggleShowNavField(){
+  const v=document.getElementById("hShowNav").value;
+  const g=document.getElementById("hNavSectionGroup");
+  if(g) g.style.display = v==="yes" ? "" : "none";
+}
 
 
 // AGENDA
@@ -6169,11 +6542,6 @@ ${t.recurringId
 
 
 
-
-
-
-
-
 // CHARTS
 function renderPhoneChart(){
   const canvas=document.getElementById("phoneChart");if(!canvas)return;
@@ -6182,6 +6550,8 @@ function renderPhoneChart(){
   if(phoneChartInst)phoneChartInst.destroy();
   phoneChartInst=new Chart(canvas.getContext("2d"),{type:"bar",data:{labels,datasets:[{label:"Horas",data,backgroundColor:data.map(v=>v>5?"rgba(139,46,26,0.7)":v>3?"rgba(184,115,51,0.7)":"rgba(74,124,47,0.7)"),borderColor:data.map(v=>v>5?"#8b2e1a":v>3?"#b87333":"#4a7c2f"),borderWidth:1.5,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:8,grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
 }
+
+
 
 function clearSleepChart(){
   if(!confirm("¿Borrar el historial de sueño de días anteriores? Se conservará el de hoy si ya lo registraste."))return;
@@ -6193,13 +6563,6 @@ function clearSleepChart(){
   toast("🗑️ Historial de sueño borrado");
 }
 
-function clearPhoneChart(){
-  if(!confirm("¿Borrar el historial de móvil de días anteriores? Se conservará el de hoy si ya lo registraste."))return;
-  const todayD=todayStr();
-  phoneUsage=phoneUsage.filter(p=>p.date===todayD);
-  save();renderPhoneChart();
-  toast("🗑️ Historial de móvil borrado");
-}
 
 function clearHabitChart(habitId){
   if(!confirm("¿Borrar los registros de días anteriores de este hábito? Se conservará el de hoy si existe."))return;
@@ -6912,6 +7275,20 @@ const hq=document.getElementById("motivHeroQuote");
         </div>`).join("");
     }
   }
+
+  const wl2=document.getElementById("motivStepsList");
+  if(wl2){
+    const steps=(motivData.steps||[]).filter(w=>w.trim());
+    if(!steps.length){
+      wl2.innerHTML=`<div class="motiv-why-placeholder">Aún no has añadido pasos. Pulsa "Editar" para escribir cómo llegar a ser tu yo ideal.</div>`;
+    } else {
+      wl2.innerHTML=steps.map((w,i)=>`
+        <div class="motiv-why-item">
+          <div class="motiv-why-num">${i+1}</div>
+          <div class="motiv-why-text">${w.replace(/</g,"&lt;")}</div>
+        </div>`).join("");
+    }
+  }
 }
 
 function toggleMotivEdit(section){
@@ -6919,24 +7296,27 @@ function toggleMotivEdit(section){
     const sec=document.getElementById("motivIdealSection");
     const isEditing=sec.classList.contains("editing");
     if(!isEditing){
-      // Abrir edición
       document.getElementById("motivIdealInput").value=motivData.ideal||"";
       sec.classList.add("editing");
       document.getElementById("motivIdealEditBtn").textContent="Cancelar";
       setTimeout(()=>document.getElementById("motivIdealInput").focus(),50);
-    } else {
-      cancelMotivEdit("ideal");
-    }
-  } else {
+    } else cancelMotivEdit("ideal");
+  } else if(section==="why"){
     const sec=document.getElementById("motivWhySection");
     const isEditing=sec.classList.contains("editing");
     if(!isEditing){
       sec.classList.add("editing");
       document.getElementById("motivWhyEditBtn").textContent="Cancelar";
       renderMotivWhyInputs();
-    } else {
-      cancelMotivEdit("why");
-    }
+    } else cancelMotivEdit("why");
+  } else if(section==="steps"){
+    const sec=document.getElementById("motivStepsSection");
+    const isEditing=sec.classList.contains("editing");
+    if(!isEditing){
+      sec.classList.add("editing");
+      document.getElementById("motivStepsEditBtn").textContent="Cancelar";
+      renderMotivStepsInputs();
+    } else cancelMotivEdit("steps");
   }
 }
 
@@ -6944,9 +7324,12 @@ function cancelMotivEdit(section){
   if(section==="ideal"){
     document.getElementById("motivIdealSection").classList.remove("editing");
     document.getElementById("motivIdealEditBtn").textContent="✏️ Editar";
-  } else {
+  } else if(section==="why"){
     document.getElementById("motivWhySection").classList.remove("editing");
     document.getElementById("motivWhyEditBtn").textContent="✏️ Editar";
+  } else if(section==="steps"){
+    document.getElementById("motivStepsSection").classList.remove("editing");
+    document.getElementById("motivStepsEditBtn").textContent="✏️ Editar";
   }
 }
 
@@ -6964,8 +7347,71 @@ function renderMotivWhyInputs(){
     <div class="motiv-why-input-row">
       <span style="font-size:0.82rem;color:var(--text3);min-width:22px;font-family:'Lora',serif;font-weight:600">${i+1}.</span>
       <input type="text" value="${w.replace(/"/g,"&quot;")}" placeholder="Porque quiero..." maxlength="200" id="motivWhyInp_${i}">
+      <button class="btn-icon" onclick="moveMotivWhy(${i},-1)" title="Subir" ${i===0?"disabled":""}>▲</button>
+      <button class="btn-icon" onclick="moveMotivWhy(${i},1)" title="Bajar" ${i===items.length-1?"disabled":""}>▼</button>
       <button class="btn-icon" onclick="removeMotivWhyInput(${i})" title="Eliminar">🗑️</button>
     </div>`).join("");
+}
+
+function moveMotivWhy(idx,dir){
+  const inputs=document.querySelectorAll("[id^='motivWhyInp_']");
+  const current=[...inputs].map(i=>i.value);
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=current.length)return;
+  [current[idx],current[newIdx]]=[current[newIdx],current[idx]];
+  motivData.whys=current;
+  renderMotivWhyInputs();
+}
+
+function renderMotivStepsInputs(){
+  const el=document.getElementById("motivStepsInputList");if(!el)return;
+  const items=motivData.steps&&motivData.steps.length?motivData.steps:[""];
+  el.innerHTML=items.map((w,i)=>`
+    <div class="motiv-why-input-row">
+      <span style="font-size:0.82rem;color:var(--text3);min-width:22px;font-family:'Lora',serif;font-weight:600">${i+1}.</span>
+      <input type="text" value="${w.replace(/"/g,"&quot;")}" placeholder="Primero voy a..." maxlength="200" id="motivStepsInp_${i}">
+      <button class="btn-icon" onclick="moveMotivStep(${i},-1)" title="Subir" ${i===0?"disabled":""}>▲</button>
+      <button class="btn-icon" onclick="moveMotivStep(${i},1)" title="Bajar" ${i===items.length-1?"disabled":""}>▼</button>
+      <button class="btn-icon" onclick="removeMotivStepInput(${i})" title="Eliminar">🗑️</button>
+    </div>`).join("");
+}
+
+function addMotivStepInput(){
+  const inputs=document.querySelectorAll("[id^='motivStepsInp_']");
+  const current=[...inputs].map(i=>i.value);
+  motivData.steps=current;
+  motivData.steps.push("");
+  renderMotivStepsInputs();
+  setTimeout(()=>{
+    const last=document.querySelector(`#motivStepsInp_${motivData.steps.length-1}`);
+    if(last)last.focus();
+  },50);
+}
+
+function removeMotivStepInput(idx){
+  const inputs=document.querySelectorAll("[id^='motivStepsInp_']");
+  const current=[...inputs].map(i=>i.value);
+  current.splice(idx,1);
+  motivData.steps=current;
+  renderMotivStepsInputs();
+}
+
+function moveMotivStep(idx,dir){
+  const inputs=document.querySelectorAll("[id^='motivStepsInp_']");
+  const current=[...inputs].map(i=>i.value);
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=current.length)return;
+  [current[idx],current[newIdx]]=[current[newIdx],current[idx]];
+  motivData.steps=current;
+  renderMotivStepsInputs();
+}
+
+function saveMotivSteps(){
+  const inputs=document.querySelectorAll("[id^='motivStepsInp_']");
+  motivData.steps=[...inputs].map(i=>i.value.trim()).filter(w=>w);
+  cancelMotivEdit("steps");
+  save();renderMotivPage();
+  toast("🪜 Pasos guardados");
 }
 
 function addMotivWhyInput(){
@@ -7096,6 +7542,14 @@ function toggleCorkExpand(id){
 function collapseCorkExpand(){
   expandedCorkNoteId=null;
   renderCorkBoard();
+}
+
+function clearPhoneChart(){
+  if(!confirm("¿Borrar TODO el historial de móvil, incluido el registro de hoy?"))return;
+  phoneUsage=[];
+  dailyActions.phoneDone=false;
+  save();renderPhoneChart();renderMovilStats();
+  toast("🗑️ Historial de móvil borrado por completo");
 }
 
 function renderCorkBoard(){
