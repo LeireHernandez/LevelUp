@@ -2540,6 +2540,7 @@ textarea {
         <div class="form-group" style="flex:1;min-width:110px;margin:0"><label>Horas</label><input type="number" id="suenoHorasInput" step="1" min="0" max="14" placeholder="8"></div>
         <div class="form-group" style="flex:1;min-width:110px;margin:0"><label>Minutos</label><input type="number" id="suenoMinutosInput" step="5" min="0" max="59" placeholder="0"></div>
         <button class="btn" onclick="doSueno()">Registrar</button>
+        <button class="btn btn-secondary btn-sm" onclick="undoSueno()" id="suenoUndoBtn" style="display:none">↩️ Deshacer hoy</button>
       </div>
     </div>
     <div class="card">
@@ -2599,6 +2600,7 @@ textarea {
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
         <input type="number" id="pasosInput" step="500" min="1" max="50000" placeholder="Pasos" style="flex:1;min-width:140px">
         <button class="btn" onclick="doPasos()">👣 Registrar</button>
+        <button class="btn btn-secondary btn-sm" onclick="undoPasos()" id="pasosUndoBtn" style="display:none;margin-top:8px">↩️ Deshacer hoy</button>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap" id="pasosShortcuts"></div>
       <div class="card">
@@ -2647,7 +2649,7 @@ textarea {
       <div class="card-title">🧘 Registrar sesión</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
         <input type="number" id="estirCmInput" step="0.5" min="0" max="60" placeholder="Cm al suelo (opcional)" style="flex:1;min-width:150px">
-        <button class="btn" onclick="doEstiramientos()">🧘 Registrar + Completar</button>
+        <button class="btn" onclick="doEstiramientos()">🧘 Registrar</button>
       </div>
       <button class="btn btn-secondary btn-sm" onclick="doEstiramientosNoMedida()">✅ Solo marcar como hecho</button>
       <button class="btn btn-secondary btn-sm" onclick="undoEstiramientos()" id="estirUndoBtn" style="display:none;margin-left:8px">↩️ Deshacer hoy</button>
@@ -2693,13 +2695,13 @@ textarea {
 
   <!-- MÓVIL -->
   <div class="page" id="page-movil">
-    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p>El exceso de pantalla daña tu planta</p></div>
+    <div class="page-header"><h2>📱 Tiempo de móvil</h2><p id="movilSubtitle">El exceso de pantalla daña tu planta</p></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-val" id="movilHoy">0</div><div class="stat-lbl">Horas hoy</div></div>
       <div class="stat-card"><div class="stat-val" id="movilMedia">0</div><div class="stat-lbl">Media semanal</div></div>
       <div class="stat-card"><div class="stat-val" id="movilMax">0</div><div class="stat-lbl">Máx. semanal</div></div>
     </div>
-    <div class="alert alert-danger" style="margin-bottom:1rem">🚨 <strong>Obligatorio.</strong> Más de 5h con el móvil mata a tu planta.</div>
+    <div class="alert alert-danger" style="margin-bottom:1rem" id="movilFatalWarning">🚨 <strong>Obligatorio.</strong></div>
     <div id="movilDoneAlert" style="margin-bottom:1rem"></div>
     <div id="movilAlert" class="alert" style="display:none;margin-bottom:1rem"></div>
     <div class="card">
@@ -2708,6 +2710,7 @@ textarea {
         <div class="form-group" style="flex:1;min-width:110px;margin:0"><label>Horas</label><input type="number" id="phoneHorasInput" step="1" min="0" max="24" placeholder="0"></div>
         <div class="form-group" style="flex:1;min-width:110px;margin:0"><label>Minutos</label><input type="number" id="phoneMinutosInput" step="5" min="0" max="59" placeholder="0"></div>
         <button class="btn btn-amber" onclick="doPhone()">📱 Registrar</button>
+        <button class="btn btn-secondary btn-sm" onclick="undoPhone()" id="movilUndoBtn" style="display:none">↩️ Deshacer</button>
       </div>
     </div>
     <div class="card">
@@ -2842,11 +2845,11 @@ textarea {
     <table class="need-table">
       <thead><tr><th>Necesidad</th><th>Hábito</th><th>Se agota en...</th><th>¿Mata?</th></tr></thead>
       <tbody>
-        <tr><td>💧 Hidratación</td><td>Beber agua (por defecto 1,2 L)</td><td>Reset a medianoche</td><td>Sí (a medianoche si &lt; mínimo)</td></tr>
+        <tr><td>💧 Hidratación</td><td>Beber agua (por defecto 1,2 L)</td><td>Reset a medianoche</td><td>Sí (a medianoche si no se llega al mínimo)</td></tr>
         <tr><td>💪 Fuerza</td><td>Deporte</td><td>7 días (ajustable)</td><td>Sí</td></tr>
-        <tr><td>😴 Energía</td><td>Sueño (registrar horas cada día)</td><td>Reset a medianoche</td><td>Sí (si no ingresar las horas o si durmes menos de 5 H tres días seguidos)</td></tr>
+        <tr><td>😴 Energía</td><td>Sueño (registrar horas cada día)</td><td>Reset a medianoche</td><td>Sí (si no ingresar las horas, si durmes menos del mínimo o si duermes poco tres días seguidos)</td></tr>
         <tr><td>🧠 Inteligencia</td><td>Alemán</td><td>3 días sin estudiar (ajustable)</td><td>Sí</td></tr>
-        <tr><td>⚡ Salud</td><td>Pasos diarios (objetivo y mínimo configurables)</td><td>Reset a medianoche</td><td>Sí si &lt; mínimo</td></tr>
+        <tr><td>⚡ Salud</td><td>Pasos diarios (objetivo y mínimo configurables)</td><td>Reset a medianoche</td><td>Sí (si no se llega al mínimo)</td></tr>
         <tr><td>🍃 Tranquilidad</td><td>Test del orden (cuestionario diario)</td><td>Reset a medianoche</td><td>Sí (obligatorio diario)</td></tr>
         <tr><td>🧘 Elasticidad</td><td>Estiramientos (sesión diaria)</td><td>Reset a medianoche</td><td>Sí (a 0%)</td></tr>
         <tr><td>📖 Entretenimiento</td><td>Leer</td><td>2 días sin leer (ajustable)</td><td>Sí (a 0%)</td></tr>
@@ -2870,7 +2873,7 @@ textarea {
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🛡️ Protector de racha</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">El protector pausa <strong>absolutamente todas las muertes</strong> durante 24 horas, incluyendo el decay de necesidades y los obligatorios diarios. Cuesta <strong>-20 XP</strong> y <strong>-3 días de racha</strong> (necesitas al menos 20 XP para activarlo). Solo se puede utilizar por causa justificada: elige el motivo en el menú desplegable (vacaciones, enfermedad, evento familiar, viaje de trabajo, emergencia u otro) y añade notas opcionales.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">El protector pausa <strong>absolutamente todas las muertes</strong> o <strong>una única necesidad</strong> durante 24 horas, incluyendo el decay de necesidades y los obligatorios diarios. El protector completo cuesta <strong>-50 XP</strong> y <strong>-5 días de racha</strong> y el protector parcial cuesta <strong>-10 XP</strong> y <strong>-2 días de racha</strong>. Solo se pueden utilizar por causas justificadas: elige el motivo en el menú desplegable (vacaciones, enfermedad, evento familiar, viaje de trabajo, emergencia u otro) y añade notas opcionales.</p>
   </div>
 
   <div class="card">
@@ -2879,10 +2882,11 @@ textarea {
     <ul style="font-size:0.84rem;color:var(--text2);line-height:2;padding-left:1.2rem;margin-top:0.4rem">
       <li><strong>Nombre, hora, prioridad</strong> (alta / media / baja) y <strong>categoría</strong> (Personal, Trabajo, Salud, Deporte, Estudio, Casa, Social u Otro)</li>
       <li><strong>Fecha:</strong> Puede ser hoy, mañana o cualquier día futuro</li>
-      <li><strong>Veces al día:</strong> Define cuántas repeticiones necesita la tarea (de 1 a 4). Puedes asignar una hora distinta a cada repetición y una unidad opcional (ej. "minutos", "vasos" ...). Cada vez que pulsas +1 ganas 1 XP; la tarea se completa cuando alcanzas el total de repeticiones.</li>
+      <li><strong>Veces al día:</strong> Define cuántas repeticiones necesita la tarea. Puedes asignar una hora distinta a cada repetición y una unidad opcional (ej. "minutos", "vasos" ...). Cada vez que pulsas +1 ganas 1 XP; la tarea se completa cuando alcanzas el total de repeticiones.</li>
       <li><strong>Notas:</strong> Detalles o comentarios adicionales visibles bajo el nombre</li>
     </ul>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem"><strong>Tareas recurrentes (🔁):</strong> define los días de la semana y una hora diferente para cada día si quieres. Se generan automáticamente en la agenda solo el día que toca. Para eliminar una tarea, borra desde el icono 🗑️ en la tarea o edita desde ✏️.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem"><strong>Tareas recurrentes (🔁):</strong> define los días de la semana y una hora diferente para cada día si quieres. Se generan automáticamente en la agenda solo el día que toca.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem">Para <strong>eliminar una tarea</strong>, borra desde el icono 🗑️ en la tarea o edita desde ✏️.</p>
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem"><strong>Marcar tareas:</strong><br>
     • <strong>✓ Completada</strong> → +1 XP.<br>
     • <strong>✕ No realizada</strong> → -1 XP. ¿La has marcado por error? ¡Tranquil@! Si la desmarcas, se devuelve el XP.<br>
@@ -2932,23 +2936,23 @@ textarea {
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Crea tus propios hábitos con control total. Al crear uno configuras:</p>
     <ul style="font-size:0.84rem;color:var(--text2);line-height:2;padding-left:1.2rem;margin-top:0.4rem">
       <li><strong>Nombre y emoji:</strong> Elige de la paleta rápida o escribe el tuyo</li>
+      <li><strong>Hábito de idioma:</strong> Indica si es un habito de estudio de un idioma. Te aparerán preguntas adicionales respectivas a tu nivel y las horas aproximadas para alcanzar el nivel máximo. La unidad de medida en estos casos siempre será horas de estudio. Te aparecerá el mapa de ruta en la pantalla de este nuevo hábito.</li>
       <li><strong>Necesidad asociada:</strong> Vincula a una de las 8 necesidades del sistema o crea una necesidad nueva con nombre e icono propios. Varios hábitos pueden compartir la misma necesidad nueva.</li>
-      <li><strong>Unidad de registro:</strong> Hecho/no hecho, minutos, horas, km, cantidad, páginas o personalizada</li>
+      <li><strong>Unidad de registro:</strong> Hecho/no hecho, minutos, horas, km, cantidad, páginas o personalizada. En el caso de idiomas, como ya se ha mencionado, la unidad serán horas de estudio.</li>
       <li><strong>Días sin hacer:</strong> Días sin hacer que provocan la muerte de la planta</li>
-      <li><strong>Frecuencia:</strong> Diaria o semanal</li>
-      <li><strong>Efecto al completar:</strong>: Sube la necesidad al 100%, sube un % concreto (acumulable o fijo), baja un % concreto (con opción de matar si llega a 0%) o solo registra sin afectar a la necesidad</li>
+      <li><strong>Frecuencia:</strong> Si es un hábito a realizar de forma diaria o semanal</li>
+      <li><strong>Efecto al completar:</strong>: Decide si este hábito sube la necesidad al 100%, sube un % concreto (acumulable o fijo), baja un % concreto (con opción de matar si llega a 0%) o solo registra sin afectar a la necesidad</li>
       <li><strong>Obligatorio:</strong> Si no lo haces, la planta muere al día siguiente</li>
-      <li><strong>Recordatorio:</strong> Hora del día. Aún en estado de desarrollo.</li>
-      <li><strong>Mostrar en el menú lateral:</strong> Elige sección (Hábitos core o Seguimiento)</li>
-      <li><strong>Funciones activables</strong>: Racha, gráfico de historial, estadísticas (media/máx/total), notas, meta numérica y récord personal. Aún en estado de desarrollo.</li>
-      <li><strong>Meta:</strong> — objetivo numérico con unidad, descripción, progreso inicial, color de la barra, fecha límite y cuenta atrás</li>
+      <li><strong>Mostrar en el menú lateral:</strong> Elige sección (Hábitos core o Seguimiento) y se mostrará en el navegador lateral junto con los demás hábitos</li>
+      <li><strong>Funciones activables</strong>: Decide si quieres que se muestre la racha, gráfico de historial, estadísticas (media/máx/total), notas y récord personal en la página de tu nuevo hábito.</li>
+      <li><strong>Meta:</strong> Objetivo numérico con unidad, descripción, progreso inicial, fecha límite y cuenta atrás asociada a este nuevo hábito (opcional)</li>
     </ul>
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem">La página de cada hábito muestra el nivel de necesidad actual, la racha, estadísticas, el gráfico de historial, la meta y los últimos registros. Al registrar, el efecto configurado se aplica inmediatamente y los objetivos mensuales vinculados se actualizan solos.</p>
   </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🏆 Metas a largo plazo</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Crea metas con nombre, emoji, objetivo numérico, unidad, descripción, color de barra, fecha límite y cuenta atrás. Para sumar progreso manualmente pulsa el botón <strong>+</strong> junto a la meta. Te pedirá cuánto añadir. Hay tres metas predefinidas (Alemán B2, Spagatt, Biblioteca) que puedes ocultar o restaurar desde Editar. Las metas aparecen en la página de inicio y en la sección <strong>Metas</strong>.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Crea metas con nombre, emoji, objetivo numérico, unidad, descripción, fecha límite y cuenta atrás. Para sumar progreso manualmente pulsa el botón <strong>+</strong> junto a la meta. Te pedirá cuánto añadir. Hay tres metas predefinidas (Alemán B2, Spagatt, Biblioteca) que puedes ocultar o restaurar desde Editar. Las metas aparecen en la página de inicio y en la sección <strong>Metas</strong>.</p>
   </div>
 
   <div class="card">
@@ -2998,19 +3002,8 @@ textarea {
 
   <div class="card">
   <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">✏️ Corregir registros por error</h3>
-  <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Si te equivocas al registrar algo, puedes corregirlo o eliminarlo — tanto en hábitos del sistema como en los personalizados:</p>
-  <ul style="font-size:0.84rem;color:var(--text2);line-height:2;padding-left:1.2rem;margin-top:0.4rem">
-    <li><strong>💧 Agua:</strong> usa los botones "-1 vaso" / "-500ml" para restar litros mal registrados.</li>
-    <li><strong>💪 Deporte:</strong> en el historial, pulsa 🗑️ junto a cualquier sesión para eliminarla (devuelve el XP).</li>
-    <li><strong>😴 Sueño y 📱 Móvil:</strong> si ya registraste el valor de hoy, vuelve a introducirlo: la app te preguntará si quieres editarlo y revertirá el XP anterior.</li>
-    <li><strong>🧠 Alemán:</strong> cada registro de horas queda en el historial reciente de la página; pulsa 🗑️ para eliminarlo (resta horas y XP).</li>
-    <li><strong>⚡ Pasos:</strong> cada registro del día aparece en "Registros de hoy"; puedes eliminar cualquiera con 🗑️.</li>
-    <li><strong>🍃 Test de orden:</strong> si ya lo completaste hoy, pulsa "✏️ Rehacer test de hoy" para deshacerlo y volver a rellenarlo.</li>
-    <li><strong>🧘 Estiramientos:</strong> pulsa "↩️ Deshacer hoy" para anular el registro del día.</li>
-    <li><strong>📖 Lectura:</strong> en "Últimas sesiones", pulsa 🗑️ junto a cualquier entrada para eliminarla.</li>
-    <li><strong>✨ Hábitos personalizados:</strong> en "Últimos registros" de cada hábito, el 🗑️ del registro más reciente lo elimina y devuelve el XP.</li>
-  </ul>
-  <p style="font-size:0.78rem;color:var(--text3);margin-top:0.6rem">Nota: eliminar un registro resta el XP que ganaste con él, para que tu nivel refleje solo lo realmente hecho.</p>
+  <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Si te equivocas al registrar algo, puedes corregirlo o eliminarlo, tanto en hábitos del sistema como en los personalizados. Para ello solo debes pulsar 🗑️ junto a cualquier sesión para eliminarla, pulsando "✏️ Rehacer test de hoy" en el test del orden o pulsando "↩️ Deshacer hoy" para anular el registro del día de estiramientos.</p>
+  <p style="font-size:0.78rem;color:var(--text3);margin-top:0.6rem">Nota: Eliminar un registro resta el XP que ganaste con él, para que tu nivel refleje solo lo realmente hecho (tramposos...).</p>
 </div>
 
 <div class="card">
@@ -3112,7 +3105,7 @@ textarea {
   <div class="page" id="page-notas">
     <div class="page-header">
       <h2>📌 Mi corcho</h2>
-      <p>Tus notas se organizan en filas de hasta 3 · Pulsa "Ver más" para leer una entera · Usa ✏️ para editarla.</p>
+      <p>Organiza tus notas · Pulsa "Ver más" para leer una entera · Usa ✏️ para editarla.</p>
     </div>
     <div style="margin-bottom:1.2rem">
       <button class="btn btn-sm" onclick="openCorkNoteModal()">+ Nueva nota</button>
@@ -3321,7 +3314,8 @@ function defaultState(){
   phoneUsage=[];
   dailyActions={orderDone:false,phoneDone:false,suenoDone:false,aguaObjReached:false,pasosObjReached:false,date:todayStr()};
   streak={current:0,lastAliveDay:null};
-
+  
+  
 // Solo resetear estados de necesidades y no los hábitos en sí
 customNeedStates={};
 
@@ -3351,8 +3345,7 @@ customHabits.forEach(h=>{
     {id:"sc_yoga",name:"Yoga",emoji:"🧘",hasKm:false,required:false}
   ];
 
-coreParams={agua:{target:1.2},pasos:{objetivo:10000,minimo:7000},sueno:{minFatal:5,minOptimo:7,lowSleepThreshold:6.5,maxLowSleepStreak:3},deporte:{diasMaxSinHacer:7},aleman:{diasMaxSinHacer:3,horasObjetivo:660,startHours:0},lectura:{diasMaxSinHacer:2}};
-
+coreParams={agua:{target:1.2},pasos:{objetivo:10000,minimo:7000},sueno:{minFatal:5,minOptimo:7,lowSleepThreshold:6.5,maxLowSleepStreak:3},deporte:{diasMaxSinHacer:7},aleman:{diasMaxSinHacer:3,horasObjetivo:660,startHours:0},lectura:{diasMaxSinHacer:2},movil:{minFatal:5,penaltyThreshold:2}};
   lastDecayTs=now;
 }
 
@@ -3464,11 +3457,14 @@ function checkDailyObligatory(){
   const today=todayStr();
   if(dailyActions.date===today)return;
   const isFirstDay = plant.createdAt && dailyActions.date===new Date(plant.createdAt).toDateString();
+
+  // Estos tres son obligatorios incluso el primer día
+  if(!dailyActions.phoneDone&&!isPhoneProtected()){killPlant("no registraste las horas de móvil ayer");return;}
+  if(!isDisabledCore('orden')&&!isNeedProtected('calmness')&&!dailyActions.orderDone){killPlant("no hiciste el test de orden ayer");return;}
+  if(!isDisabledCore('sueno')&&!isNeedProtected('vitality')&&!dailyActions.suenoDone){killPlant("no registraste las horas de sueño ayer");return;}
+
   if(!isFirstDay){
     if(!isDisabledCore('agua')&&!isNeedProtected('hydration')&&hydration.loggedToday<hydration.target){killPlant("deshidratación — no bebiste suficiente agua ayer");return;}
-    if(!dailyActions.phoneDone&&!isPhoneProtected()){killPlant("no registraste las horas de móvil ayer");return;}
-    if(!isDisabledCore('orden')&&!isNeedProtected('calmness')&&!dailyActions.orderDone){killPlant("no hiciste el test de orden ayer");return;}
-    if(!isDisabledCore('sueno')&&!isNeedProtected('vitality')&&!dailyActions.suenoDone){killPlant("no registraste las horas de sueño ayer");return;}
     if(!isNeedProtected('energy')&&energy.doneToday&&energy.stepsToday<coreParams.pasos.minimo){killPlant("sedentarismo — pocos pasos ayer");return;}
     if(!isNeedProtected('vitality')&&sleep.lowSleepStreak>=(coreParams.sueno.maxLowSleepStreak||3)){killPlant(`agotamiento crónico — ${coreParams.sueno.maxLowSleepStreak||3} noches con poco sueño`);return;}
     if(!isNeedProtected('vitality')&&sleep.highSleepStreak>=(coreParams.sueno.maxHighSleepStreak||3)){killPlant(`exceso de sueño — ${coreParams.sueno.maxHighSleepStreak||3} noches durmiendo demasiado`);return;}
@@ -3549,6 +3545,7 @@ function load(){
     if(sleep.lowSleepStreak===undefined)sleep.lowSleepStreak=0;
     if(!goals.reading)goals.reading={entries:[]};
     if(!goals.german.entries)goals.german.entries=[];
+    
 if(!energy.todayEntries)energy.todayEntries=[];
 (goals.sport.sessions||[]).forEach((s,i)=>{if(!s.id)s.id="sp_legacy_"+i;});
 (goals.reading.entries||[]).forEach((e,i)=>{if(!e.id)e.id="rd_legacy_"+i;});
@@ -3567,6 +3564,7 @@ if(!energy.todayEntries)energy.todayEntries=[];
     if(sleep.highSleepStreak===undefined)sleep.highSleepStreak=0;
     if(!coreParams.deporte)coreParams.deporte={diasMaxSinHacer:7};
     if(!coreParams.aleman)coreParams.aleman={diasMaxSinHacer:3,horasObjetivo:660};
+    if(!coreParams.movil)coreParams.movil={minFatal:5,penaltyThreshold:2};
     if(!sportCats.length)sportCats=[{id:"sc_run",name:"Running",emoji:"🏃",hasKm:true,required:false}];
     forest=s.forest||[];
 lastAppTouch=s.lastAppTouch||Date.now();
@@ -3913,7 +3911,7 @@ if(dailyActions.suenoDone){
   sleep.history=sleep.history.filter(h=>h.date!==todayStr());
   dailyActions.suenoDone=false;
 }
-  if(!isNeedProtected('vitality')&&!isPlantNewToday()&&hours<coreParams.sueno.minFatal){killPlant(`menos de ${decimalHoursToHM(coreParams.sueno.minFatal)} de sueño`);return;}
+  if(!isNeedProtected('vitality')&&hours<coreParams.sueno.minFatal){killPlant(`menos de ${decimalHoursToHM(coreParams.sueno.minFatal)} de sueño`);return;}
   sleep.hoursToday=hours;sleep.doneToday=true;dailyActions.suenoDone=true;
   let sleepLvl;
   const lowThresh=coreParams.sueno.lowSleepThreshold!==undefined?coreParams.sueno.lowSleepThreshold:6.5;
@@ -4002,8 +4000,8 @@ if(dailyActions.phoneDone){
   if(!confirm(`Ya registraste ${decimalHoursToHM(phoneUsage.find(p=>p.date===todayStr())?.hours||0)} de móvil. ¿Editar el valor?`))return;
   // Revertir penalización de calmness si la hubo
   const prev=phoneUsage.find(p=>p.date===todayStr());
-  if(prev&&prev.hours>2){
-    const dmg=(prev.hours-2)*12;
+if(prev&&prev.hours>coreParams.movil.penaltyThreshold){
+    const dmg=(prev.hours-coreParams.movil.penaltyThreshold)*12;
     if(needsState.calmness){
       needsState.calmness.value=Math.min(100,needsState.calmness.value+dmg);
       needsState.calmness.extraCalmness=Math.min(100,(needsState.calmness.extraCalmness||0)+dmg);
@@ -4021,9 +4019,9 @@ if(dailyActions.phoneDone){
   if(phoneUsage.length>14)phoneUsage.shift();
   dailyActions.phoneDone=true;
   triggerMonthlyObjUpdate('__movil');
-  if(!isPhoneProtected()&&!isPlantNewToday()&&h>5){killPlant(`adicción al móvil — ${decimalHoursToHM(h)} de pantalla`);return;}
-  if(h>2){const dmg=(h-2)*12;if(needsState.calmness){needsState.calmness.value=Math.max(0,needsState.calmness.value-dmg);needsState.calmness.extraCalmness=Math.max(0,(needsState.calmness.extraCalmness||0)-dmg);}}
-  else toast(`📱 ${decimalHoursToHM(h)} · Sin penalización`);
+if(!isPhoneProtected()&&h>coreParams.movil.minFatal){killPlant(`adicción al móvil — ${decimalHoursToHM(h)} de pantalla`);return;}
+if(h>coreParams.movil.penaltyThreshold){const dmg=(h-coreParams.movil.penaltyThreshold)*12;if(needsState.calmness){needsState.calmness.value=Math.max(0,needsState.calmness.value-dmg);needsState.calmness.extraCalmness=Math.max(0,(needsState.calmness.extraCalmness||0)-dmg);}}
+else toast(`📱 ${decimalHoursToHM(h)} · Sin penalización`);
   if(hEl)hEl.value="";if(mEl)mEl.value="";
   checkDeath();save();renderAll();renderPhoneChart();
 }
@@ -4674,6 +4672,7 @@ function openEditCore(which){
   <div class="form-row"><div class="form-group"><label>Nivel de partida</label><select id="ep_aleman_start"><option value="0" ${(p.aleman.startHours||0)===0?"selected":""}>A1 (0h)</option><option value="200" ${(p.aleman.startHours||0)===200?"selected":""}>A2 (200h)</option><option value="400" ${(p.aleman.startHours||0)===400?"selected":""}>B1 (400h)</option><option value="660" ${(p.aleman.startHours||0)===660?"selected":""}>B2 (660h)</option></select></div><div class="form-group"><label>Horas ya acumuladas</label><input type="number" id="ep_aleman_current" step="1" min="0" max="3000" value="${Math.round(goals.german.hours)}"></div></div>`;}
   if(which==="deporte"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">💪 Deporte</h4><div class="form-row"><div class="form-group"><label>Días sin hacer → muerte</label><input type="number" id="ep_dep_dias" step="0.5" min="1" max="30" value="${p.deporte.diasMaxSinHacer}"></div></div>`;}
   if(which==="lectura"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">📖 Lectura</h4><div class="form-row"><div class="form-group"><label>Días sin leer → muerte</label><input type="number" id="ep_lectura_dias" step="0.5" min="0.5" max="30" value="${coreParams.lectura?.diasMaxSinHacer||2}"></div></div>`;}
+  if(which==="movil"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">📱 Móvil</h4><div class="form-row"><div class="form-group"><label>Horas fatales (mata la planta)</label><input type="number" id="ep_movil_fatal" step="0.5" min="1" max="24" value="${p.movil.minFatal}"></div><div class="form-group"><label>Penaliza tranquilidad a partir de (h)</label><input type="number" id="ep_movil_penalty" step="0.5" min="0" max="10" value="${p.movil.penaltyThreshold}"></div></div>`;}
   content.innerHTML=html||"<p style='color:var(--text3);font-size:0.84rem'>Sin parámetros.</p>";
   modal.classList.add("open");
 }
@@ -4683,6 +4682,7 @@ function saveCoreEdit(){
   const get=id=>{const el=document.getElementById(id);return el?parseFloat(el.value):null;};
   if(which==="agua"||which==="all"){const v=get("ep_agua_target");if(v>0){coreParams.agua.target=v;hydration.target=v;}}
   if(which==="pasos"||which==="all"){const o=get("ep_pasos_obj"),m=get("ep_pasos_min");if(o>0)coreParams.pasos.objetivo=o;if(m>=0)coreParams.pasos.minimo=m;}
+  if(which==="movil"||which==="all"){const f=get("ep_movil_fatal"),pn=get("ep_movil_penalty");if(f>0)coreParams.movil.minFatal=f;if(pn>=0)coreParams.movil.penaltyThreshold=pn;}
   if(which==="sueno"||which==="all"){
     const f=hmToDecimalHours(get("ep_sueno_fatal_h"),get("ep_sueno_fatal_m"));
     const o=hmToDecimalHours(get("ep_sueno_opt_h"),get("ep_sueno_opt_m"));
@@ -5270,6 +5270,11 @@ function fullResetGameHard(){
   defaultState();
   recurringTasks=[];
   forest=[];
+  corkNotes=[];
+  motivData={ideal:"",whys:[],steps:[]};
+  lastAppTouch=Date.now();
+  treeOverlayDismissed=false;
+  expandedCorkNoteId=null;
   localStorage.removeItem("levelup_need_overrides");
   needOverrides={};
   save();renderAll();renderNav();renderPhoneChart();renderSleepChart();startDecay();
@@ -5901,7 +5906,15 @@ const ds2 = document.getElementById("deporteSubtitle");
 if(ds2) ds2.innerHTML = `Realiza <strong>una sesión</strong> para mantener tu planta fuerte · Muerte si no hace en <strong>${coreParams.deporte.diasMaxSinHacer}d</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openSportCatModal()">🏅 Categorías</button> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('deporte')">⚙️ Ajustar</button>`;
 const als = document.getElementById("alemanSubtitle");
 if(als) als.innerHTML = `Estudiar alemán mantiene la inteligencia de tu planta · Muerte si no estudias <strong>${coreParams.aleman.diasMaxSinHacer}d</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('aleman')">⚙️ Ajustar</button>`;
-  
+const ms2 = document.getElementById("movilSubtitle");
+if(ms2) ms2.innerHTML = `El exceso de pantalla daña tu planta · Fatal: <strong>${decimalHoursToHM(coreParams.movil.minFatal)}</strong>, penaliza desde <strong>${decimalHoursToHM(coreParams.movil.penaltyThreshold)}</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('movil')">⚙️ Ajustar</button>`;
+const mfw = document.getElementById("movilFatalWarning");
+if(mfw) mfw.innerHTML = `🚨 <strong>Obligatorio.</strong> Más de ${decimalHoursToHM(coreParams.movil.minFatal)} con el móvil mata a tu planta.`;
+
+const sub2=document.getElementById("suenoUndoBtn");if(sub2)sub2.style.display=dailyActions.suenoDone?"":"none";
+const pub=document.getElementById("pasosUndoBtn");if(pub)pub.style.display=energy.doneToday?"":"none";
+const mub=document.getElementById("movilUndoBtn");if(mub)mub.style.display=dailyActions.phoneDone?"":"none";
+
   // AGUA
   const wl=hydration.level;
   const wf=document.getElementById("waterFill");if(wf)wf.style.height=wl+"%";
@@ -6216,7 +6229,7 @@ let registerFieldsHtml="";
         <button class="btn btn-secondary btn-sm" onclick="addHabitNoteInput('${h.id}')" style="margin-top:0.4rem">+ Añadir nota</button>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem">
           <button class="btn btn-secondary btn-sm" onclick="toggleHabitNotesEdit('${h.id}')">Cancelar</button>
-          <button class="btn btn-sm" onclick="saveHabitNotes('${h.id}')">💾 Guardar</button>
+          <button class="btn btn-sm" id="hWizardSaveBtn" onclick="saveHabit()">💾 Guardar</button>
         </div>
       </div>
     </div>`;
@@ -6410,6 +6423,8 @@ function renderHabitWizard(){
   const nextBtn=document.getElementById("hWizardNextBtn");
   if(backBtn) backBtn.style.display = habitWizardStep===0 ? "none" : "";
   if(nextBtn) nextBtn.style.display = habitWizardStep===steps.length-1 ? "none" : "";
+  const saveBtn=document.getElementById("hWizardSaveBtn");
+if(saveBtn) saveBtn.style.display = habitWizardStep===steps.length-1 ? "" : "none";
 }
 
 function habitWizardNext(){
@@ -6548,7 +6563,9 @@ function renderPhoneChart(){
   const labels=[],data=[];
   for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);labels.push(d.toLocaleDateString("es-ES",{weekday:"short",day:"numeric"}));const e=phoneUsage.find(p=>p.date===d.toDateString());data.push(e?.hours||0);}
   if(phoneChartInst)phoneChartInst.destroy();
-  phoneChartInst=new Chart(canvas.getContext("2d"),{type:"bar",data:{labels,datasets:[{label:"Horas",data,backgroundColor:data.map(v=>v>5?"rgba(139,46,26,0.7)":v>3?"rgba(184,115,51,0.7)":"rgba(74,124,47,0.7)"),borderColor:data.map(v=>v>5?"#8b2e1a":v>3?"#b87333":"#4a7c2f"),borderWidth:1.5,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:8,grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  const maxData=Math.max(...data,0);
+  const yMax=Math.max(4,Math.ceil(maxData)+1);
+  phoneChartInst=new Chart(canvas.getContext("2d"),{type:"bar",data:{labels,datasets:[{label:"Horas",data,backgroundColor:data.map(v=>v>(coreParams.movil?.minFatal||5)?"rgba(139,46,26,0.7)":v>(coreParams.movil?.penaltyThreshold||2)?"rgba(184,115,51,0.7)":"rgba(74,124,47,0.7)"),borderColor:data.map(v=>v>(coreParams.movil?.minFatal||5)?"#8b2e1a":v>(coreParams.movil?.penaltyThreshold||2)?"#b87333":"#4a7c2f"),borderWidth:1.5,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:yMax,grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
 }
 
 
@@ -7237,10 +7254,17 @@ function renderMotivPage(){
   if(sn)sn.textContent=streak.current||0;
   if(ss){
     const s=streak.current||0;
-    if(s===0)ss.textContent="Empieza hoy. El primer día siempre es el más importante.";
-    else if(s<7)ss.textContent="Llevas una semana construyendo tu mejor versión. ¡Sigue!";
-    else if(s<30)ss.textContent="Ya es un hábito real. Tu constancia dice mucho de ti.";
-    else ss.textContent="Esto ya es un estilo de vida. Eres increíble.";
+    if(s===1)ss.textContent="Empieza hoy. El primer día siempre es el más importante.";
+    else if(s<7)ss.textContent="Estás en tu primera semana. ¡Sigue!";
+    else if(s<30)ss.textContent="Estás en tu primer mes. ¡Increible!";
+    else if(s<60)ss.textContent="¿Estás en tu segundo mes ya?. ¡Wow!";
+    else if(s<90)ss.textContent="Siguiente reto: Alcanza una racha de 90 días. ¡Ánimo!";
+    else if(s<180)ss.textContent="¿Te atreves a alcanzar una racha de 180 días?";
+    else if(s<230)ss.textContent="¿Te acuerdas de cómo empezaste? ¡Y mira donde estás ahora!";
+    else if(s<250)ss.textContent="¡Reto: alcanza una racha de 250 días!";
+    else if(s<300)ss.textContent="¡Te quedan muy pocos meses para alcanzar la racha del año!";
+    else if(s<360)ss.textContent="¡NO ME LO PUEDO CREER! Te queda muy poquito para conseguir esa racha anual. ¡No pares ahora!";
+    else ss.textContent="Esto ya es un estilo de vida. Eres increíble. Recuerda todo lo alcanzado y sigue mejorando.";
   }
 
   // Hero: quote del día
@@ -7257,7 +7281,7 @@ const hq=document.getElementById("motivHeroQuote");
     if(motivData.ideal&&motivData.ideal.trim()){
       it.innerHTML=`<span style="font-family:'Lora',serif;font-size:0.95rem;color:var(--text);line-height:1.8;white-space:pre-wrap">${motivData.ideal.replace(/</g,"&lt;")}</span>`;
     } else {
-      it.innerHTML=`<span class="motiv-ideal-placeholder">Describe a tu yo ideal. ¿Cómo vive? ¿Cómo se cuida? ¿Qué hace cada día? Escríbelo en presente, como si ya fuera real.</span>`;
+      it.innerHTML=`<span class="motiv-ideal-placeholder">Describe a tu yo ideal. ¿Cómo vive? ¿Cómo se cuida? ¿Qué hace cada día? ¿Qué opinas de esa persona?.</span>`;
     }
   }
 
@@ -7266,7 +7290,7 @@ const hq=document.getElementById("motivHeroQuote");
   if(wl){
     const whys=(motivData.whys||[]).filter(w=>w.trim());
     if(!whys.length){
-      wl.innerHTML=`<div class="motiv-why-placeholder">Aún no has añadido tus porqués. Pulsa "Editar" para escribir las razones que te mueven.</div>`;
+      wl.innerHTML=`<div class="motiv-why-placeholder">Aún no has añadido tus porqués. Pulsa "Editar" para escribir tus razones para mejorar.</div>`;
     } else {
       wl.innerHTML=whys.map((w,i)=>`
         <div class="motiv-why-item">
@@ -7369,7 +7393,7 @@ function renderMotivStepsInputs(){
   el.innerHTML=items.map((w,i)=>`
     <div class="motiv-why-input-row">
       <span style="font-size:0.82rem;color:var(--text3);min-width:22px;font-family:'Lora',serif;font-weight:600">${i+1}.</span>
-      <input type="text" value="${w.replace(/"/g,"&quot;")}" placeholder="Primero voy a..." maxlength="200" id="motivStepsInp_${i}">
+      <input type="text" value="${w.replace(/"/g,"&quot;")}" placeholder="Voy a..." maxlength="200" id="motivStepsInp_${i}">
       <button class="btn-icon" onclick="moveMotivStep(${i},-1)" title="Subir" ${i===0?"disabled":""}>▲</button>
       <button class="btn-icon" onclick="moveMotivStep(${i},1)" title="Bajar" ${i===items.length-1?"disabled":""}>▼</button>
       <button class="btn-icon" onclick="removeMotivStepInput(${i})" title="Eliminar">🗑️</button>
@@ -7552,6 +7576,7 @@ function clearPhoneChart(){
   toast("🗑️ Historial de móvil borrado por completo");
 }
 
+
 function renderCorkBoard(){
   const el=document.getElementById("corkBoard");if(!el)return;
   if(!corkNotes.length){
@@ -7566,14 +7591,12 @@ function renderCorkBoard(){
     const rot=CORK_ROTATIONS[i%CORK_ROTATIONS.length];
     const date=new Date(n.createdAt).toLocaleDateString('es-ES',{day:'numeric',month:'short'});
     const isExpanded=expandedCorkNoteId===n.id;
-    const truncated=n.body.length>140;
-    const bodyText=isExpanded?n.body:(truncated?n.body.slice(0,137)+"…":n.body);
     return `<div class="cork-note${isExpanded?" cork-note-expanded":""}" style="background:${n.color};transform:rotate(${isExpanded?0:rot}deg)">
       <div class="cork-pin" style="background:${n.pin}"></div>
       <div class="cork-note-content">
         ${n.title?`<div class="cork-note-title">${n.title}</div>`:""}
-        <div class="cork-note-body">${bodyText.replace(/</g,"&lt;")}</div>
-        ${truncated?`<div class="cork-note-more" onclick="toggleCorkExpand('${n.id}')">${isExpanded?"Ver menos ▴":"Ver más ▾"}</div>`:""}
+        <div class="cork-note-body" id="corkBody_${n.id}">${n.body.replace(/</g,"&lt;")}</div>
+        <div class="cork-note-more" id="corkMore_${n.id}" style="display:none" onclick="toggleCorkExpand('${n.id}')"></div>
         <div class="cork-note-date">${date}</div>
         <div class="cork-note-actions">
           <button class="cork-note-btn" onclick="openCorkNoteModal('${n.id}')">✏️ Editar</button>
@@ -7583,6 +7606,72 @@ function renderCorkBoard(){
     </div>`;
   }).join("");
   el.innerHTML=notesHtml+(expandedCorkNoteId?`<div class="cork-backdrop" onclick="collapseCorkExpand()"></div>`:"");
+
+  // Medir overflow real de cada nota para decidir si mostrar "Ver más"
+  corkNotes.forEach(n=>{
+    const bodyEl=document.getElementById("corkBody_"+n.id);
+    const moreEl=document.getElementById("corkMore_"+n.id);
+    if(!bodyEl||!moreEl)return;
+    const isExpanded=expandedCorkNoteId===n.id;
+    if(isExpanded){
+      moreEl.style.display="";
+      moreEl.textContent="Ver menos ▴";
+    } else if(bodyEl.scrollHeight>bodyEl.clientHeight+2){
+      moreEl.style.display="";
+      moreEl.textContent="Ver más ▾";
+    } else {
+      moreEl.style.display="none";
+    }
+  });
+}
+
+function undoSueno(){
+  if(!dailyActions.suenoDone){toast("No hay registro de sueño hoy");return;}
+  if(!confirm(`¿Deshacer el registro de sueño de hoy (${decimalHoursToHM(sleep.hoursToday)})? Se restará el XP ganado.`))return;
+  const todayD=todayStr();
+  const xpGiven=sleep.hoursToday>=coreParams.sueno.minOptimo?8:3;
+  plant.xp=Math.max(0,plant.xp-xpGiven);
+  const lowThresh=coreParams.sueno.lowSleepThreshold??6.5;
+  const highThresh=coreParams.sueno.highSleepThreshold??10;
+  if(sleep.hoursToday<lowThresh&&sleep.lowSleepStreak>0)sleep.lowSleepStreak--;
+  if(sleep.hoursToday>highThresh&&sleep.highSleepStreak>0)sleep.highSleepStreak--;
+  sleep.history=sleep.history.filter(h=>h.date!==todayD);
+  sleep.doneToday=false;sleep.hoursToday=null;
+  dailyActions.suenoDone=false;
+  updateAllLevels();save();renderAll();renderSleepChart();
+  toast("↩️ Sueño deshecho");
+}
+
+function undoPasos(){
+  if(!energy.doneToday){toast("No hay pasos registrados hoy");return;}
+  if(!confirm(`¿Deshacer los ${energy.stepsToday.toLocaleString()} pasos de hoy? Se restará el XP ganado.`))return;
+  plant.xp=Math.max(0,plant.xp-Math.floor(energy.stepsToday/500));
+  energy.stepsToday=0;
+  energy.todayEntries=[];
+  energy.extraEnergy=0;
+  energy.doneToday=false;
+  dailyActions.pasosObjReached=false;
+  updateAllLevels();save();renderAll();
+  toast("↩️ Pasos deshechos");
+}
+
+function undoPhone(){
+  if(!dailyActions.phoneDone){toast("No hay registro de móvil hoy");return;}
+  if(!confirm("¿Deshacer el registro de móvil de hoy?"))return;
+  const today=todayStr();
+  const idx=phoneUsage.findIndex(p=>p.date===today);
+  if(idx>=0){
+    const entry=phoneUsage[idx];
+    if(entry.hours>coreParams.movil.penaltyThreshold&&needsState.calmness){
+      const dmg=(entry.hours-coreParams.movil.penaltyThreshold)*12;
+      needsState.calmness.value=Math.min(100,needsState.calmness.value+dmg);
+      needsState.calmness.extraCalmness=Math.min(100,(needsState.calmness.extraCalmness||0)+dmg);
+    }
+    phoneUsage.splice(idx,1);
+  }
+  dailyActions.phoneDone=false;
+  save();renderAll();renderPhoneChart();
+  toast("↩️ Registro de móvil deshecho");
 }
 
 
