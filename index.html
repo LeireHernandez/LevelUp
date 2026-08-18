@@ -1902,9 +1902,10 @@ textarea {
         </div>
       </div>
 
-      <div class="habit-step" data-step="effect">
-        <p class="wizard-step-label">¿Cómo afecta al completar el hábito?</p>
-        <select id="hEffectType">
+<div class="habit-step" data-step="effect">
+  <p class="wizard-step-label">¿Cómo afecta al completar el hábito?</p>
+  <p style="font-size:0.76rem;color:var(--text3);margin-bottom:0.8rem">Si esta necesidad la alimentan varios hábitos <strong>diarios</strong>, el nivel de la necesidad será el más bajo entre todos ellos hoy, y solo llegará al 100% cuando TODOS estén completados al máximo.</p>
+  <select id="hEffectType">
           <option value="fill100">✅ Sube la necesidad al 100%</option>
           <option value="fillCustom">📈 Sube la necesidad un % concreto</option>
           <option value="damage">📉 Baja la necesidad un % concreto</option>
@@ -2080,31 +2081,56 @@ textarea {
 <div class="modal-overlay" id="taskModal">
   <div class="modal">
     <h3 id="taskModalTitle">Nueva tarea</h3>
-    <div class="form-group-full"><label>Tarea *</label><input type="text" id="taskName" placeholder="Ej: Ir al súper" maxlength="80"></div>
-    <div class="form-row">
-      <div class="form-group"><label>Hora (opcional)</label><input type="time" id="taskTime"></div>
-      <div class="form-group"><label>Prioridad</label>
-        <select id="taskPriority"><option value="high">🔴 Alta</option><option value="mid" selected>🟡 Media</option><option value="low">🟢 Baja</option></select>
+    <div class="habit-wizard-progress" id="taskWizardProgressLabel">Paso 1 de 5</div>
+    <div class="habit-wizard-progress-bar"><div class="habit-wizard-progress-fill" id="taskWizardProgressFill" style="width:20%"></div></div>
+    <div style="margin-top:1rem">
+
+      <div class="habit-step" data-step="identity">
+        <p class="wizard-step-label">¿Cómo se llama la tarea?</p>
+        <div class="form-group-full"><label>Tarea *</label><input type="text" id="taskName" placeholder="Ej: Ir al súper" maxlength="80"></div>
       </div>
-    </div>
-    <div class="form-row">
-  <div class="form-group"><label>Veces al día</label>
-    <input type="number" id="taskTimesPerDay" min="1" max="50" step="1" value="1" onchange="updateTaskTimesInputs()">
-  </div>
-  <div class="form-group"><label>Unidad (opcional, ej. minutos)</label><input type="text" id="taskUnitLabel" placeholder="Ej: minutos, vasos..."></div>
-</div>
-<div id="taskMultiTimesContainer" style="display:none;margin-bottom:10px"></div>
-    <div class="form-row">
-      <div class="form-group"><label>Categoría</label>
-        <select id="taskCategory"></select>
+
+      <div class="habit-step" data-step="schedule">
+        <p class="wizard-step-label">¿Cuándo y con qué prioridad?</p>
+        <div class="form-row">
+          <div class="form-group"><label>Hora (opcional)</label><input type="time" id="taskTime"></div>
+          <div class="form-group"><label>Prioridad</label>
+            <select id="taskPriority"><option value="high">🔴 Alta</option><option value="mid" selected>🟡 Media</option><option value="low">🟢 Baja</option></select>
+          </div>
+        </div>
       </div>
-      <div class="form-group"><label>Fecha</label><input type="date" id="taskDate"></div>
+
+      <div class="habit-step" data-step="repeat">
+        <p class="wizard-step-label">¿Cuántas veces al día?</p>
+        <div class="form-row">
+          <div class="form-group"><label>Veces al día</label>
+            <input type="number" id="taskTimesPerDay" min="1" max="50" step="1" value="1" onchange="updateTaskTimesInputs()">
+          </div>
+          <div class="form-group"><label>Unidad (opcional, ej. minutos)</label><input type="text" id="taskUnitLabel" placeholder="Ej: minutos, vasos..."></div>
+        </div>
+        <div id="taskMultiTimesContainer" style="display:none;margin-bottom:10px"></div>
+      </div>
+
+      <div class="habit-step" data-step="category">
+        <p class="wizard-step-label">Categoría y fecha</p>
+        <div class="form-row">
+          <div class="form-group"><label>Categoría</label><select id="taskCategory"></select></div>
+          <div class="form-group"><label>Fecha</label><input type="date" id="taskDate"></div>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="notes">
+        <p class="wizard-step-label">Notas finales</p>
+        <div class="form-group-full"><label>Notas (opcional)</label><textarea id="taskNotes" placeholder="Detalles..." rows="2"></textarea></div>
+      </div>
+
     </div>
-    <div class="form-group-full"><label>Notas (opcional)</label><textarea id="taskNotes" placeholder="Detalles..." rows="2"></textarea></div>
     <input type="hidden" id="taskEditId">
     <div class="modal-footer">
       <button class="btn btn-secondary btn-sm" onclick="closeTaskModal()">Cancelar</button>
-      <button class="btn btn-blue btn-sm" onclick="saveTask()">Guardar tarea</button>
+      <button class="btn btn-secondary btn-sm" id="taskWizardBackBtn" onclick="taskWizardBack()">← Atrás</button>
+      <button class="btn btn-blue btn-sm" id="taskWizardNextBtn" onclick="taskWizardNext()">Siguiente →</button>
+      <button class="btn btn-blue btn-sm" id="taskWizardSaveBtn" onclick="saveTask()">Guardar tarea</button>
     </div>
   </div>
 </div>
@@ -2151,37 +2177,70 @@ textarea {
 <div class="modal-overlay" id="goalModal">
   <div class="modal">
     <h3 id="goalModalTitle">Nueva meta a largo plazo</h3>
-    <div class="form-row">
-      <div class="form-group"><label>Nombre *</label><input type="text" id="gmName" placeholder="Ej: Correr una maratón" maxlength="60"></div>
-      <div class="form-group"><label>Emoji</label><input type="text" id="gmIcon" placeholder="🏅" maxlength="2" style="font-size:1.3rem;text-align:center" value="🎯"></div>
-      <div class="form-group-full" style="margin-bottom:10px">
-  <label>Emojis rápidos</label>
-  <div class="emoji-picker-row" id="gmEmojiPicker"></div>
-</div>
-    </div>
-    <div id="gmProgressFields">
-      <div class="form-row">
-        <div class="form-group"><label>Objetivo numérico</label><input type="number" id="gmTarget" step="1" min="0" placeholder="Opcional"></div>
-        <div class="form-group"><label>Unidad</label><input type="text" id="gmUnit" placeholder="Ej: km, horas, libros"></div>
+    <div class="habit-wizard-progress" id="goalWizardProgressLabel">Paso 1 de 4</div>
+    <div class="habit-wizard-progress-bar"><div class="habit-wizard-progress-fill" id="goalWizardProgressFill" style="width:25%"></div></div>
+    <div style="margin-top:1rem">
+
+      <div class="habit-step" data-step="identity">
+        <p class="wizard-step-label">¿Cómo se llama tu meta?</p>
+        <div class="form-row">
+          <div class="form-group"><label>Nombre *</label><input type="text" id="gmName" placeholder="Ej: Correr una maratón" maxlength="60"></div>
+          <div class="form-group"><label>Emoji</label><input type="text" id="gmIcon" placeholder="🏅" maxlength="2" style="font-size:1.3rem;text-align:center" value="🎯"></div>
+        </div>
+        <div class="form-group-full" style="margin-bottom:0">
+          <label>Emojis rápidos</label>
+          <div class="emoji-picker-row" id="gmEmojiPicker"></div>
+        </div>
       </div>
-      <div class="form-group"><label>Progreso actual</label><input type="number" id="gmProgress" step="0.1" min="0" value="0"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Fecha límite (opcional)</label><input type="date" id="gmDeadline"></div>
-      <div class="form-group"><label>Cuenta atrás</label>
-        <select id="gmCountdown" onchange="toggleGoalCountdownFields()"><option value="no">No</option><option value="yes">Sí</option></select>
+
+      <div class="habit-step" data-step="progress">
+        <p class="wizard-step-label">¿Tiene un objetivo numérico?</p>
+        <div id="gmProgressFields">
+          <div class="form-row">
+            <div class="form-group"><label>Objetivo numérico</label><input type="number" id="gmTarget" step="1" min="0" placeholder="Opcional"></div>
+            <div class="form-group"><label>Unidad</label><input type="text" id="gmUnit" placeholder="Ej: km, horas, libros"></div>
+          </div>
+          <div class="form-group"><label>Progreso actual</label><input type="number" id="gmProgress" step="0.1" min="0" value="0"></div>
+        </div>
       </div>
+
+      <div class="habit-step" data-step="deadline">
+        <p class="wizard-step-label">¿Fecha límite y cuenta atrás?</p>
+        <div class="form-row">
+          <div class="form-group"><label>Fecha límite (opcional)</label><input type="date" id="gmDeadline" onchange="toggleGoalCountdownFields()"></div>
+          <div class="form-group"><label>Cuenta atrás</label>
+            <select id="gmCountdown" onchange="toggleGoalCountdownFields()"><option value="no">No</option><option value="yes">Sí</option></select>
+          </div>
+        </div>
+        <p id="gmCountdownNote" style="display:none;font-size:0.74rem;color:var(--text3);margin:-0.4rem 0 0.8rem">📅 El % se calculará solo según los días transcurridos: 0% hoy, 100% el día del plazo.</p>
+        <p style="font-size:0.72rem;color:var(--text3)">Necesitas una fecha límite para poder activar la cuenta atrás.</p>
+      </div>
+
+      <div class="habit-step" data-step="display">
+        <p class="wizard-step-label">Estilo y visibilidad</p>
+        <div class="form-row">
+          <div class="form-group"><label>Color</label>
+            <select id="gmColor"><option value="green">🟢 Verde</option><option value="blue">🔵 Azul</option><option value="purple">🟣 Morado</option><option value="amber">🟡 Amarillo</option><option value="red">🔴 Rojo</option></select>
+          </div>
+          <div class="form-group"><label>Mostrar en pantalla principal</label>
+            <select id="gmShowHome"><option value="yes">Sí</option><option value="no">No</option></select>
+          </div>
+        </div>
+        <div class="form-group-full"><label>Descripción</label><textarea id="gmDesc" placeholder="Quiero lograr esto porque..." rows="2"></textarea></div>
+      </div>
+
     </div>
-    <p id="gmCountdownNote" style="display:none;font-size:0.74rem;color:var(--text3);margin:-0.4rem 0 0.8rem">📅 El % se calculará solo según los días transcurridos: 0% hoy, 100% el día del plazo.</p>
-    <div class="form-group-full"><label>Color</label>
-      <select id="gmColor"><option value="green">🟢 Verde</option><option value="blue">🔵 Azul</option><option value="purple">🟣 Morado</option><option value="amber">🟡 Amarillo</option><option value="red">🔴 Rojo</option></select>
-    </div>
-    <div class="form-group-full"><label>Descripción</label><textarea id="gmDesc" placeholder="Quiero lograr esto porque..." rows="2"></textarea></div>
     <input type="hidden" id="gmEditId">
-    <div class="modal-footer">
-      <button class="btn btn-secondary btn-sm" onclick="closeGoalModal()">Cancelar</button>
-      <button class="btn btn-danger btn-sm" id="gmDeleteBtn" style="display:none" onclick="deleteGoalFromModal()">🗑️ Eliminar</button>
-      <button class="btn btn-sm" onclick="saveGoal()">💾 Guardar</button>
+    <div class="modal-footer" style="justify-content:space-between">
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" onclick="closeGoalModal()">Cancelar</button>
+        <button class="btn btn-danger btn-sm" id="gmDeleteBtn" style="display:none" onclick="deleteGoalFromModal()">🗑️ Eliminar</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" id="goalWizardBackBtn" onclick="goalWizardBack()">← Atrás</button>
+        <button class="btn btn-sm" id="goalWizardNextBtn" onclick="goalWizardNext()">Siguiente →</button>
+        <button class="btn btn-sm" id="goalWizardSaveBtn" onclick="saveGoal()">💾 Guardar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2190,37 +2249,62 @@ textarea {
 <div class="modal-overlay" id="monthlyObjModal">
   <div class="modal" style="max-width:440px">
     <h3 id="mobjModalTitle">Nuevo objetivo mensual</h3>
-    <div class="form-group-full"><label>Objetivo *</label><input type="text" id="mobjName" placeholder="Ej: Estudiar alemán 3 veces por semana" maxlength="80"></div>
-    <div class="form-row">
-      <div class="form-group"><label>Categoría</label>
-        <select id="mobjCat"><option>Salud</option><option>Deporte</option><option>Estudio</option><option>Personal</option><option>Trabajo</option><option>Social</option><option>Otro</option></select>
+    <div class="habit-wizard-progress" id="mobjWizardProgressLabel">Paso 1 de 4</div>
+    <div class="habit-wizard-progress-bar"><div class="habit-wizard-progress-fill" id="mobjWizardProgressFill" style="width:25%"></div></div>
+    <div style="margin-top:1rem">
+
+      <div class="habit-step" data-step="identity">
+        <p class="wizard-step-label">¿Cuál es el objetivo?</p>
+        <div class="form-group-full"><label>Objetivo *</label><input type="text" id="mobjName" placeholder="Ej: Estudiar alemán 3 veces por semana" maxlength="80"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Categoría</label>
+            <select id="mobjCat"><option>Salud</option><option>Deporte</option><option>Estudio</option><option>Personal</option><option>Trabajo</option><option>Social</option><option>Otro</option></select>
+          </div>
+          <div class="form-group"><label>Emoji</label><input type="text" id="mobjIcon" placeholder="🎯" maxlength="2" style="font-size:1.3rem;text-align:center" value="🎯"></div>
+        </div>
+        <div class="form-group-full" style="margin-bottom:0">
+          <label>Emojis rápidos</label>
+          <div class="emoji-picker-row" id="mobjEmojiPicker"></div>
+        </div>
       </div>
-      <div class="form-group"><label>Emoji</label><input type="text" id="mobjIcon" placeholder="🎯" maxlength="2" style="font-size:1.3rem;text-align:center" value="🎯"></div>
-      <div class="form-group-full" style="margin-bottom:10px">
-  <label>Emojis rápidos</label>
-  <div class="emoji-picker-row" id="mobjEmojiPicker"></div>
-</div>
+
+      <div class="habit-step" data-step="schedule">
+        <p class="wizard-step-label">¿Cuándo?</p>
+        <div class="form-row">
+          <div class="form-group"><label>Mes</label><input type="month" id="mobjMonth"></div>
+          <div class="form-group"><label>Fecha límite</label><input type="date" id="mobjDeadline"></div>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="link">
+        <p class="wizard-step-label">¿Cómo mides el progreso?</p>
+        <div class="form-group-full"><label>🔗 Vincular a hábito (opcional)</label>
+          <select id="mobjLinkedHabit"><option value="">-- Sin vincular --</option></select>
+          <p style="font-size:0.68rem;color:var(--text3);margin-top:3px">Cada registro de ese hábito sumará +1 al progreso de este objetivo.</p>
+        </div>
+        <div class="form-row" id="mobjTargetRow">
+          <div class="form-group"><label>Veces objetivo</label><input type="number" id="mobjTarget" min="1" step="1" placeholder="Ej: 5 veces"></div>
+          <div class="form-group"><label>Progreso actual</label><input type="number" id="mobjProgress" min="0" step="1" value="0"></div>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="notes">
+        <p class="wizard-step-label">Notas finales</p>
+        <div class="form-group-full"><label>Notas (opcional)</label><textarea id="mobjNotes" placeholder="Detalles..." rows="2"></textarea></div>
+      </div>
+
     </div>
-    <div class="form-row">
-      <div class="form-group"><label>Mes</label><input type="month" id="mobjMonth"></div>
-      <div class="form-group"><label>Fecha límite</label><input type="date" id="mobjDeadline"></div>
-    </div>
-<div class="form-group-full"><label>🔗 Vincular a hábito (opcional)</label>
-  <select id="mobjLinkedHabit">
-    <option value="">-- Sin vincular --</option>
-  </select>
-  <p style="font-size:0.68rem;color:var(--text3);margin-top:3px">Cada registro de ese hábito sumará +1 al progreso de este objetivo.</p>
-</div>
-<div class="form-row" id="mobjTargetRow">
-  <div class="form-group"><label>Veces objetivo</label><input type="number" id="mobjTarget" min="1" step="1" placeholder="Ej: 5 veces"></div>
-  <div class="form-group"><label>Progreso actual</label><input type="number" id="mobjProgress" min="0" step="1" value="0"></div>
-</div>
-    <div class="form-group-full"><label>Notas (opcional)</label><textarea id="mobjNotes" placeholder="Detalles..." rows="2"></textarea></div>
     <input type="hidden" id="mobjEditId">
-    <div class="modal-footer">
-      <button class="btn btn-secondary btn-sm" onclick="closeMonthlyObjModal()">Cancelar</button>
-      <button class="btn btn-danger btn-sm" id="mobjDeleteBtn" style="display:none" onclick="deleteMonthlyObjFromModal()">🗑️ Eliminar</button>
-      <button class="btn btn-sm" onclick="saveMonthlyObj()">💾 Guardar</button>
+    <div class="modal-footer" style="justify-content:space-between">
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" onclick="closeMonthlyObjModal()">Cancelar</button>
+        <button class="btn btn-danger btn-sm" id="mobjDeleteBtn" style="display:none" onclick="deleteMonthlyObjFromModal()">🗑️ Eliminar</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" id="mobjWizardBackBtn" onclick="mobjWizardBack()">← Atrás</button>
+        <button class="btn btn-sm" id="mobjWizardNextBtn" onclick="mobjWizardNext()">Siguiente →</button>
+        <button class="btn btn-sm" id="mobjWizardSaveBtn" onclick="saveMonthlyObj()">💾 Guardar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2262,38 +2346,59 @@ textarea {
 <div class="modal-overlay" id="recurringModal">
   <div class="modal">
     <h3>🔁 Tarea recurrente</h3>
-    <div class="form-group-full"><label>Nombre *</label><input type="text" id="recName" placeholder="Ej: Hacer deporte" maxlength="80"></div>
-    <div class="form-group-full"><label>Días de la semana</label>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px" id="recDaysRow">
-        <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="1"> Lun</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="2"> Mar</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="3"> Mié</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="4"> Jue</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="5"> Vie</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="6"> Sáb</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="0"> Dom</label>
+    <div class="habit-wizard-progress" id="recWizardProgressLabel">Paso 1 de 4</div>
+    <div class="habit-wizard-progress-bar"><div class="habit-wizard-progress-fill" id="recWizardProgressFill" style="width:25%"></div></div>
+    <div style="margin-top:1rem">
+
+      <div class="habit-step" data-step="identity">
+        <p class="wizard-step-label">¿Cómo se llama la tarea?</p>
+        <div class="form-group-full"><label>Nombre *</label><input type="text" id="recName" placeholder="Ej: Hacer deporte" maxlength="80"></div>
       </div>
-    </div>
-    <div class="form-row" style="margin-top:0.6rem">
-  <div class="form-group"><label>Veces al día</label>
-    <input type="number" id="recTimesPerDay" min="1" max="50" step="1" value="1" onchange="updateRecTimesContainer(window._currentEditingRec||null)">
-  </div>
-</div>
-    <div id="recTimesContainer" style="margin-top:0.8rem">
-      <p style="font-size:0.78rem;color:var(--text3)">Selecciona días para configurar horas.</p>
-    </div>
-    <div class="form-row" style="margin-top:0.6rem">
-      <div class="form-group"><label>Categoría</label>
-        <select id="recCategory"></select>
+
+      <div class="habit-step" data-step="days">
+        <p class="wizard-step-label">¿Qué días de la semana?</p>
+        <div class="form-group-full">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px" id="recDaysRow">
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="1"> Lun</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="2"> Mar</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="3"> Mié</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="4"> Jue</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="5"> Vie</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="6"> Sáb</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" value="0"> Dom</label>
+          </div>
+        </div>
       </div>
-      <div class="form-group"><label>Prioridad</label>
-        <select id="recPriority"><option value="high">🔴 Alta</option><option value="mid" selected>🟡 Media</option><option value="low">🟢 Baja</option></select>
+
+      <div class="habit-step" data-step="repeat">
+        <p class="wizard-step-label">¿Cuántas veces al día y a qué hora?</p>
+        <div class="form-row">
+          <div class="form-group"><label>Veces al día</label>
+            <input type="number" id="recTimesPerDay" min="1" max="50" step="1" value="1" onchange="updateRecTimesContainer(window._currentEditingRec||null)">
+          </div>
+        </div>
+        <div id="recTimesContainer" style="margin-top:0.8rem">
+          <p style="font-size:0.78rem;color:var(--text3)">Selecciona días para configurar horas.</p>
+        </div>
       </div>
+
+      <div class="habit-step" data-step="category">
+        <p class="wizard-step-label">Categoría y prioridad</p>
+        <div class="form-row">
+          <div class="form-group"><label>Categoría</label><select id="recCategory"></select></div>
+          <div class="form-group"><label>Prioridad</label>
+            <select id="recPriority"><option value="high">🔴 Alta</option><option value="mid" selected>🟡 Media</option><option value="low">🟢 Baja</option></select>
+          </div>
+        </div>
+      </div>
+
     </div>
     <input type="hidden" id="recEditId">
     <div class="modal-footer">
       <button class="btn btn-secondary btn-sm" onclick="closeRecurringModal()">Cancelar</button>
-      <button class="btn btn-sm" onclick="saveRecurring()">💾 Guardar</button>
+      <button class="btn btn-secondary btn-sm" id="recWizardBackBtn" onclick="recWizardBack()">← Atrás</button>
+      <button class="btn btn-sm" id="recWizardNextBtn" onclick="recWizardNext()">Siguiente →</button>
+      <button class="btn btn-sm" id="recWizardSaveBtn" onclick="saveRecurring()">💾 Guardar</button>
     </div>
   </div>
 </div>
@@ -3274,6 +3379,24 @@ function getCurrentCustomNeedLevel(habit){
     return customNeedStates[needId] ?? 100;
   }
 
+  // Si TODOS los hábitos que comparten esta necesidad son diarios, el nivel se
+  // calcula según lo completado HOY (no por decaimiento acumulado). Se usa el
+  // mínimo entre todos: si falta uno, manda su propio %; si todos llegan al
+  // máximo configurado, la necesidad sube al 100%.
+  const dailySiblings = customHabits.filter(h => getHabitNeedId(h) === needId);
+  const allDaily = dailySiblings.length > 0 && dailySiblings.every(h => h.freq === "daily");
+  if(allDaily){
+    const fillableSiblings = dailySiblings.filter(h => {
+      const t = (h.effect || {}).type || "fill100";
+      return t === "fill100" || t === "fillCustom";
+    });
+    if(fillableSiblings.length){
+      const level = Math.min(...fillableSiblings.map(getDailySiblingTodayLevel));
+      customNeedStates[needId] = level;
+      return level;
+    }
+  }
+
   const eff = habit.effect || { type: "fill100" };
   if(eff.type === "damage" || eff.type === "none"){
     return customNeedStates[needId] ?? 100;
@@ -3678,6 +3801,23 @@ function getHabitNeedId(habit){
     return primary ? "cneed_" + primary.customNeedName.toLowerCase().replace(/\s+/g,"_") : "cneed_" + habit.id;
   }
   return habit.id;
+}
+
+// Calcula el % de "hoy" para un hábito diario que alimenta una necesidad compartida
+function getDailySiblingTodayLevel(h){
+  const eff = h.effect || { type: "fill100" };
+  const todayKey = getTodayKey();
+  const todayLogs = (habitLogs[h.id] || []).filter(l => l.date === todayKey);
+  if(todayLogs.length){
+    if(eff.type === "fill100") return 100;
+    if(eff.type === "fillCustom"){
+      return eff.accumulate ? Math.min(100, todayLogs.length * (eff.value || 50)) : (eff.value || 50);
+    }
+    return 100; // damage/none registrado hoy: se cuenta como hecho
+  }
+  // Aún no registrado hoy: decae con la hora, igual que las necesidades del sistema
+  const now = new Date(), hh = now.getHours() + now.getMinutes() / 60;
+  return Math.max(0, 100 - (hh * 100 / 24));
 }
 
 function needClass(v){return v>=50?"ok":v>=25?"warn":"critical";}
@@ -4649,27 +4789,33 @@ function openEditCore(which){
     const threshH=Math.floor(threshVal),threshM=Math.round((threshVal-threshH)*60);
     const highVal=p.sueno.highSleepThreshold!==undefined?p.sueno.highSleepThreshold:10;
     const highH=Math.floor(highVal),highM=Math.round((highVal-highH)*60);
-    html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">😴 Sueño</h4>
+html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.3rem;font-size:0.9rem">😴 Sueño</h4>
+
+    <p style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin:0.7rem 0 0.4rem">⚠️ Límite vital — mata a la planta al instante</p>
     <div class="form-row" style="align-items:end">
       <div class="form-group" style="margin:0"><label>Horas mínimas fatales (h)</label><input type="number" id="ep_sueno_fatal_h" step="1" min="0" max="6" value="${fatalH}"></div>
       <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_fatal_m" step="5" min="0" max="59" value="${fatalM}"></div>
     </div>
+
+    <p style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin:1rem 0 0.4rem">🎯 Objetivo diario — para el XP completo</p>
     <div class="form-row" style="align-items:end">
       <div class="form-group" style="margin:0"><label>Horas óptimas (h)</label><input type="number" id="ep_sueno_opt_h" step="1" min="5" max="10" value="${optH}"></div>
       <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_opt_m" step="5" min="0" max="59" value="${optM}"></div>
     </div>
+
+    <p style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin:1rem 0 0.4rem">📉 Alerta por poco sueño</p>
     <div class="form-row" style="align-items:end">
       <div class="form-group" style="margin:0"><label>Umbral "poco sueño" (h)</label><input type="number" id="ep_sueno_thresh_h" step="1" min="3" max="9" value="${threshH}"></div>
       <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_thresh_m" step="5" min="0" max="59" value="${threshM}"></div>
     </div>
+    <div class="form-group-full" style="margin-top:6px"><label>Noches seguidas por debajo del umbral → muerte</label><input type="number" id="ep_sueno_streak" step="1" min="2" max="14" value="${p.sueno.maxLowSleepStreak||3}"></div>
+
+    <p style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin:1rem 0 0.4rem">📈 Alerta por exceso de sueño</p>
     <div class="form-row" style="align-items:end">
       <div class="form-group" style="margin:0"><label>Umbral "exceso de sueño" (h)</label><input type="number" id="ep_sueno_high_h" step="1" min="6" max="16" value="${highH}"></div>
       <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_high_m" step="5" min="0" max="59" value="${highM}"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label>Noches seguidas con poco sueño → muerte</label><input type="number" id="ep_sueno_streak" step="1" min="2" max="14" value="${p.sueno.maxLowSleepStreak||3}"></div>
-      <div class="form-group"><label>Noches seguidas con exceso → muerte</label><input type="number" id="ep_sueno_high_streak" step="1" min="2" max="14" value="${p.sueno.maxHighSleepStreak||3}"></div>
-    </div>`;
+    <div class="form-group-full" style="margin-top:6px"><label>Noches seguidas por encima del umbral → muerte</label><input type="number" id="ep_sueno_high_streak" step="1" min="2" max="14" value="${p.sueno.maxHighSleepStreak||3}"></div>`;
   }
   if(which==="aleman"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">🧠 Alemán</h4><div class="form-row"><div class="form-group"><label>Días sin estudiar → muerte</label><input type="number" id="ep_aleman_dias" step="0.5" min="0.5" max="30" value="${p.aleman.diasMaxSinHacer}"></div><div class="form-group"><label>Horas objetivo C2</label><input type="number" id="ep_aleman_horas" step="10" min="50" max="3000" value="${p.aleman.horasObjetivo}"></div></div>
   <div class="form-row"><div class="form-group"><label>Nivel de partida</label><select id="ep_aleman_start"><option value="0" ${(p.aleman.startHours||0)===0?"selected":""}>A1 (0h)</option><option value="200" ${(p.aleman.startHours||0)===200?"selected":""}>A2 (200h)</option><option value="400" ${(p.aleman.startHours||0)===400?"selected":""}>B1 (400h)</option><option value="660" ${(p.aleman.startHours||0)===660?"selected":""}>B2 (660h)</option></select></div><div class="form-group"><label>Horas ya acumuladas</label><input type="number" id="ep_aleman_current" step="1" min="0" max="3000" value="${Math.round(goals.german.hours)}"></div></div>`;}
@@ -4773,6 +4919,13 @@ function editOrderQuestion(i){
 // LONG GOALS
 function toggleGoalCountdownFields(){
   const isCountdown=document.getElementById("gmCountdown").value==="yes";
+  if(isCountdown && !document.getElementById("gmDeadline").value){
+    toast("⚠️ Añade primero una fecha límite");
+    document.getElementById("gmCountdown").value="no";
+    const pf=document.getElementById("gmProgressFields");if(pf)pf.style.display="";
+    const note=document.getElementById("gmCountdownNote");if(note)note.style.display="none";
+    return;
+  }
   const pf=document.getElementById("gmProgressFields");if(pf)pf.style.display=isCountdown?"none":"";
   const note=document.getElementById("gmCountdownNote");if(note)note.style.display=isCountdown?"":"none";
 }
@@ -4794,6 +4947,7 @@ function openGoalModal(editId){
       document.getElementById("gmDeadline").value=g.deadline||"";
       document.getElementById("gmCountdown").value=g.countdown?"yes":"no";
       document.getElementById("gmDesc").value=g.desc||"";
+      document.getElementById("gmShowHome").value=g.showOnHome===false?"no":"yes";
     }
   } else {
     ["gmName","gmTarget","gmUnit","gmDesc","gmDeadline"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
@@ -4801,9 +4955,11 @@ function openGoalModal(editId){
     document.getElementById("gmProgress").value=0;
     document.getElementById("gmColor").value="green";
     document.getElementById("gmCountdown").value="no";
+    document.getElementById("gmShowHome").value="yes";
   }
   toggleGoalCountdownFields();
   renderGenericEmojiPicker("gmEmojiPicker",GOAL_EMOJIS,"gmIcon",document.getElementById("gmIcon").value);
+  goalWizardStep=0;renderGoalWizard();
 }
 
 function closeGoalModal(){document.getElementById("goalModal").classList.remove("open");}
@@ -4814,9 +4970,13 @@ function deleteGoalFromModal(){
   longGoals=longGoals.filter(g=>g.id!==id);
   closeGoalModal();save();renderAll();toast("🗑️ Meta eliminada");
 }
+
 function saveGoal(){
   const name=document.getElementById("gmName").value.trim();
   if(!name){toast("Escribe el nombre de la meta");return;}
+  const deadline=document.getElementById("gmDeadline").value;
+  const countdown=document.getElementById("gmCountdown").value==="yes";
+  if(countdown&&!deadline){toast("La cuenta atrás necesita una fecha límite");return;}
   const editId=document.getElementById("gmEditId").value;
   const existing=editId?longGoals.find(x=>x.id===editId):null;
   const obj={
@@ -4826,8 +4986,8 @@ function saveGoal(){
     unit:document.getElementById("gmUnit").value,
     progress:parseFloat(document.getElementById("gmProgress").value)||0,
     color:document.getElementById("gmColor").value,
-    deadline:document.getElementById("gmDeadline").value,
-    countdown:document.getElementById("gmCountdown").value==="yes",
+    deadline,countdown,
+    showOnHome:document.getElementById("gmShowHome").value!=="no",
     createdAt:existing?.createdAt||getTodayKey(),
     desc:document.getElementById("gmDesc").value.trim()
   };
@@ -4882,11 +5042,34 @@ sel.innerHTML=`<option value="">-- Sin vincular --</option>`+
     document.getElementById("mobjCat").value="Personal";
     document.getElementById("mobjMonth").value=thisMonth;
     if(sel)sel.value="";
-    const mt=document.getElementById("mobjTarget");if(mt)mt.value="";
+   const mt=document.getElementById("mobjTarget");if(mt)mt.value="";
     const mp=document.getElementById("mobjProgress");if(mp)mp.value=0;
   }
   renderGenericEmojiPicker("mobjEmojiPicker",GOAL_EMOJIS,"mobjIcon",document.getElementById("mobjIcon").value);
+  mobjWizardStep=0;renderMobjWizard();
 }
+
+const MOBJ_WIZARD_STEPS=["identity","schedule","link","notes"];
+let mobjWizardStep=0;
+function renderMobjWizard(){
+  const steps=MOBJ_WIZARD_STEPS;
+  if(mobjWizardStep>=steps.length)mobjWizardStep=steps.length-1;
+  if(mobjWizardStep<0)mobjWizardStep=0;
+  const activeKey=steps[mobjWizardStep];
+  document.querySelectorAll("#monthlyObjModal .habit-step").forEach(el=>{el.style.display=el.dataset.step===activeKey?"block":"none";});
+  document.getElementById("mobjWizardProgressLabel").textContent=`Paso ${mobjWizardStep+1} de ${steps.length}`;
+  document.getElementById("mobjWizardProgressFill").style.width=`${((mobjWizardStep+1)/steps.length)*100}%`;
+  document.getElementById("mobjWizardBackBtn").style.display=mobjWizardStep===0?"none":"";
+  document.getElementById("mobjWizardNextBtn").style.display=mobjWizardStep===steps.length-1?"none":"";
+  document.getElementById("mobjWizardSaveBtn").style.display=mobjWizardStep===steps.length-1?"":"none";
+}
+function mobjWizardNext(){
+  const cur=MOBJ_WIZARD_STEPS[mobjWizardStep];
+  if(cur==="identity"&&!document.getElementById("mobjName").value.trim()){toast("Escribe el objetivo");return;}
+  mobjWizardStep=Math.min(mobjWizardStep+1,MOBJ_WIZARD_STEPS.length-1);
+  renderMobjWizard();
+}
+function mobjWizardBack(){mobjWizardStep=Math.max(mobjWizardStep-1,0);renderMobjWizard();}
 
 function closeMonthlyObjModal(){document.getElementById("monthlyObjModal").classList.remove("open");}
 function deleteMonthlyObjFromModal(){
@@ -5080,7 +5263,30 @@ function openTaskModal(editId){
     document.getElementById("taskPriority").value="mid";document.getElementById("taskCategory").value="Personal";
     updateTaskTimesInputs();
   }
+  taskWizardStep=0;renderTaskWizard();
 }
+
+const TASK_WIZARD_STEPS=["identity","schedule","repeat","category","notes"];
+let taskWizardStep=0;
+function renderTaskWizard(){
+  const steps=TASK_WIZARD_STEPS;
+  if(taskWizardStep>=steps.length)taskWizardStep=steps.length-1;
+  if(taskWizardStep<0)taskWizardStep=0;
+  const activeKey=steps[taskWizardStep];
+  document.querySelectorAll("#taskModal .habit-step").forEach(el=>{el.style.display=el.dataset.step===activeKey?"block":"none";});
+  document.getElementById("taskWizardProgressLabel").textContent=`Paso ${taskWizardStep+1} de ${steps.length}`;
+  document.getElementById("taskWizardProgressFill").style.width=`${((taskWizardStep+1)/steps.length)*100}%`;
+  document.getElementById("taskWizardBackBtn").style.display=taskWizardStep===0?"none":"";
+  document.getElementById("taskWizardNextBtn").style.display=taskWizardStep===steps.length-1?"none":"";
+  document.getElementById("taskWizardSaveBtn").style.display=taskWizardStep===steps.length-1?"":"none";
+}
+function taskWizardNext(){
+  const cur=TASK_WIZARD_STEPS[taskWizardStep];
+  if(cur==="identity"&&!document.getElementById("taskName").value.trim()){toast("Escribe el nombre de la tarea");return;}
+  taskWizardStep=Math.min(taskWizardStep+1,TASK_WIZARD_STEPS.length-1);
+  renderTaskWizard();
+}
+function taskWizardBack(){taskWizardStep=Math.max(taskWizardStep-1,0);renderTaskWizard();}
 
 function closeTaskModal(){document.getElementById("taskModal").classList.remove("open");}
 
@@ -5373,6 +5579,27 @@ function navLinkHtml(page,icon,label,customId){
   return `<div class="nav-link" data-page="${page}"${customId?` data-custom-id="${customId}"`:""}><span class="icon">${icon}</span> ${label}</div>`;
 }
 
+const GOAL_WIZARD_STEPS=["identity","progress","deadline","display"];
+let goalWizardStep=0;
+function renderGoalWizard(){
+  const steps=GOAL_WIZARD_STEPS;
+  if(goalWizardStep>=steps.length)goalWizardStep=steps.length-1;
+  if(goalWizardStep<0)goalWizardStep=0;
+  const activeKey=steps[goalWizardStep];
+  document.querySelectorAll("#goalModal .habit-step").forEach(el=>{el.style.display=el.dataset.step===activeKey?"block":"none";});
+  document.getElementById("goalWizardProgressLabel").textContent=`Paso ${goalWizardStep+1} de ${steps.length}`;
+  document.getElementById("goalWizardProgressFill").style.width=`${((goalWizardStep+1)/steps.length)*100}%`;
+  document.getElementById("goalWizardBackBtn").style.display=goalWizardStep===0?"none":"";
+  document.getElementById("goalWizardNextBtn").style.display=goalWizardStep===steps.length-1?"none":"";
+  document.getElementById("goalWizardSaveBtn").style.display=goalWizardStep===steps.length-1?"":"none";
+}
+function goalWizardNext(){
+  const cur=GOAL_WIZARD_STEPS[goalWizardStep];
+  if(cur==="identity"&&!document.getElementById("gmName").value.trim()){toast("Escribe el nombre de la meta");return;}
+  goalWizardStep=Math.min(goalWizardStep+1,GOAL_WIZARD_STEPS.length-1);
+  renderGoalWizard();
+}
+function goalWizardBack(){goalWizardStep=Math.max(goalWizardStep-1,0);renderGoalWizard();}
 
 // RENDER ALL
 function renderAll(){
@@ -5445,7 +5672,7 @@ function renderHome(){
 
   // Long goals (preview)
   const gl=document.getElementById("homeGoalsList");
-  const allGoals=buildAllGoalsData();
+const allGoals=buildAllGoalsData(true);
   if(!allGoals.length){gl.innerHTML=`<p style="font-size:0.84rem;color:var(--text3)">Sin metas aún. <button class="btn btn-xs" onclick="openGoalModal()">Añadir meta</button></p>`;}
   else gl.innerHTML=allGoals.slice(0,4).map(g=>renderGoalRow(g)).join("");
 
@@ -5469,7 +5696,7 @@ function renderHome(){
 if(pto)pto.style.display=(plant.alive&&plant.level>=8&&!treeOverlayDismissed)?"block":"none";
 }
 
-function buildAllGoalsData(){
+function buildAllGoalsData(onlyHome){
   const built=[];
   const builtin=[
     {id:"__german",icon:"📖",name:"Alemán B2",sub:`${Math.round(goals.german.hours)}/${goals.german.target||660}h`,pct:(goals.german.hours/(goals.german.target||660))*100,color:"green"},
@@ -5480,6 +5707,7 @@ function buildAllGoalsData(){
     if(!disabledBuiltinGoals.includes(g.id)) built.push(g);
   });
   longGoals.forEach(g=>{
+    if(onlyHome && g.showOnHome===false) return;
     if(g.countdown&&g.deadline){
       const start=new Date((g.createdAt||g.deadline)+'T00:00:00');
       const end=new Date(g.deadline+'T00:00:00');
@@ -6848,9 +7076,10 @@ function openRecurringModal(editId){
   const checkboxes=document.querySelectorAll("#recDaysRow input[type=checkbox]");
   checkboxes.forEach(cb=>cb.checked=false);
 
-  let r=null;
+let r=null;
   if(editId){
     r=recurringTasks.find(x=>x.id===editId);
+    window._currentEditingRec=r;
     if(r){
       document.getElementById("recName").value=r.name;
       document.getElementById("recCategory").value=r.category||"Personal";
@@ -6861,11 +7090,39 @@ function openRecurringModal(editId){
   } else {
     document.getElementById("recTimesPerDay").value="1";
   }
-  updateRecTimesContainer(r);
+updateRecTimesContainer(r);
   checkboxes.forEach(cb=>{
     cb.onchange=()=>updateRecTimesContainer(r);
   });
+  recWizardStep=0;renderRecWizard();
 }
+
+const REC_WIZARD_STEPS=["identity","days","repeat","category"];
+let recWizardStep=0;
+function renderRecWizard(){
+  const steps=REC_WIZARD_STEPS;
+  if(recWizardStep>=steps.length)recWizardStep=steps.length-1;
+  if(recWizardStep<0)recWizardStep=0;
+  const activeKey=steps[recWizardStep];
+  document.querySelectorAll("#recurringModal .habit-step").forEach(el=>{el.style.display=el.dataset.step===activeKey?"block":"none";});
+  document.getElementById("recWizardProgressLabel").textContent=`Paso ${recWizardStep+1} de ${steps.length}`;
+  document.getElementById("recWizardProgressFill").style.width=`${((recWizardStep+1)/steps.length)*100}%`;
+  document.getElementById("recWizardBackBtn").style.display=recWizardStep===0?"none":"";
+  document.getElementById("recWizardNextBtn").style.display=recWizardStep===steps.length-1?"none":"";
+  document.getElementById("recWizardSaveBtn").style.display=recWizardStep===steps.length-1?"":"none";
+}
+function recWizardNext(){
+  const cur=REC_WIZARD_STEPS[recWizardStep];
+  if(cur==="identity"&&!document.getElementById("recName").value.trim()){toast("Escribe el nombre de la tarea");return;}
+  if(cur==="days"){
+    const anyChecked=[...document.querySelectorAll("#recDaysRow input[type=checkbox]")].some(cb=>cb.checked);
+    if(!anyChecked){toast("Selecciona al menos un día");return;}
+    updateRecTimesContainer(window._currentEditingRec||null);
+  }
+  recWizardStep=Math.min(recWizardStep+1,REC_WIZARD_STEPS.length-1);
+  renderRecWizard();
+}
+function recWizardBack(){recWizardStep=Math.max(recWizardStep-1,0);renderRecWizard();}
 
 function closeRecurringModal(){document.getElementById("recurringModal").classList.remove("open");}
 
@@ -7611,21 +7868,23 @@ function renderCorkBoard(){
   }).join("");
   el.innerHTML=notesHtml+(expandedCorkNoteId?`<div class="cork-backdrop" onclick="collapseCorkExpand()"></div>`:"");
 
-  // Medir overflow real de cada nota para decidir si mostrar "Ver más"
-  corkNotes.forEach(n=>{
-    const bodyEl=document.getElementById("corkBody_"+n.id);
-    const moreEl=document.getElementById("corkMore_"+n.id);
-    if(!bodyEl||!moreEl)return;
-    const isExpanded=expandedCorkNoteId===n.id;
-    if(isExpanded){
-      moreEl.style.display="";
-      moreEl.textContent="Ver menos ▴";
-    } else if(bodyEl.scrollHeight>bodyEl.clientHeight+2){
-      moreEl.style.display="";
-      moreEl.textContent="Ver más ▾";
-    } else {
-      moreEl.style.display="none";
-    }
+// Medir overflow real de cada nota para decidir si mostrar "Ver más"
+  requestAnimationFrame(()=>{
+    corkNotes.forEach(n=>{
+      const bodyEl=document.getElementById("corkBody_"+n.id);
+      const moreEl=document.getElementById("corkMore_"+n.id);
+      if(!bodyEl||!moreEl)return;
+      const isExpanded=expandedCorkNoteId===n.id;
+      if(isExpanded){
+        moreEl.style.display="";
+        moreEl.textContent="Ver menos ▴";
+      } else if(bodyEl.scrollHeight>bodyEl.clientHeight+2){
+        moreEl.style.display="";
+        moreEl.textContent="Ver más ▾";
+      } else {
+        moreEl.style.display="none";
+      }
+    });
   });
 }
 
