@@ -4084,7 +4084,7 @@ function deleteGermanEntry(id){
 function renderAlemanHist(){
   const el=document.getElementById("alemanHistContent");if(!el)return;
   const entries=(goals.german.entries||[]).slice().reverse().slice(0,10);
-  if(!entries.length){el.innerHTML=`<p style="font-size:0.82rem;color:var(--text3)">Sin registros aún (los añadidos antes de esta actualización no aparecen aquí, pero las horas siguen contando).</p>`;return;}
+  if(!entries.length){el.innerHTML=`<p style="font-size:0.82rem;color:var(--text3)">Sin registros aún.</p>`;return;}
   el.innerHTML=entries.map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem">
     <span style="color:var(--text3)">${e.date}</span>
     <span style="font-weight:500;color:var(--green-md)">+${e.hours}h</span>
@@ -6388,7 +6388,7 @@ if(ps2) ps2.innerHTML = `Caminar mantiene sana a tu planta · Objetivo: <strong>
 const ss2 = document.getElementById("suenoSubtitle");
 if(ss2) ss2.innerHTML = `El descanso mantiene a tu planta con energía · Muere si duermes menos de <strong>${decimalHoursToHM(coreParams.sueno.minFatal)}</strong>  · Horas óptimas <strong>${decimalHoursToHM(coreParams.sueno.minOptimo)}</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('sueno')">⚙️ Ajustar</button>`;
 const ds2 = document.getElementById("deporteSubtitle");
-if(ds2) ds2.innerHTML = `Realiza deporte para mantener tu planta fuerte · La planta muere si no haces deporte en <strong>${coreParams.deporte.diasMaxSinHacer} días</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openSportCatModal()">🏅 Categorías</button> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('deporte')">⚙️ Ajustar</button>`;
+if(ds2) ds2.innerHTML = `Realiza deporte para mantener tu planta fuerte · La planta muere si no haces deporte en <strong>${coreParams.deporte.diasMaxSinHacer} días · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('deporte')">⚙️ Ajustar</button>`;
 const als = document.getElementById("alemanSubtitle");
 if(als) als.innerHTML = `Estudiar alemán mantiene la inteligencia de tu planta · La planta muere si no estudias en <strong>${coreParams.aleman.diasMaxSinHacer} días</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('aleman')">⚙️ Ajustar</button>`;
 const ms2 = document.getElementById("movilSubtitle");
