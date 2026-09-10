@@ -2421,6 +2421,56 @@ textarea {
   </div>
 </div>
 
+<!-- MODAL: NUEVA SESIÓN DEPORTE -->
+<div class="modal-overlay" id="sportSessionModal">
+  <div class="modal" style="max-width:440px">
+    <h3>🏋️ Nueva sesión</h3>
+    <div class="habit-wizard-progress" id="sportWizardProgressLabel">Paso 1 de 4</div>
+    <div class="habit-wizard-progress-bar"><div class="habit-wizard-progress-fill" id="sportWizardProgressFill" style="width:25%"></div></div>
+    <div style="margin-top:1rem">
+
+      <div class="habit-step" data-step="category">
+        <p class="wizard-step-label">¿Qué deporte has hecho?</p>
+        <div class="sport-cat-list" id="sportCatSelectorModal"></div>
+      </div>
+
+      <div class="habit-step" data-step="details">
+        <p class="wizard-step-label">Detalles de la sesión</p>
+        <div class="form-row-3">
+          <div class="form-group"><label>Fecha</label><input type="date" id="sportDate"></div>
+          <div class="form-group"><label>Minutos</label><input type="number" id="sportMins" min="5" max="360" step="5" placeholder="Ej: 45"></div>
+          <div class="form-group"><label>Intensidad</label>
+            <select id="sportIntensity"><option value="low">🟢 Baja</option><option value="mid" selected>🟡 Media</option><option value="high">🔴 Alta</option></select>
+          </div>
+        </div>
+        <div id="sportKmSection" style="display:none;margin-top:0.8rem">
+          <div class="form-row">
+            <div class="form-group"><label>Distancia (km)</label><input type="number" id="sportKmInput" step="0.5" min="0.5" max="200" placeholder="Km"></div>
+            <div class="form-group"><label>Ritmo (min/km)</label><input type="number" id="sportRitmoInput" step="0.1" min="2" max="20" placeholder="Opcional"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="habit-step" data-step="notes">
+        <p class="wizard-step-label">Notas finales</p>
+        <div class="form-group-full"><label>Notas (opcional)</label><textarea id="sportNotes" placeholder="Ej: Nuevo récord, me sentí bien..." rows="3"></textarea></div>
+      </div>
+
+      <div class="habit-step" data-step="confirm">
+        <p class="wizard-step-label">Resumen</p>
+        <div id="sportSummaryBox" style="background:var(--green-mist);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;font-size:0.85rem;color:var(--text2);line-height:1.8"></div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" onclick="closeSportSessionModal()">Cancelar</button>
+      <button class="btn btn-secondary btn-sm" id="sportWizardBackBtn" onclick="sportWizardBack()">← Atrás</button>
+      <button class="btn btn-sm" id="sportWizardNextBtn" onclick="sportWizardNext()">Siguiente →</button>
+      <button class="btn btn-sm" id="sportWizardSaveBtn" onclick="doSport()" style="display:none">💪 Registrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: TAREA RECURRENTE -->
 <div class="modal-overlay" id="recurringModal">
   <div class="modal">
@@ -2657,58 +2707,53 @@ textarea {
   </div>
 
   <!-- DEPORTE -->
-  <div class="page" id="page-deporte">
-    <div class="page-header">
-      <h2>💪 Deporte</h2>
-      <p id="deporteSubtitle">Realiza <strong>una sesión</strong> para mantener tu planta fuerte · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openSportCatModal()">🏅 Categorías</button> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('deporte')">⚙️ Ajustar</button></p>
+<div class="page" id="page-deporte">
+  <div class="page-header">
+    <h2>💪 Deporte</h2>
+    <p id="deporteSubtitle">Realiza <strong>una sesión</strong> para mantener tu planta fuerte · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openSportCatModal()">🏅 Categorías</button> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('deporte')">⚙️ Ajustar</button></p>
+  </div>
+  <div class="card" id="sportWeeklyStatusCard">
+    <div class="card-title">📋 Esta semana</div>
+    <div id="sportWeeklyStatus"></div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val" id="deporteSesiones">0</div><div class="stat-lbl">Sesiones este mes</div></div>
+    <div class="stat-card"><div class="stat-val" id="deporteMaxKm">0</div><div class="stat-lbl">Km máx. sesión</div></div>
+    <div class="stat-card"><div class="stat-val" id="deporteNeed">100%</div><div class="stat-lbl">Fuerza actual</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <span>🏅 Mis categorías</span>
+      <button class="btn btn-secondary btn-xs" onclick="openSportCatModal()">+ Nueva categoría</button>
     </div>
-    <div class="card" id="sportWeeklyStatusCard">
-      <div class="card-title">📋 Esta semana</div>
-      <div id="sportWeeklyStatus"></div>
+    <div id="sportCatPreviewList" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+  </div>
+  <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div>
+      <div style="font-family:'Lora',serif;font-size:1.05rem;color:var(--green-dk);font-weight:500">🏋️ Registrar sesión</div>
+      <p style="font-size:0.78rem;color:var(--text3);margin-top:3px">Añade una nueva sesión de deporte paso a paso</p>
     </div>
-    <div class="stats-row">
-      <div class="stat-card"><div class="stat-val" id="deporteSesiones">0</div><div class="stat-lbl">Sesiones este mes</div></div>
-      <div class="stat-card"><div class="stat-val" id="deporteMaxKm">0</div><div class="stat-lbl">Km máx. sesión</div></div>
-      <div class="stat-card"><div class="stat-val" id="deporteNeed">100%</div><div class="stat-lbl">Fuerza actual</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">🏋️ Registrar sesión</div>
-      <div class="form-group-full">
-        <label>Categoría deportiva</label>
-        <div class="sport-cat-list" id="sportCatSelector"></div>
-        <p style="font-size:0.68rem;color:var(--text3);margin-top:4px">Crea tu propia categoría   <button class="btn btn-secondary btn-xs" onclick="openSportCatModal()">Crear categoría</button></p>
+    <button class="btn" onclick="openSportSessionModal()">+ Nueva sesión</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <span>📈 Evolución</span>
+      <div style="display:flex;gap:6px" id="sportChartPills">
+        <button class="btn btn-secondary btn-xs active-filter" id="sportChartBtnKm" onclick="setSportChartMode('km')">📏 Km</button>
+        <button class="btn btn-secondary btn-xs" id="sportChartBtnRitmo" onclick="setSportChartMode('ritmo')">⏱️ Ritmo</button>
       </div>
-    <div class="form-row-3">
-  <div class="form-group"><label>Fecha</label><input type="date" id="sportDate"></div>
-  <div class="form-group"><label>Duración (minutos)</label><input type="number" id="sportMins" min="5" max="360" step="5" placeholder="Ej: 45"></div>
-  <div class="form-group"><label>Intensidad</label>
-    <select id="sportIntensity"><option value="low">🟢 Baja</option><option value="mid" selected>🟡 Media</option><option value="high">🔴 Alta</option></select>
+    </div>
+    <div class="form-group" style="margin-bottom:0.8rem"><label>Categoría</label><select id="sportChartCatSelect" onchange="setSportChartCategory(this.value)"></select></div>
+    <div class="chart-wrap"><canvas id="deporteChart" height="200"></canvas></div>
+    <p id="sportChartNoKm" style="display:none;font-size:0.8rem;color:var(--text3);text-align:center;padding:1.5rem 0">Esta categoría no registra km ni ritmo.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 Historial reciente</div>
+    <div id="deporteHistContent"></div>
   </div>
 </div>
-      <div id="sportKmSection" style="display:none" class="form-row">
-        <div class="form-group"><label>Distancia (km)</label><input type="number" id="sportKmInput" step="0.5" min="0.5" max="200" placeholder="Km"></div>
-        <div class="form-group"><label>Ritmo (min/km)</label><input type="number" id="sportRitmoInput" step="0.1" min="2" max="20" placeholder="Opcional"></div>
-      </div>
-      <div class="form-group-full"><label>Notas (opcional)</label><input type="text" id="sportNotes" placeholder="Ej: Nuevo récord..."></div>
-      <button class="btn" onclick="doSport()">💪 Registrar sesión</button>
-    </div>
-    <div class="card">
-      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <span>📈 Evolución</span>
-        <div style="display:flex;gap:6px" id="sportChartPills">
-          <button class="btn btn-secondary btn-xs active-filter" id="sportChartBtnKm" onclick="setSportChartMode('km')">📏 Km</button>
-          <button class="btn btn-secondary btn-xs" id="sportChartBtnRitmo" onclick="setSportChartMode('ritmo')">⏱️ Ritmo</button>
-        </div>
-      </div>
-      <div class="form-group" style="margin-bottom:0.8rem"><label>Categoría</label><select id="sportChartCatSelect" onchange="setSportChartCategory(this.value)"></select></div>
-      <div class="chart-wrap"><canvas id="deporteChart" height="200"></canvas></div>
-      <p id="sportChartNoKm" style="display:none;font-size:0.8rem;color:var(--text3);text-align:center;padding:1.5rem 0">Esta categoría no registra km ni ritmo.</p>
-    </div>
-    <div class="card">
-      <div class="card-title">📋 Historial reciente</div>
-      <div id="deporteHistContent"></div>
-    </div>
-  </div>
 
   <!-- SUEÑO -->
   <div class="page" id="page-sueno">
@@ -3923,6 +3968,89 @@ function getHabitNeedId(habit){
   return habit.id;
 }
 
+const SPORT_WIZARD_STEPS=["category","details","notes","confirm"];
+let sportWizardStep=0;
+
+function openSportSessionModal(){
+  if(!plant.alive){toast("❌ Reinicia primero");return;}
+  document.getElementById("sportSessionModal").classList.add("open");
+  document.getElementById("sportDate").value=getTodayKey();
+  document.getElementById("sportMins").value="";
+  document.getElementById("sportKmInput").value="";
+  document.getElementById("sportRitmoInput").value="";
+  document.getElementById("sportNotes").value="";
+  document.getElementById("sportIntensity").value="mid";
+  selectedSportCat=null;
+  renderSportCatSelectorModal();
+  const kmSec=document.getElementById("sportKmSection");if(kmSec)kmSec.style.display="none";
+  sportWizardStep=0;
+  renderSportWizard();
+}
+function closeSportSessionModal(){document.getElementById("sportSessionModal").classList.remove("open");}
+
+function renderSportCatSelectorModal(){
+  const sel=document.getElementById("sportCatSelectorModal");if(!sel)return;
+  sel.innerHTML=sportCats.map(c=>`<div class="sport-cat-chip${selectedSportCat===c.id?" selected":""}" onclick="selectSportCatModal('${c.id}')">${c.emoji} ${c.name}${c.required?` <span style="font-size:0.65rem;color:var(--red)">⚠️</span>`:""}</div>`).join("");
+}
+
+function selectSportCatModal(id){
+  selectedSportCat=id;
+  renderSportCatSelectorModal();
+  const catObj=sportCats.find(c=>c.id===id);
+  const kmSec=document.getElementById("sportKmSection");
+  if(kmSec)kmSec.style.display=catObj&&catObj.hasKm?"":"none";
+}
+
+function renderSportWizard(){
+  const steps=SPORT_WIZARD_STEPS;
+  if(sportWizardStep>=steps.length)sportWizardStep=steps.length-1;
+  if(sportWizardStep<0)sportWizardStep=0;
+  const activeKey=steps[sportWizardStep];
+  document.querySelectorAll("#sportSessionModal .habit-step").forEach(el=>{el.style.display=el.dataset.step===activeKey?"block":"none";});
+  document.getElementById("sportWizardProgressLabel").textContent=`Paso ${sportWizardStep+1} de ${steps.length}`;
+  document.getElementById("sportWizardProgressFill").style.width=`${((sportWizardStep+1)/steps.length)*100}%`;
+  document.getElementById("sportWizardBackBtn").style.display=sportWizardStep===0?"none":"";
+  document.getElementById("sportWizardNextBtn").style.display=sportWizardStep===steps.length-1?"none":"";
+  document.getElementById("sportWizardSaveBtn").style.display=sportWizardStep===steps.length-1?"":"none";
+  if(activeKey==="confirm")renderSportSummary();
+}
+
+function sportWizardNext(){
+  const cur=SPORT_WIZARD_STEPS[sportWizardStep];
+  if(cur==="category"&&!selectedSportCat){toast("Selecciona una categoría");return;}
+  if(cur==="details"){
+    const mins=parseInt(document.getElementById("sportMins").value)||0;
+    const km=parseFloat(document.getElementById("sportKmInput").value)||0;
+    const cat=sportCats.find(c=>c.id===selectedSportCat);
+    if(mins<5&&km<=0){toast("Ingresa la duración o distancia");return;}
+    if(cat&&cat.hasKm&&km<0){toast("Distancia inválida");return;}
+  }
+  sportWizardStep=Math.min(sportWizardStep+1,SPORT_WIZARD_STEPS.length-1);
+  renderSportWizard();
+}
+function sportWizardBack(){sportWizardStep=Math.max(sportWizardStep-1,0);renderSportWizard();}
+
+function renderSportSummary(){
+  const box=document.getElementById("sportSummaryBox");if(!box)return;
+  const cat=sportCats.find(c=>c.id===selectedSportCat);
+  const mins=parseInt(document.getElementById("sportMins").value)||0;
+  const km=parseFloat(document.getElementById("sportKmInput").value)||0;
+  const ritmo=parseFloat(document.getElementById("sportRitmoInput").value)||0;
+  const intensity=document.getElementById("sportIntensity").value;
+  const date=document.getElementById("sportDate").value;
+  const notes=document.getElementById("sportNotes").value.trim();
+  const intLbl={low:"🟢 Baja",mid:"🟡 Media",high:"🔴 Alta"}[intensity];
+  box.innerHTML=`
+    <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--text3)">Deporte:</span><strong>${cat?cat.emoji+" "+cat.name:"—"}</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--text3)">Fecha:</span><strong>${date||"—"}</strong></div>
+    ${mins?`<div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--text3)">Duración:</span><strong>${mins} min</strong></div>`:""}
+    ${km?`<div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--text3)">Distancia:</span><strong>${km} km</strong></div>`:""}
+    ${ritmo?`<div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--text3)">Ritmo:</span><strong>${ritmo} min/km</strong></div>`:""}
+    <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--text3)">Intensidad:</span><strong>${intLbl}</strong></div>
+    ${notes?`<div style="padding:6px 0 0;border-top:1px solid var(--border);margin-top:6px"><span style="color:var(--text3);font-size:0.78rem">Notas:</span><br><em style="font-size:0.82rem">${notes}</em></div>`:""}
+  `;
+}
+
 // Calcula el % de "hoy" para un hábito diario que alimenta una necesidad compartida
 function getDailySiblingTodayLevel(h){
   const eff = h.effect || { type: "fill100" };
@@ -4048,6 +4176,7 @@ function doSport(){
 
   toast(`${cat.emoji} Sesión de ${cat.name} registrada · Fuerza 100%`);
   save();renderAll();
+  closeSportSessionModal();
 }
 
 
@@ -4342,6 +4471,20 @@ function openLogModal(habitId){
 }
 
 function closeLogModal(){document.getElementById("logHabitModal").classList.remove("open");logHabitId=null;}
+
+function renderSportCatPreview(){
+  const el=document.getElementById("sportCatPreviewList");if(!el)return;
+  if(!sportCats.length){
+    el.innerHTML=`<p style="font-size:0.82rem;color:var(--text3)">Sin categorías. Crea la primera.</p>`;
+    return;
+  }
+  el.innerHTML=sportCats.map(c=>`
+    <div class="sport-cat-chip" style="cursor:default;position:relative">
+      ${c.emoji} ${c.name}
+      ${c.hasKm?`<span style="font-size:0.62rem;color:var(--text3);margin-left:2px">· km</span>`:""}
+      ${c.required?`<span style="font-size:0.65rem;color:var(--red)" title="Obligatoria semanal">⚠️</span>`:""}
+    </div>`).join("");
+}
 
 function closeLogModal()
 {document.getElementById("logHabitModal").classList.remove("open");logHabitId=null;}
@@ -4826,17 +4969,17 @@ function addSportCategory(){
   if(!name){toast("Escribe el nombre");return;}
   sportCats.push({id:"sc_"+Date.now(),name,emoji,hasKm,required});
   document.getElementById("newSportName").value="";document.getElementById("newSportEmoji").value="";
-  save();renderSportCatListEdit();toast(`${emoji} "${name}" añadida`);
+  save();renderSportCatListEdit();renderSportCatPreview();toast(`${emoji} "${name}" añadida`);
 }
 
 function deleteSportCat(id){
   if(sportCats.length<=1){toast("⚠️ Necesitas al menos una categoría");return;}
-  sportCats=sportCats.filter(c=>c.id!==id);save();renderSportCatListEdit();
+  sportCats=sportCats.filter(c=>c.id!==id);save();renderSportCatListEdit();renderSportCatPreview();
 }
 
 function toggleSportCatRequired(id){
   const cat=sportCats.find(c=>c.id===id);
-  if(cat){cat.required=!cat.required;save();renderSportCatListEdit();}
+  if(cat){cat.required=!cat.required;save();renderSportCatListEdit();renderSportCatPreview();}
 }
 
 function renderSportCatListEdit(){
@@ -6285,10 +6428,7 @@ if(sdEl0 && !sdEl0.value) sdEl0.value=getTodayKey();
   const ds=document.getElementById("deporteSesiones");
   if(ds){const now=new Date();ds.textContent=(goals.sport.sessions||[]).filter(s=>{const d=new Date(s.date+'T00:00:00');return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length;}
   const dm=document.getElementById("deporteMaxKm");if(dm)dm.textContent=goals.running.maxKm||0;
-  const sel=document.getElementById("sportCatSelector");
-  if(sel)sel.innerHTML=sportCats.map(c=>`<div class="sport-cat-chip${selectedSportCat===c.id?" selected":""}" onclick="selectSportCat('${c.id}')">${c.emoji} ${c.name}${c.required?` <span style="font-size:0.65rem;color:var(--red)">⚠️</span>`:""}</div>`).join("");
-  const catObj=selectedSportCat?sportCats.find(c=>c.id===selectedSportCat):null;
-  const kmSec=document.getElementById("sportKmSection");if(kmSec)kmSec.style.display=catObj&&catObj.hasKm?"grid":"none";
+if(document.getElementById("sportCatSelectorModal"))renderSportCatSelectorModal();
   const dh=document.getElementById("deporteHistContent");
   if(dh){
   const recent=(goals.sport.sessions||[]).slice(-8).reverse();
@@ -6305,6 +6445,7 @@ if(sdEl0 && !sdEl0.value) sdEl0.value=getTodayKey();
     </div>
   </div>`).join("");
 }
+renderSportCatPreview();
   renderSportChart();
 }
 function deleteSportSession(id){
