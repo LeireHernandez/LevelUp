@@ -1134,6 +1134,9 @@ textarea {
   text-align:center;
 }
 
+.cork-note-expanded .cork-note-content{overflow:visible;}
+.cork-note-expanded .cork-note-body{overflow:visible;}
+
 .feature-toggle-text { flex:1; }
 .feature-toggle-name { font-size:0.78rem; font-weight:500; color:var(--text); }
 .feature-toggle-desc { font-size:0.65rem; color:var(--text3); }
@@ -1812,9 +1815,36 @@ textarea {
 /* Modal corcho */
 #corkNoteModal .modal{max-width:440px;}
 
+/* OVERLAY GLOBAL DE MUERTE */
+#deathOverlay{
+  z-index:5000;
+  background:rgba(15,10,5,0.8);
+  backdrop-filter:blur(2px);
+}
+#deathOverlay .death-card{
+  margin:0;
+  max-width:380px;
+  width:90%;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  animation:deathCardIn 0.25s ease;
+}
+@keyframes deathCardIn{
+  from{opacity:0;transform:translateY(12px) scale(0.97);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+
 </style>
 </head>
 <body>
+
+<!-- OVERLAY GLOBAL: PLANTA MUERTA (se muestra sobre cualquier pantalla) -->
+<div class="modal-overlay" id="deathOverlay">
+  <div class="death-card">
+    <h2>🍂 Tu planta ha muerto</h2>
+    <p id="deathReasonTextGlobal"></p>
+    <button class="btn" style="background:rgba(139,46,26,0.12);color:var(--red);font-size:0.73rem" onclick="resetFromDeathOverlay()">Reiniciar planta</button>
+  </div>
+</div>
 
 <button class="burger" id="burgerBtn" aria-label="Menú"><span></span><span></span><span></span></button>
 <div class="nav-overlay" id="navOverlay"></div>
@@ -2561,7 +2591,6 @@ textarea {
             <div class="stat-card"><div class="stat-val" id="aguaObj">1.2</div><div class="stat-lbl">Objetivo (L)</div></div>
             <div class="stat-card"><div class="stat-val" id="aguaPct">0%</div><div class="stat-lbl">Completado</div></div>
           </div>
-          <div class="alert alert-info" id="aguaAlertMsg">Bebe agua para mantener tu planta viva.</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
             <input type="number" id="waterInput" step="0.1" min="0.1" max="2" placeholder="Litros" value="0.3" style="flex:1;min-width:120px">
             <button class="btn" onclick="addWater(parseFloat(document.getElementById('waterInput').value))">💧 Beber</button>
@@ -2600,12 +2629,13 @@ textarea {
         <div class="sport-cat-list" id="sportCatSelector"></div>
         <p style="font-size:0.68rem;color:var(--text3);margin-top:4px">Crea tu propia categoría   <button class="btn btn-secondary btn-xs" onclick="openSportCatModal()">Crear categoría</button></p>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label>Duración (minutos)</label><input type="number" id="sportMins" min="5" max="360" step="5" placeholder="Ej: 45"></div>
-        <div class="form-group"><label>Intensidad</label>
-          <select id="sportIntensity"><option value="low">🟢 Baja</option><option value="mid" selected>🟡 Media</option><option value="high">🔴 Alta</option></select>
-        </div>
-      </div>
+    <div class="form-row-3">
+  <div class="form-group"><label>Fecha</label><input type="date" id="sportDate"></div>
+  <div class="form-group"><label>Duración (minutos)</label><input type="number" id="sportMins" min="5" max="360" step="5" placeholder="Ej: 45"></div>
+  <div class="form-group"><label>Intensidad</label>
+    <select id="sportIntensity"><option value="low">🟢 Baja</option><option value="mid" selected>🟡 Media</option><option value="high">🔴 Alta</option></select>
+  </div>
+</div>
       <div id="sportKmSection" style="display:none" class="form-row">
         <div class="form-group"><label>Distancia (km)</label><input type="number" id="sportKmInput" step="0.5" min="0.5" max="200" placeholder="Km"></div>
         <div class="form-group"><label>Ritmo (min/km)</label><input type="number" id="sportRitmoInput" step="0.1" min="2" max="20" placeholder="Opcional"></div>
@@ -2788,11 +2818,16 @@ textarea {
     </div>
     <div class="card">
       <div class="card-title">📚 Mi biblioteca <button class="btn btn-blue btn-xs" style="margin-left:auto" onclick="openBookModal()">+ Añadir</button></div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem" id="booksFilterRow">
-        <button class="btn btn-secondary btn-xs active-filter" onclick="filterBooks('all',this)">Todos</button>
-        <button class="btn btn-secondary btn-xs" onclick="filterBooks('Ficción',this)">Ficción</button>
-        <button class="btn btn-secondary btn-xs" onclick="filterBooks('No ficción',this)">No ficción</button>
-      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:end">
+  <div class="form-group" style="flex:1;min-width:160px;margin:0"><label>Buscar por título o autor</label><input type="text" id="booksSearchInput" placeholder="Buscar..." oninput="searchBooksInput(this.value)"></div>
+  <div class="form-group" style="min-width:150px;margin:0"><label>Género</label>
+    <select id="booksGenreFilter" onchange="filterBooksByGenreSelect(this.value)">
+      <option value="all">Todos los géneros</option>
+      <option>Ficción</option><option>No ficción</option><option>Ciencia ficción</option><option>Fantasía</option><option>Misterio</option><option>Romance</option><option>Terror</option><option>Histórico</option><option>Biografía</option><option>Autoayuda</option><option>Ciencia</option><option>Filosofía</option><option>Otro</option>
+    </select>
+  </div>
+  <button class="btn btn-secondary btn-sm" id="booksShowMoreBtn" style="display:none" onclick="toggleBooksShowAll()">Ver todos</button>
+</div>
       <div id="booksListContent"></div>
     </div>
     <div class="card">
@@ -2809,7 +2844,6 @@ textarea {
       <div class="stat-card"><div class="stat-val" id="movilMedia">0</div><div class="stat-lbl">Media semanal</div></div>
       <div class="stat-card"><div class="stat-val" id="movilMax">0</div><div class="stat-lbl">Máx. semanal</div></div>
     </div>
-    <div class="alert alert-danger" style="margin-bottom:1rem" id="movilFatalWarning">🚨 <strong>Obligatorio.</strong></div>
     <div id="movilDoneAlert" style="margin-bottom:1rem"></div>
     <div id="movilAlert" class="alert" style="display:none;margin-bottom:1rem"></div>
     <div class="card">
@@ -2923,6 +2957,8 @@ textarea {
       <div id="editMonthlyObjsList"></div>
     </div>
 
+
+
     <div class="edit-section">
       <div class="edit-section-title">🌿 Necesidades de la planta</div>
       <p style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem">Edita los nombres e iconos de las necesidades o crea nuevas necesidades personalizadas vinculadas a los hábitos.</p>
@@ -3004,24 +3040,24 @@ textarea {
     • Puedes filtrar la vista por categoría con los botones superiores.</p>
   </div>
 
-  <div class="card">
+<div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">💧 Hidratación</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra el agua con botones rápidos (+1 vaso / +500ml / +1L), una cantidad personalizada en el campo de texto, o cliclando en los vasos del tanque. Si te equivocas, usa los botones "-1 vaso" / "-500ml" para restar. El nivel mínimo se ajusta con el botón ⚙️ (objetivo en litros).</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra el agua con botones rápidos (+1 vaso / +500ml / +1L), una cantidad personalizada en el campo de texto, o cliclando en los vasos del tanque. Si te equivocas, usa los botones "-1 vaso" / "-500ml" para restar. Cada registro aparece en el historial del día y puedes eliminar cualquier entrada con 🗑️ (se devuelve el XP). El objetivo en litros se ajusta con el botón ⚙️. Por defecto, alcanzar el objetivo es uno de los "Pendientes obligatorios hoy" si lo activas desde Editar.</p>
   </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">💪 Deporte</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra sesiones seleccionando una <strong>categoría deportiva</strong>, la duración en minutos, la intensidad (baja / media / alta) y notas opcionales. Las categorías con km habilitados muestran además campos de distancia y ritmo. El panel <strong>"Esta semana"</strong> muestra si has cumplido el mínimo de una sesión y las categorías marcadas como obligatorias. Gestiona las categorías (crear, eliminar, marcar como obligatoria, activar km) desde el botón 🏅 Categorías o desde Editar.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra sesiones seleccionando una <strong>categoría deportiva</strong>, la duración en minutos, la intensidad (baja / media / alta) y notas opcionales. Las categorías con km habilitados muestran además campos de distancia y ritmo; si no introduces ritmo pero sí km y minutos, se calcula solo. El panel <strong>"Esta semana"</strong> muestra tus sesiones y las categorías marcadas como obligatorias (deben cumplirse cada semana). El gráfico de evolución permite alternar entre vista de <strong>km</strong> o <strong>ritmo</strong> y filtrar por categoría. En el historial puedes eliminar sesiones con 🗑️ (se devuelven los 12 XP). Gestiona las categorías (crear, eliminar, marcar como obligatoria, activar km) desde el botón 🏅 Categorías o desde Editar. Registrar una sesión sube la Fuerza al 100%.</p>
   </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🧠 Alemán</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra horas de estudio acumuladas. La hoja de ruta muestra tu progreso de A1 a C2. Desde ⚙️ Ajustar puedes cambiar el nivel de partida (A1/A2/B1/B2/C1/C2), las horas ya acumuladas antes de usar la app, el objetivo total de horas y los días sin estudiar que provocan la muerte, útil si reinicias la planta pero no quieres perder tu progreso real.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra horas de estudio acumuladas. La hoja de ruta muestra tu progreso de A1 a C2 con barras por nivel. Cada registro aparece en el historial y puedes eliminar cualquier entrada con 🗑️ (se devuelven las horas y el XP). Desde ⚙️ Ajustar puedes cambiar el nivel de partida (A1/A2/B1/B2/C1/C2), las horas ya acumuladas antes de usar la app, el objetivo total de horas y los días sin estudiar que provocan la muerte, útil si reinicias la planta pero no quieres perder tu progreso real. Registrar horas sube la Inteligencia al 100%.</p>
   </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">⚡ Pasos diarios</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra pasos manualmente con un campo de texto o con los atajos de objetivo y mínimo que aparecen automáticamente según tus parámetros. Desde ⚙️ Ajustar puedes cambiar el objetivo diario y el mínimo por debajo del cual la planta muere.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra pasos manualmente con un campo de texto. Cada registro del día aparece en el historial y puedes eliminar cualquier entrada con 🗑️ (se devuelve el XP correspondiente). El botón "↩️ Deshacer hoy" borra todos los pasos del día de golpe. Desde ⚙️ Ajustar puedes cambiar el objetivo diario (barra verde al alcanzarlo) y el mínimo por debajo del cual la planta muere (barra roja si no llegas y ya has registrado). Acumular pasos sube la Salud de la planta progresivamente.</p>
   </div>
 
   <div class="card">
@@ -3034,9 +3070,9 @@ textarea {
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra una sesión con o sin medida de cm al suelo. La medida va actualizando el progreso hacia el spagatt completo (0 cm). Si solo quieres marcar que has hecho los estiramientos sin medir, usa "✅ Solo marcar como hecho".</p>
   </div>
 
-  <div class="card">
+<div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">📖 Lectura</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra minutos de lectura con botones rápidos (15, 30, 45 min, 1h) o campo personalizado. Desde el botón 📚 <strong>Añadir libro</strong> puedes registrar los libros que terminas, con título, autor, género, puntuación (1–5 estrellas), fecha de finalización y reseña opcional. La biblioteca filtra por género y muestra las reseñas. Los días sin leer que provocan la muerte son configurables desde ⚙️.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Registra minutos de lectura con botones rápidos (15, 30, 45 min, 1h) o campo personalizado. Desde el botón 📚 <strong>Añadir libro</strong> puedes registrar los libros que terminas, con título, autor, género, puntuación (1–5 estrellas), fecha de finalización y reseña opcional. La biblioteca filtra por género y permite buscar por título o autor; además, cada sesión de lectura queda guardada en el historial y puedes eliminar cualquier registro con 🗑️ (se devuelve el XP ganado). Los días sin leer que provocan la muerte son configurables desde ⚙️.</p>
   </div>
 
   <div class="card">
@@ -3058,14 +3094,14 @@ textarea {
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7;margin-top:0.6rem">La página de cada hábito muestra el nivel de necesidad actual, la racha, estadísticas, el gráfico de historial, la meta y los últimos registros. Al registrar, el efecto configurado se aplica inmediatamente y los objetivos mensuales vinculados se actualizan solos.</p>
   </div>
 
-  <div class="card">
+<div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">🏆 Metas a largo plazo</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Crea metas con nombre, emoji, objetivo numérico, unidad, descripción, fecha límite y cuenta atrás. Para sumar progreso manualmente pulsa el botón <strong>+</strong> junto a la meta. Te pedirá cuánto añadir. Hay tres metas predefinidas (Alemán B2, Spagatt, Biblioteca) que puedes ocultar o restaurar desde Editar. Las metas aparecen en la página de inicio y en la sección <strong>Metas</strong>.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Crea metas con nombre, emoji, objetivo numérico, unidad, descripción, fecha límite y cuenta atrás. Para sumar progreso manualmente pulsa el botón <strong>+</strong> junto a la meta. Te pedirá cuánto añadir. Hay tres metas predefinidas (Alemán B2, Spagatt, Biblioteca) que puedes ocultar del todo o solo del inicio, y restaurar cuando quieras desde Editar. Cada meta personalizada puede mostrarse u ocultarse del inicio individualmente con el botón 👁️/🙈. Las metas aparecen en la página de inicio y en la sección <strong>Metas</strong>.</p>
   </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">📅 Objetivos mensuales</h3>
-    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Añade objetivos con nombre, emoji, categoría, mes, fecha límite (con cuenta atrás), notas y un campo de "veces objetivo". Puedes vincular un objetivo a cualquier hábito del sistema o personalizado: cada vez que registres ese hábito, el progreso sube +1 automáticamente y el objetivo se completa solo al llegar al número de veces marcado. Sin vinculación, puedes marcarlo como completado manualmente con un clic. Los objetivos se filtran por mes en la sección <strong>Metas</strong> y aparecen también en el inicio.</p>
+    <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Añade objetivos con nombre, emoji, categoría, mes, fecha límite (con cuenta atrás), notas y un campo de "veces objetivo". Puedes vincular un objetivo a cualquier hábito del sistema (Deporte, Agua, Lectura, Sueño, Pasos, Orden, Estiramientos, Móvil o Alemán) o personalizado: cada vez que registres ese hábito, el progreso sube +1 automáticamente y el objetivo se completa solo al llegar al número de veces marcado. Sin vinculación, puedes marcarlo como completado manualmente con un clic. Los objetivos se filtran por mes en la sección <strong>Metas</strong> (con botones de filtro por mes) y aparecen también en el inicio.</p>
   </div>
 
   <div class="card">
@@ -3091,20 +3127,24 @@ textarea {
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">Cuando tu planta alcanza el nivel 8, aparece un panel para plantarla en el prado. Ese árbol se guarda en la página <strong>Mi bosque</strong> y se inicia una nueva planta desde cero (conservando todos tus datos). Si no usas la app durante más de 30 días, el bosque arde y los árboles se pierden (no contribuyas a los incendios forestales...). A la hora de plantar el árbol, puedes cambiarle el nombre (lo cual, seamos sinceros, no tiene mucho sentido y recomiento seguir llamardo al árbol como le llamabas a la plant). Cuando tu árbol sea parte del bosque, solo tienes que hacer click para ver el nombre del árbol, cuándo empezaste a cuidarlo y cuando lo plantaste en el prado. Un bosque de recuerdos vegetales.</p>
   </div>
 
-  <div class="card">
+<div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.5rem;font-weight:500">✏️ Editar — personalización completa</h3>
     <p style="font-size:0.84rem;color:var(--text2);line-height:1.7">La sección <strong>Editar</strong> es el panel de control de toda la app. Desde aquí puedes:</p>
     <ul style="font-size:0.84rem;color:var(--text2);line-height:2;padding-left:1.2rem;margin-top:0.4rem">
-      <li><strong>Renombrar tu planta (utilizar un nombre original es obligatorio)</strong></li>
+      <li><strong>Renombrar tu planta</strong> (utilizar un nombre original es obligatorio)</li>
       <li><strong>Ajustar todos los parámetros</strong> de los hábitos del sistema a la vez o uno a uno</li>
-      <li><strong>Desactivar y reactivar</strong> cualquier hábito del sistema (su necesidad desaparece de la planta y deja de contar como obligatorio). Aunque bastante tops los habitos que ya os he puesto</li>
-      <li><strong>Crear, editar y eliminar hábitos personalizados</strong> con todas las opciones descritas arriba</li>
+      <li><strong>Desactivar y reactivar</strong> cualquier hábito del sistema (su necesidad desaparece de la planta y deja de contar como obligatorio). Aunque bastante tops los hábitos que ya os he puesto</li>
+      <li><strong>Añadir o quitar hábitos del sistema de los "Pendientes obligatorios hoy":</strong> por defecto solo Orden y Sueño aparecen ahí, pero puedes marcar cualquier otro hábito core (Deporte, Agua, Alemán, Pasos, Estiramientos, Lectura) para que también aparezca como pendiente y, si no lo cumples, muera la planta al día siguiente</li>
+      <li><strong>Crear, editar y eliminar hábitos personalizados</strong> con todas las opciones descritas arriba. También puedes marcarlos como obligatorios para que aparezcan en la lista de pendientes del inicio</li>
       <li><strong>Editar las preguntas del test de orden:</strong> añadir, editar o eliminar</li>
-      <li><strong>Gestionar categorías deportivas:</strong> Crear con emoji y nombre, activar km y ritmo, marcar como obligatoria semanal y eliminarla</li>
+      <li><strong>Gestionar categorías deportivas:</strong> crear con emoji y nombre, activar km y ritmo, marcar como obligatoria semanal y eliminarla</li>
+      <li><strong>Gestionar categorías de agenda:</strong> crear, renombrar y eliminar las categorías que usas para tus tareas</li>
       <li><strong>Editar, añadir o eliminar metas a largo plazo</strong> y objetivos mensuales</li>
-      <li><strong>Editar o eliminar necesidades:</strong> Puedes cambiar el nombre e icono de cualquier necesidad del sistema o personalizada, o crea necesidades nuevas vinculadas a un hábito</li>
-      <li><strong>Ocultar y restaurar metas predefinidas</strong> (Alemán B2, Spagatt y/o Biblioteca)</li>
+      <li><strong>Editar o eliminar necesidades:</strong> puedes cambiar el nombre e icono de cualquier necesidad del sistema o personalizada, o crear necesidades nuevas vinculadas a un hábito</li>
+      <li><strong>Ocultar y restaurar metas predefinidas</strong> (Alemán B2, Spagatt y/o Biblioteca), y decidir si se muestran o no en la pantalla de inicio</li>
+      <li><strong>Ocultar pantallas completas</strong> que no uses (Mi bosque, Mi corcho, Mi motivación, Cómo funciona). Podrás volver a mostrarlas cuando quieras</li>
       <li><strong>Reiniciar la planta</strong> (conservando tus datos) o <strong>reiniciar toda la app</strong> (borrando todo, incluyendo tus árboles ya plantados). Ten cuidado, no hay vuelta atrás...</li>
+      <li>Y varias cosas más. ¡Os animo a trastear y ver lo que podéis hacer!</li>
     </ul>
   </div>
 
@@ -3283,9 +3323,12 @@ let lastDecayTs=Date.now();
 let phoneChartInst=null, suenoChartInst=null, deporteChartInst=null, sportChartMode="km", sportChartCatId=null, customChartInsts={};
 let decayInterval=null;
 let agendaFilter='all', booksFilter='all', mobjMonthFilter='all';
+let booksSearchTerm="", booksShowAll=false;
 let selectedSportCat=null, logHabitId=null;
 let disabledCoreHabits=[];
+let obligatoryCoreHabits=["orden","sueno"];
 let disabledBuiltinGoals=[];
+let builtinGoalsHomeVisible = {__german:true,__spagatt:true,__books:true};
 
 let sportCats = [
   {id:"sc_run",name:"Running",emoji:"🏃",hasKm:true,required:false},
@@ -3461,7 +3504,9 @@ customHabits.forEach(h=>{
   agendaTasks=[]; books=[]; longGoals=[]; monthlyObjs=[];
   orderQuestions=[...DEFAULT_ORDER_QUESTIONS];
   disabledCoreHabits=[];
+  obligatoryCoreHabits=["orden","sueno"];
   disabledBuiltinGoals=[];
+  builtinGoalsHomeVisible = {__german:true,__spagatt:true,__books:true};
   disabledAppPages=[];
   agendaCats=["Personal","Trabajo","Salud","Deporte","Estudio","Casa","Social","Otro"];
   sportCats=[
@@ -3584,20 +3629,43 @@ function checkDailyObligatory(){
   if(dailyActions.date===today)return;
   const isFirstDay = plant.createdAt && dailyActions.date===new Date(plant.createdAt).toDateString();
 
-  // Estos tres son obligatorios incluso el primer día
   if(!dailyActions.phoneDone&&!isPhoneProtected()){killPlant("no registraste las horas de móvil ayer");return;}
-  if(!isDisabledCore('orden')&&!isNeedProtected('calmness')&&!dailyActions.orderDone){killPlant("no hiciste el test de orden ayer");return;}
-  if(!isDisabledCore('sueno')&&!isNeedProtected('vitality')&&!dailyActions.suenoDone){killPlant("no registraste las horas de sueño ayer");return;}
+
+  // Recorremos los obligatorios configurables
+  for(const key of obligatoryCoreHabits){
+    if(isDisabledCore(key))continue;
+    if(key==="agua"&&isNeedProtected('hydration'))continue;
+    if(key==="sueno"&&isNeedProtected('vitality'))continue;
+    if(key==="orden"&&isNeedProtected('calmness'))continue;
+    if(key==="deporte"&&isNeedProtected('strength'))continue;
+    if(key==="aleman"&&isNeedProtected('intelligence'))continue;
+    if(key==="pasos"&&isNeedProtected('energy'))continue;
+    if(key==="estiramientos"&&isNeedProtected('flexibility'))continue;
+    if(key==="lectura"&&isNeedProtected('entertainment'))continue;
+    if(isFirstDay&&["agua","pasos"].includes(key))continue;
+    if(!isCoreHabitDoneToday(key)){
+      const lbl={
+        agua:"deshidratación — no bebiste suficiente agua ayer",
+        deporte:"no hiciste deporte ayer",
+        sueno:"no registraste las horas de sueño ayer",
+        aleman:"no estudiaste alemán ayer",
+        pasos:"sedentarismo — pocos pasos ayer",
+        orden:"no hiciste el test de orden ayer",
+        estiramientos:"no hiciste estiramientos ayer",
+        lectura:"no leíste ayer"
+      }[key]||`no cumpliste: ${key}`;
+      killPlant(lbl);return;
+    }
+  }
 
   if(!isFirstDay){
-    if(!isDisabledCore('agua')&&!isNeedProtected('hydration')&&hydration.loggedToday<hydration.target){killPlant("deshidratación — no bebiste suficiente agua ayer");return;}
-    if(!isNeedProtected('energy')&&energy.doneToday&&energy.stepsToday<coreParams.pasos.minimo){killPlant("sedentarismo — pocos pasos ayer");return;}
     if(!isNeedProtected('vitality')&&sleep.lowSleepStreak>=(coreParams.sueno.maxLowSleepStreak||3)){killPlant(`agotamiento crónico — ${coreParams.sueno.maxLowSleepStreak||3} noches con poco sueño`);return;}
     if(!isNeedProtected('vitality')&&sleep.highSleepStreak>=(coreParams.sueno.maxHighSleepStreak||3)){killPlant(`exceso de sueño — ${coreParams.sueno.maxHighSleepStreak||3} noches durmiendo demasiado`);return;}
     for(const h of customHabits){
       if(h.obligatory&&!dailyActions["custom_"+h.id]&&!isNeedProtected(getHabitNeedId(h))){killPlant(`no hiciste tu hábito obligatorio: "${h.name}"`);return;}
     }
   }
+
   dailyActions.orderDone=false;dailyActions.phoneDone=false;dailyActions.suenoDone=false;
   dailyActions.aguaObjReached=false;dailyActions.pasosObjReached=false;
   customHabits.forEach(h=>{if(h.obligatory)dailyActions["custom_"+h.id]=false;});
@@ -3620,7 +3688,7 @@ function toggleAppPage(id){
 // SAVE Y LOAD
 function save(){
   updateAllLevels();
-  const s={plant,needsState,hydration,flexibility,energy,sleep,goals,phoneUsage,dailyActions,streak,customHabits,customNeedStates,habitLogs,habitStreaks,protector,agendaTasks,books,longGoals,monthlyObjs,orderQuestions,coreParams,lastDecayTs,sportCats,disabledCoreHabits,disabledBuiltinGoals,recurringTasks,forest,lastAppTouch,corkNotes,motivData,agendaCats,disabledAppPages};
+  const s={plant, disabledCoreHabits,disabledBuiltinGoals,builtinGoalsHomeVisible,needsState,hydration,flexibility,energy,sleep,goals,phoneUsage,dailyActions,streak,customHabits,customNeedStates,habitLogs,habitStreaks,protector,agendaTasks,books,longGoals,monthlyObjs,orderQuestions,coreParams,lastDecayTs,sportCats,disabledCoreHabits,disabledBuiltinGoals,recurringTasks,forest,lastAppTouch,corkNotes,motivData,agendaCats,disabledAppPages,obligatoryCoreHabits};
   try{localStorage.setItem("levelup_v7",JSON.stringify(s));}catch(e){console.warn(e);}
 }
 
@@ -3640,6 +3708,7 @@ function load(){
     energy=s.energy||{};
     sleep=s.sleep||{};
     goals=s.goals||{};
+    obligatoryCoreHabits=s.obligatoryCoreHabits||["orden","sueno"];
     phoneUsage=s.phoneUsage||[];
     dailyActions=s.dailyActions||{};
     streak=s.streak||{current:0,lastAliveDay:null};
@@ -3656,9 +3725,11 @@ function load(){
     coreParams=s.coreParams||{};
     sportCats=s.sportCats||[];
     disabledCoreHabits=s.disabledCoreHabits||[];
+    obligatoryCoreHabits=s.obligatoryCoreHabits||["orden","sueno"];
     agendaCats=(s.agendaCats&&s.agendaCats.length)?s.agendaCats:["Personal","Trabajo","Salud","Deporte","Estudio","Casa","Social","Otro"];
     disabledAppPages=s.disabledAppPages||[];
     disabledBuiltinGoals=s.disabledBuiltinGoals||[];
+    builtinGoalsHomeVisible = s.builtinGoalsHomeVisible || {__german:true,__spagatt:true,__books:true};
     lastDecayTs=s.lastDecayTs||Date.now();
     if(!hydration.lastResetDate)hydration.lastResetDate=getTodayKey();
     if(hydration.extraHydration===undefined)hydration.extraHydration=0;
@@ -3900,7 +3971,6 @@ function removeWater(liters){
 function doSport(){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
   if(!selectedSportCat){toast("Selecciona una categoría deportiva");return;}
-  document.querySelectorAll(".sport-cat-chip").forEach(c=>c.classList.remove("selected"));
   const cat=sportCats.find(c=>c.id===selectedSportCat);
   if(!cat){toast("Categoría no válida");return;}
   const mins=parseInt(document.getElementById("sportMins")?.value)||0;
@@ -3909,22 +3979,25 @@ function doSport(){
   if(!ritmo&&km>0&&mins>0)ritmo=Math.round((mins/km)*100)/100;
   const intensity=document.getElementById("sportIntensity")?.value||"mid";
   const notes=document.getElementById("sportNotes")?.value||"";
+  const sportDate=document.getElementById("sportDate")?.value||getTodayKey();
   if(mins<5&&km<=0){toast("Ingresa la duración o distancia");return;}
+
+  const session={id:"sp_"+Date.now(),date:sportDate,catId:cat.id,catName:cat.name,catEmoji:cat.emoji,mins,km,ritmo,intensity,notes};
   goals.sport.sessions.push(session);
+  goals.sport.sessions.sort((a,b)=>a.date.localeCompare(b.date));
   if(goals.sport.sessions.length>120)goals.sport.sessions.shift();
   if(km>goals.running.maxKm)goals.running.maxKm=km;
+
+  document.querySelectorAll(".sport-cat-chip").forEach(c=>c.classList.remove("selected"));
   ["sportMins","sportKmInput","sportRitmoInput","sportNotes"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  const sdEl=document.getElementById("sportDate");if(sdEl)sdEl.value=getTodayKey();
   selectedSportCat=null;
+
   if(needsState.strength){needsState.strength.value=100;needsState.strength.lastFulfilled=Date.now();}
   plant.xp+=12;checkLevelUp();
-const session={id:"sp_"+Date.now(),date:getTodayKey(),catId:cat.id,catName:cat.name,catEmoji:cat.emoji,mins,km,ritmo,intensity,notes};
-  const nowD=new Date();
-const thisMonthD=`${nowD.getFullYear()}-${String(nowD.getMonth()+1).padStart(2,'0')}`;
-triggerMonthlyObjUpdate('__deporte');
+  triggerMonthlyObjUpdate('__deporte');
 
   toast(`${cat.emoji} Sesión de ${cat.name} registrada · Fuerza 100%`);
-  // Actualizar objetivos mensuales vinculados a deporte
-
   save();renderAll();
 }
 
@@ -4054,13 +4127,34 @@ if(dailyActions.suenoDone){
   sleep.history=sleep.history.filter(h=>h.date!==todayStr());
   dailyActions.suenoDone=false;
 }
-  if(!isNeedProtected('vitality')&&hours<coreParams.sueno.minFatal){killPlant(`menos de ${decimalHoursToHM(coreParams.sueno.minFatal)} de sueño`);return;}
+  if(!isNeedProtected('vitality')&&!isPlantNewToday()&&hours<coreParams.sueno.minFatal){killPlant(`menos de ${decimalHoursToHM(coreParams.sueno.minFatal)} de sueño`);return;}
   sleep.hoursToday=hours;sleep.doneToday=true;dailyActions.suenoDone=true;
   let sleepLvl;
   const lowThresh=coreParams.sueno.lowSleepThreshold!==undefined?coreParams.sueno.lowSleepThreshold:6.5;
   const highThresh=coreParams.sueno.highSleepThreshold!==undefined?coreParams.sueno.highSleepThreshold:10;
   if(hours>=coreParams.sueno.minOptimo){sleepLvl=100;}
   else{sleepLvl=Math.round((hours/coreParams.sueno.minOptimo)*100);}
+  if(hours<lowThresh){
+    if(!isPlantNewToday()){
+      sleep.lowSleepStreak=(sleep.lowSleepStreak||0)+1;
+      const maxStreak=coreParams.sueno.maxLowSleepStreak||3;
+      if(!isNeedProtected('vitality')&&sleep.lowSleepStreak>=maxStreak){killPlant(`agotamiento crónico — ${maxStreak} noches durmiendo menos de ${decimalHoursToHM(lowThresh)}`);return;}
+    }
+  } else { sleep.lowSleepStreak=0; }
+  if(hours>highThresh){
+    if(!isPlantNewToday()){
+      sleep.highSleepStreak=(sleep.highSleepStreak||0)+1;
+      const maxHighStreak=coreParams.sueno.maxHighSleepStreak||3;
+      if(!isNeedProtected('vitality')&&sleep.highSleepStreak>=maxHighStreak){killPlant(`exceso de sueño — ${maxHighStreak} noches durmiendo más de ${decimalHoursToHM(highThresh)}`);return;}
+    }
+  } else { sleep.highSleepStreak=0; }
+  if(isPlantNewToday()){
+    sleep.level=100;
+    needsState.vitality={value:100,lastFulfilled:Date.now()};
+  } else {
+    sleep.level=sleepLvl;needsState.vitality={value:sleepLvl,lastFulfilled:Date.now()};
+  }
+  sleep.history.push({date:todayStr(),hours,level:sleepLvl});
 if(hours<lowThresh){
     sleep.lowSleepStreak=(sleep.lowSleepStreak||0)+1;
     const maxStreak=coreParams.sueno.maxLowSleepStreak||3;
@@ -4127,12 +4221,14 @@ function doLectura(){
   if(isNaN(mins)||mins<=0){toast("Ingresa los minutos");return;}
   document.getElementById("lecturaMinsInput").value="";doLecturaVal(mins);
 }
+
 function doLecturaVal(mins){
   if(!plant.alive){toast("❌ Reinicia primero");return;}
-  goals.reading.entries.push({id:"rd_"+Date.now(),date:todayStr(),minutes:mins});
+  const xpGained=Math.floor(mins/15);
+  goals.reading.entries.push({id:"rd_"+Date.now(),date:todayStr(),minutes:mins,xp:xpGained});
   if(goals.reading.entries.length>60)goals.reading.entries.shift();
   if(needsState.entertainment){needsState.entertainment.value=100;needsState.entertainment.lastFulfilled=Date.now();}
-  plant.xp+=Math.floor(mins/15);checkLevelUp();
+  plant.xp+=xpGained;checkLevelUp();
   triggerMonthlyObjUpdate('__lectura');
   toast(`📚 +${mins} min`);save();renderAll();
 }
@@ -4162,9 +4258,13 @@ if(prev&&prev.hours>coreParams.movil.penaltyThreshold){
   if(phoneUsage.length>14)phoneUsage.shift();
   dailyActions.phoneDone=true;
   triggerMonthlyObjUpdate('__movil');
-if(!isPhoneProtected()&&h>coreParams.movil.minFatal){killPlant(`adicción al móvil — ${decimalHoursToHM(h)} de pantalla`);return;}
-if(h>coreParams.movil.penaltyThreshold){const dmg=(h-coreParams.movil.penaltyThreshold)*12;if(needsState.calmness){needsState.calmness.value=Math.max(0,needsState.calmness.value-dmg);needsState.calmness.extraCalmness=Math.max(0,(needsState.calmness.extraCalmness||0)-dmg);}}
-else toast(`📱 ${decimalHoursToHM(h)} · Sin penalización`);
+if(isPlantNewToday()){
+  toast(`📱 ${decimalHoursToHM(h)} registrado · primer día, sin efecto en la planta`);
+} else {
+  if(!isPhoneProtected()&&h>coreParams.movil.minFatal){killPlant(`adicción al móvil — ${decimalHoursToHM(h)} de pantalla`);return;}
+  if(h>coreParams.movil.penaltyThreshold){const dmg=(h-coreParams.movil.penaltyThreshold)*12;if(needsState.calmness){needsState.calmness.value=Math.max(0,needsState.calmness.value-dmg);needsState.calmness.extraCalmness=Math.max(0,(needsState.calmness.extraCalmness||0)-dmg);}}
+  else toast(`📱 ${decimalHoursToHM(h)} · Sin penalización`);
+}
   if(hEl)hEl.value="";if(mEl)mEl.value="";
   checkDeath();save();renderAll();renderPhoneChart();
 }
@@ -4782,40 +4882,56 @@ function openEditCore(which){
   let html="";
   if(which==="agua"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">💧 Hidratación</h4><div class="form-row"><div class="form-group"><label>Objetivo agua (L)</label><input type="number" id="ep_agua_target" step="0.1" min="0.5" max="5" value="${p.agua.target}"></div></div>`;}
   if(which==="pasos"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">⚡ Pasos</h4><div class="form-row"><div class="form-group"><label>Objetivo</label><input type="number" id="ep_pasos_obj" step="500" min="1000" max="30000" value="${p.pasos.objetivo}"></div><div class="form-group"><label>Mínimo</label><input type="number" id="ep_pasos_min" step="500" min="0" max="15000" value="${p.pasos.minimo}"></div></div>`;}
-  if(which==="sueno"||which==="all"){
+    if(which==="sueno"||which==="all"){
     const fatalH=Math.floor(p.sueno.minFatal),fatalM=Math.round((p.sueno.minFatal-fatalH)*60);
     const optH=Math.floor(p.sueno.minOptimo),optM=Math.round((p.sueno.minOptimo-optH)*60);
     const threshVal=p.sueno.lowSleepThreshold!==undefined?p.sueno.lowSleepThreshold:6.5;
     const threshH=Math.floor(threshVal),threshM=Math.round((threshVal-threshH)*60);
     const highVal=p.sueno.highSleepThreshold!==undefined?p.sueno.highSleepThreshold:10;
     const highH=Math.floor(highVal),highM=Math.round((highVal-highH)*60);
-html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.3rem;font-size:0.9rem">😴 Sueño</h4>
-
-    <p style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin:0.7rem 0 0.4rem">⚠️ Límite vital — mata a la planta al instante</p>
-    <div class="form-row" style="align-items:end">
-      <div class="form-group" style="margin:0"><label>Horas mínimas fatales (h)</label><input type="number" id="ep_sueno_fatal_h" step="1" min="0" max="6" value="${fatalH}"></div>
-      <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_fatal_m" step="5" min="0" max="59" value="${fatalM}"></div>
+    html+=`
+    <div style="margin:1rem 0 0.5rem">
+      <h4 style="font-family:'Lora',serif;color:var(--green-dk);font-size:0.95rem;margin-bottom:0.3rem">Sueño</h4>
+      <p style="font-size:0.72rem;color:var(--text3)">Ajusta los límites que determinan cómo el sueño afecta a tu planta.</p>
     </div>
 
-    <p style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin:1rem 0 0.4rem">🎯 Objetivo diario — para el XP completo</p>
-    <div class="form-row" style="align-items:end">
-      <div class="form-group" style="margin:0"><label>Horas óptimas (h)</label><input type="number" id="ep_sueno_opt_h" step="1" min="5" max="10" value="${optH}"></div>
-      <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_opt_m" step="5" min="0" max="59" value="${optM}"></div>
+    <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.9rem 1rem;margin-bottom:0.7rem;background:var(--card2)">
+      <div style="font-size:0.78rem;font-weight:600;color:var(--red);margin-bottom:0.2rem">Límite vital</div>
+      <p style="font-size:0.7rem;color:var(--text3);margin-bottom:0.6rem">Por debajo de este valor, la planta muere al instante.</p>
+      <div class="form-row" style="align-items:end;margin-bottom:0">
+        <div class="form-group" style="margin:0"><label>Horas</label><input type="number" id="ep_sueno_fatal_h" step="1" min="0" max="6" value="${fatalH}"></div>
+        <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_fatal_m" step="5" min="0" max="59" value="${fatalM}"></div>
+      </div>
     </div>
 
-    <p style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin:1rem 0 0.4rem">📉 Alerta por poco sueño</p>
-    <div class="form-row" style="align-items:end">
-      <div class="form-group" style="margin:0"><label>Umbral "poco sueño" (h)</label><input type="number" id="ep_sueno_thresh_h" step="1" min="3" max="9" value="${threshH}"></div>
-      <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_thresh_m" step="5" min="0" max="59" value="${threshM}"></div>
+    <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.9rem 1rem;margin-bottom:0.7rem;background:var(--card2)">
+      <div style="font-size:0.78rem;font-weight:600;color:var(--green-dk);margin-bottom:0.2rem">Objetivo diario</div>
+      <p style="font-size:0.7rem;color:var(--text3);margin-bottom:0.6rem">A partir de esta cantidad de horas se considera sueño óptimo y da el XP completo.</p>
+      <div class="form-row" style="align-items:end;margin-bottom:0">
+        <div class="form-group" style="margin:0"><label>Horas</label><input type="number" id="ep_sueno_opt_h" step="1" min="5" max="10" value="${optH}"></div>
+        <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_opt_m" step="5" min="0" max="59" value="${optM}"></div>
+      </div>
     </div>
-    <div class="form-group-full" style="margin-top:6px"><label>Noches seguidas por debajo del umbral → muerte</label><input type="number" id="ep_sueno_streak" step="1" min="2" max="14" value="${p.sueno.maxLowSleepStreak||3}"></div>
 
-    <p style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin:1rem 0 0.4rem">📈 Alerta por exceso de sueño</p>
-    <div class="form-row" style="align-items:end">
-      <div class="form-group" style="margin:0"><label>Umbral "exceso de sueño" (h)</label><input type="number" id="ep_sueno_high_h" step="1" min="6" max="16" value="${highH}"></div>
-      <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_high_m" step="5" min="0" max="59" value="${highM}"></div>
+    <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.9rem 1rem;margin-bottom:0.7rem;background:var(--card2)">
+      <div style="font-size:0.78rem;font-weight:600;color:var(--amber);margin-bottom:0.2rem">Alerta por poco sueño</div>
+      <p style="font-size:0.7rem;color:var(--text3);margin-bottom:0.6rem">Noches seguidas por debajo de este umbral antes de que muera la planta.</p>
+      <div class="form-row" style="align-items:end">
+        <div class="form-group" style="margin:0"><label>Horas</label><input type="number" id="ep_sueno_thresh_h" step="1" min="3" max="9" value="${threshH}"></div>
+        <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_thresh_m" step="5" min="0" max="59" value="${threshM}"></div>
+      </div>
+      <div class="form-group-full" style="margin-top:6px;margin-bottom:0"><label>Noches seguidas → muerte</label><input type="number" id="ep_sueno_streak" step="1" min="2" max="14" value="${p.sueno.maxLowSleepStreak||3}"></div>
     </div>
-    <div class="form-group-full" style="margin-top:6px"><label>Noches seguidas por encima del umbral → muerte</label><input type="number" id="ep_sueno_high_streak" step="1" min="2" max="14" value="${p.sueno.maxHighSleepStreak||3}"></div>`;
+
+    <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.9rem 1rem;margin-bottom:0.4rem;background:var(--card2)">
+      <div style="font-size:0.78rem;font-weight:600;color:var(--blue);margin-bottom:0.2rem">Alerta por exceso de sueño</div>
+      <p style="font-size:0.7rem;color:var(--text3);margin-bottom:0.6rem">Noches seguidas por encima de este umbral antes de que muera la planta.</p>
+      <div class="form-row" style="align-items:end">
+        <div class="form-group" style="margin:0"><label>Horas</label><input type="number" id="ep_sueno_high_h" step="1" min="6" max="16" value="${highH}"></div>
+        <div class="form-group" style="margin:0"><label>Minutos</label><input type="number" id="ep_sueno_high_m" step="5" min="0" max="59" value="${highM}"></div>
+      </div>
+      <div class="form-group-full" style="margin-top:6px;margin-bottom:0"><label>Noches seguidas → muerte</label><input type="number" id="ep_sueno_high_streak" step="1" min="2" max="14" value="${p.sueno.maxHighSleepStreak||3}"></div>
+    </div>`;
   }
   if(which==="aleman"||which==="all"){html+=`<h4 style="font-family:'Lora',serif;color:var(--green-dk);margin:0.8rem 0 0.5rem;font-size:0.9rem">🧠 Alemán</h4><div class="form-row"><div class="form-group"><label>Días sin estudiar → muerte</label><input type="number" id="ep_aleman_dias" step="0.5" min="0.5" max="30" value="${p.aleman.diasMaxSinHacer}"></div><div class="form-group"><label>Horas objetivo C2</label><input type="number" id="ep_aleman_horas" step="10" min="50" max="3000" value="${p.aleman.horasObjetivo}"></div></div>
   <div class="form-row"><div class="form-group"><label>Nivel de partida</label><select id="ep_aleman_start"><option value="0" ${(p.aleman.startHours||0)===0?"selected":""}>A1 (0h)</option><option value="200" ${(p.aleman.startHours||0)===200?"selected":""}>A2 (200h)</option><option value="400" ${(p.aleman.startHours||0)===400?"selected":""}>B1 (400h)</option><option value="660" ${(p.aleman.startHours||0)===660?"selected":""}>B2 (660h)</option></select></div><div class="form-group"><label>Horas ya acumuladas</label><input type="number" id="ep_aleman_current" step="1" min="0" max="3000" value="${Math.round(goals.german.hours)}"></div></div>`;}
@@ -4919,13 +5035,6 @@ function editOrderQuestion(i){
 // LONG GOALS
 function toggleGoalCountdownFields(){
   const isCountdown=document.getElementById("gmCountdown").value==="yes";
-  if(isCountdown && !document.getElementById("gmDeadline").value){
-    toast("⚠️ Añade primero una fecha límite");
-    document.getElementById("gmCountdown").value="no";
-    const pf=document.getElementById("gmProgressFields");if(pf)pf.style.display="";
-    const note=document.getElementById("gmCountdownNote");if(note)note.style.display="none";
-    return;
-  }
   const pf=document.getElementById("gmProgressFields");if(pf)pf.style.display=isCountdown?"none":"";
   const note=document.getElementById("gmCountdownNote");if(note)note.style.display=isCountdown?"":"none";
 }
@@ -5369,6 +5478,13 @@ function markTaskDone(id){
   save();renderAgenda();renderNav();
 }
 
+function resetFromDeathOverlay(){
+  // Ocultar el overlay inmediatamente para que no bloquee la interacción
+  const ov=document.getElementById("deathOverlay");
+  if(ov)ov.classList.remove("open");
+  fullResetGame();
+}
+
 function markTaskFailed(id){
   const t=agendaTasks.find(x=>x.id===id);if(!t)return;
   const isMulti=t.timesPerDay&&t.timesPerDay>1;
@@ -5428,15 +5544,24 @@ function renamePlant(){
   if(n&&n.trim()){plant.name=n.trim().slice(0,20);save();renderAll();}
 }
 
+function isCoreHabitDoneToday(key){
+  switch(key){
+    case "agua":         return hydration.loggedToday>=hydration.target;
+    case "deporte":      return getWeekSessions().some(s=>s.date===getTodayKey());
+    case "sueno":        return dailyActions.suenoDone;
+    case "aleman":       return (goals.german.entries||[]).some(e=>e.date===todayStr());
+    case "pasos":        return energy.stepsToday>=coreParams.pasos.objetivo;
+    case "orden":        return dailyActions.orderDone;
+    case "estiramientos":return flexibility.doneToday;
+    case "lectura":      return (goals.reading.entries||[]).some(e=>e.date===todayStr());
+    default:             return false;
+  }
+}
+
 function fullResetGame(){
-  if(!confirm("¿Reiniciar la planta? Se reiniciará la racha, el XP y el nivel de tu planta, y sus necesidades volverán al 100%. Todos tus demás datos (lecturas, horas de alemán, registros de sueño y móvil, libros, metas, objetivos, agenda y hábitos) se conservan tal cual."))return;
+  if(!confirm("¿Reiniciar la planta? Se reiniciará la racha, el XP y el nivel de tu planta, y sus necesidades volverán al 100%, menos en el caso de las necesidades diarias, que tendrán el porcentaje dependiendo de la hora del día. "))return;
   if(decayInterval)clearInterval(decayInterval);
 
-  // Solo reiniciamos lo relativo a la racha, XP y nivel de la planta,
-  // y el estado "de hoy" de sus necesidades (para que revive sana y no
-  // vuelva a morir al instante por datos de un día ya cerrado).
-  // Todo el HISTORIAL real (goals, phoneUsage, sleep.history, habitLogs,
-  // coreParams, hábitos, agenda, libros, metas...) se conserva intacto.
   const now=Date.now(), todayKey=getTodayKey(), today=todayStr();
   plant.level=1;
   plant.xp=0;
@@ -5446,6 +5571,7 @@ function fullResetGame(){
   plant.createdAt=now;
   streak={current:0,lastAliveDay:null};
   lastDecayTs=now;
+  obligatoryCoreHabits=["orden","sueno"];
 
   dailyActions={orderDone:false,phoneDone:false,suenoDone:false,aguaObjReached:false,pasosObjReached:false,date:today};
   hydration.loggedToday=0;hydration.extraHydration=0;hydration.lastResetDate=todayKey;
@@ -5466,6 +5592,10 @@ function fullResetGame(){
   protector={active:false,expiresAt:null,reason:"",mode:"full",targetNeedId:null,targetLabel:""};
 
   save();renderAll();renderNav();renderPhoneChart();renderSleepChart();startDecay();
+
+   // Forzar cierre del overlay de muerte
+  const ov=document.getElementById("deathOverlay");
+  if(ov)ov.classList.remove("open");
   toast("🌱 Planta reiniciada · Racha, XP y nivel a cero · Tus registros se conservan");
 }
 
@@ -5502,10 +5632,30 @@ function getLevelName(){const h=goals.german.hours;if(h>=1200)return"C2";if(h>=9
 
 function getPendientes(){
   const pending=[];
-  if(!isDisabledCore('orden')&&!dailyActions.orderDone)pending.push({icon:"🍃",name:"Test de orden",page:"orden"});
+  // Core obligatorios configurables
+  const coreLabels={
+    agua:{icon:"💧",name:"Hidratación",page:"agua"},
+    deporte:{icon:"💪",name:"Deporte",page:"deporte"},
+    sueno:{icon:"😴",name:"Sueño de anoche",page:"sueno"},
+    aleman:{icon:"🧠",name:"Alemán",page:"aleman"},
+    pasos:{icon:"⚡",name:"Pasos diarios",page:"pasos"},
+    orden:{icon:"🍃",name:"Test de orden",page:"orden"},
+    estiramientos:{icon:"🧘",name:"Estiramientos",page:"estiramientos"},
+    lectura:{icon:"📖",name:"Lectura",page:"lectura"},
+  };
+  obligatoryCoreHabits.forEach(key=>{
+    if(isDisabledCore(key))return;
+    if(!coreLabels[key])return;
+    if(!isCoreHabitDoneToday(key)){
+      pending.push({...coreLabels[key],coreKey:key});
+    }
+  });
+  // Móvil siempre obligatorio (como hasta ahora)
   if(!dailyActions.phoneDone)pending.push({icon:"📱",name:"Horas de móvil",page:"movil"});
-  if(!isDisabledCore('sueno')&&!dailyActions.suenoDone)pending.push({icon:"😴",name:"Sueño de anoche",page:"sueno"});
-  customHabits.filter(h=>h.obligatory&&!dailyActions["custom_"+h.id]).forEach(h=>pending.push({icon:h.icon,name:h.name,page:"habitos-custom"}));
+  // Custom obligatorios
+  customHabits.filter(h=>h.obligatory&&!dailyActions["custom_"+h.id]).forEach(h=>{
+    pending.push({icon:h.icon,name:h.name,page:"custom-habit-detail",customId:h.id});
+  });
   return pending;
 }
 
@@ -5624,6 +5774,16 @@ function renderHome(){
   document.getElementById("homeAliveContent").style.display=alive?"":"none";
   document.getElementById("deathCardHome").style.display=alive?"none":"";
   if(!alive){document.getElementById("deathReasonText").textContent=`Motivo: ${plant.deathReason||"desconocido"}`;}
+
+  // Overlay global de muerte: se muestra encima de CUALQUIER pantalla
+  const deathOverlay=document.getElementById("deathOverlay");
+  if(deathOverlay){
+    deathOverlay.classList.toggle("open",!alive);
+    if(!alive){
+      const drtg=document.getElementById("deathReasonTextGlobal");
+      if(drtg)drtg.textContent=`Motivo: ${plant.deathReason||"desconocido"}`;
+    }
+  }
   document.getElementById("homePlantEmoji").textContent=plantEmoji();
   document.getElementById("homePlantName").textContent=plant.name;
   document.getElementById("homePlantTagline").textContent=plantTagline();
@@ -5663,8 +5823,9 @@ function renderHome(){
   if(isProtectorActive()){
     const rem=Math.ceil((protector.expiresAt-Date.now())/3600000);
     const modeLbl=protector.mode==="partial"?`🎯 Protegido: ${protector.targetLabel}`:"🛡️ Protección total";
-    ps.innerHTML=`<div class="alert alert-purple" style="margin-bottom:0.8rem">${modeLbl} · ~${rem}h restantes · ${protector.reason}</div>`;
-    pBtn.style.display="none";
+    ps.innerHTML=`<div class="alert alert-purple" style="margin-bottom:0.8rem">${modeLbl} · ~${rem}h restantes · ${protector.reason}</div>
+<button class="btn btn-danger btn-sm" onclick="deactivateProtector()">🛡️ Desactivar protector</button>`;
+pBtn.style.display="none";
   } else {
     ps.innerHTML=`<p style="font-size:0.82rem;color:var(--text3);margin-bottom:0.8rem">Protección total: -50 XP y -5 días racha. Proteger solo una necesidad: -10 XP y -2 días racha.</p>`;
     pBtn.style.display="";
@@ -5703,9 +5864,11 @@ function buildAllGoalsData(onlyHome){
     {id:"__spagatt",icon:"🧘",name:"Spagatt",sub:goals.spagatt.cmToGround<=0?"¡Completado!":goals.spagatt.cmToGround.toFixed(1)+"cm al suelo",pct:Math.max(0,((32-goals.spagatt.cmToGround)/32)*100),color:"green"},
     {id:"__books",icon:"📚",name:"Biblioteca",sub:`${books.length} libros`,pct:Math.min(100,(books.length/20)*100),color:"blue"},
   ];
-  builtin.forEach(g=>{
-    if(!disabledBuiltinGoals.includes(g.id)) built.push(g);
-  });
+builtin.forEach(g=>{
+  if(disabledBuiltinGoals.includes(g.id)) return;
+  if(onlyHome && builtinGoalsHomeVisible[g.id]===false) return;
+  built.push(g);
+});
   longGoals.forEach(g=>{
     if(onlyHome && g.showOnHome===false) return;
     if(g.countdown&&g.deadline){
@@ -5747,11 +5910,15 @@ function renderGoalRow(g){
   const deadlineHtml=g.deadline&&g.countdown?countdownBadge(g.deadline,pct>=100):"";
   const isBuiltin=g.id&&g.id.startsWith("__");
   const isUserGoal=longGoals.find(x=>x.id===g.id);
-  let editBtn="";
+  let editBtn="", homeBtn="";
   if(isBuiltin){
-    editBtn=`<button class="btn-icon" onclick="toggleBuiltinGoal('${g.id}')" title="Ocultar">🗑️</button>`;
+    editBtn=`<button class="btn-icon" onclick="toggleBuiltinGoal('${g.id}')" title="Ocultar por completo">🗑️</button>`;
+    const hidden=builtinGoalsHomeVisible[g.id]===false;
+    homeBtn=`<button class="btn-icon" onclick="toggleBuiltinGoalHome('${g.id}')" title="${hidden?'Mostrar en inicio':'Ocultar de inicio'}">${hidden?"👁️":"🙈"}</button>`;
   } else if(isUserGoal){
     editBtn=`<button class="btn-icon" onclick="openGoalModal('${g.id}')" title="Editar">✏️</button>`;
+    const hidden=g.showOnHome===false;
+    homeBtn=`<button class="btn-icon" onclick="toggleGoalHome('${g.id}')" title="${hidden?'Mostrar en inicio':'Ocultar de inicio'}">${hidden?"👁️":"🙈"}</button>`;
   }
   const addBtn=isUserGoal&&g.target>0
     ?`<button class="btn-icon" onclick="addGoalProgress('${g.id}')" title="Sumar progreso" style="color:var(--green-md);border-color:var(--green-lt)">+</button>`
@@ -5766,6 +5933,7 @@ function renderGoalRow(g){
     <div style="display:flex;align-items:center;gap:6px">
       <div class="goal-pct">${pct.toFixed(0)}%</div>
       ${addBtn}
+      ${homeBtn}
       ${editBtn}
     </div>
   </div>`;
@@ -5877,24 +6045,26 @@ function renderEditPage(){
     {key:"estiramientos",icon:"🧘",name:"Estiramientos",desc:"Elasticidad"},
     {key:"lectura",icon:"📖",name:"Lectura",desc:`Sin leer ${coreParams.lectura?.diasMaxSinHacer||2}d → muerte`},
   ];
-  const cel=document.getElementById("editCoreHabitsList");
-  if(cel){
-    cel.innerHTML=coreItems.map(c=>{
-      const disabled=isDisabledCore(c.key);
-      return `<div class="edit-item-row" style="${disabled?"opacity:0.5":""}">
-        <div class="edit-item-icon">${c.icon}</div>
-        <div class="edit-item-info">
-          <div class="edit-item-name">${c.name} ${disabled?"<span style='font-size:0.65rem;color:var(--red)'>DESACTIVADO</span>":""}</div>
-          <div class="edit-item-sub">${c.desc}</div>
-        </div>
-        <div class="edit-item-actions">
-          <button class="btn btn-secondary btn-xs" onclick="openEditCore('${c.key}')">⚙️ Parámetros</button>
-          <button class="btn btn-xs ${disabled?"":"btn-danger"}" onclick="toggleCoreHabit('${c.key}')">${disabled?"🔁 Activar":"⛔ Desactivar"}</button>
-        </div>
-      </div>`;
-    }).join("");
-    renderNeedsEditor();
-  }
+const cel=document.getElementById("editCoreHabitsList");
+if(cel){
+  cel.innerHTML=coreItems.map(c=>{
+    const disabled=isDisabledCore(c.key);
+    const obligatory=obligatoryCoreHabits.includes(c.key);
+    return `<div class="edit-item-row" style="${disabled?"opacity:0.5":""}">
+      <div class="edit-item-icon">${c.icon}</div>
+      <div class="edit-item-info">
+        <div class="edit-item-name">${c.name} ${disabled?"<span style='font-size:0.65rem;color:var(--red)'>DESACTIVADO</span>":""} ${obligatory&&!disabled?"<span style='font-size:0.65rem;color:var(--amber)'>⚠️ OBLIGATORIO</span>":""}</div>
+        <div class="edit-item-sub">${c.desc}</div>
+      </div>
+      <div class="edit-item-actions">
+        <button class="btn btn-secondary btn-xs" onclick="openEditCore('${c.key}')">⚙️ Parámetros</button>
+        ${!disabled?`<button class="btn btn-xs ${obligatory?"btn-amber":""}" onclick="toggleCoreObligatory('${c.key}')">${obligatory?"⚠️ Quitar de pendientes":"➕ Añadir a pendientes"}</button>`:""}
+        <button class="btn btn-xs ${disabled?"":"btn-danger"}" onclick="toggleCoreHabit('${c.key}')">${disabled?"🔁 Activar":"⛔ Desactivar"}</button>
+      </div>
+    </div>`;
+  }).join("");
+  renderNeedsEditor();
+}
 
   // Custom habits
   const cuel=document.getElementById("editCustomHabitsList");
@@ -5960,26 +6130,53 @@ function renderEditPage(){
   }
 
   // Metas predefinidas para restaurarlas si están ocultas
-  const ebl=document.getElementById("editBuiltinGoalsList");
-  if(ebl){
-    const builtinDefs=[
-      {id:"__german",icon:"📖",name:"Alemán B2"},
-      {id:"__spagatt",icon:"🧘",name:"Spagatt"},
-      {id:"__books",icon:"📚",name:"Biblioteca"},
-    ];
-    const hidden=builtinDefs.filter(g=>disabledBuiltinGoals.includes(g.id));
-    if(!hidden.length){
-      ebl.innerHTML=`<p style="font-size:0.75rem;color:var(--text3);margin-bottom:0.5rem">Metas predefinidas: Alemán B2 · Spagatt · Biblioteca — visibles en inicio</p>`;
-    } else {
-      ebl.innerHTML=`<p style="font-size:0.75rem;color:var(--text3);margin-bottom:0.5rem">Metas predefinidas ocultas:</p>`+
-      hidden.map(g=>`<div class="edit-item-row">
-        <div class="edit-item-icon">${g.icon}</div>
-        <div class="edit-item-info"><div class="edit-item-name">${g.name}</div><div class="edit-item-sub">Ocultada</div></div>
-        <div class="edit-item-actions"><button class="btn btn-secondary btn-xs" onclick="toggleBuiltinGoal('${g.id}')">↩️ Restaurar</button></div>
-      </div>`).join("");
-    }
+const ebl=document.getElementById("editBuiltinGoalsList");
+if(ebl){
+  const builtinDefs=[
+    {id:"__german",icon:"📖",name:"Alemán B2"},
+    {id:"__spagatt",icon:"🧘",name:"Spagatt"},
+    {id:"__books",icon:"📚",name:"Biblioteca"},
+  ];
+  ebl.innerHTML=builtinDefs.map(g=>{
+    const disabled=disabledBuiltinGoals.includes(g.id);
+    const homeHidden=builtinGoalsHomeVisible[g.id]===false;
+    return `<div class="edit-item-row" style="${disabled?"opacity:0.5":""}">
+      <div class="edit-item-icon">${g.icon}</div>
+      <div class="edit-item-info">
+        <div class="edit-item-name">${g.name} ${disabled?"<span style='font-size:0.65rem;color:var(--red)'>OCULTA</span>":homeHidden?"<span style='font-size:0.65rem;color:var(--amber)'>NO EN INICIO</span>":""}</div>
+      </div>
+      <div class="edit-item-actions">
+        ${!disabled?`<button class="btn btn-secondary btn-xs" onclick="toggleBuiltinGoalHome('${g.id}')">${homeHidden?"👁️ Mostrar en inicio":"🙈 Ocultar de inicio"}</button>`:""}
+        <button class="btn btn-xs ${disabled?"":"btn-danger"}" onclick="toggleBuiltinGoal('${g.id}')">${disabled?"↩️ Restaurar":"🗑️ Ocultar del todo"}</button>
+      </div>
+    </div>`;
+  }).join("");
+
   }
 
+}
+
+function toggleCoreObligatory(key){
+  if(obligatoryCoreHabits.includes(key)){
+    obligatoryCoreHabits=obligatoryCoreHabits.filter(k=>k!==key);
+    toast(`➖ "${key}" quitado de pendientes`);
+  } else {
+    obligatoryCoreHabits.push(key);
+    toast(`⚠️ "${key}" añadido a pendientes obligatorios`);
+  }
+  save();renderAll();
+}
+
+function toggleBuiltinGoalHome(id){
+  builtinGoalsHomeVisible[id] = builtinGoalsHomeVisible[id]===false ? true : false;
+  save();renderAll();
+  toast(builtinGoalsHomeVisible[id]===false ? "🙈 Oculta de inicio" : "👁️ Visible en inicio");
+}
+function toggleGoalHome(id){
+  const g=longGoals.find(x=>x.id===id);if(!g)return;
+  g.showOnHome = g.showOnHome===false ? true : false;
+  save();renderAll();
+  toast(g.showOnHome===false ? "🙈 Oculta de inicio" : "👁️ Visible en inicio");
 }
 
 function deleteGoalDirect(id){
@@ -6004,17 +6201,25 @@ function deleteMonthlyObjDirect(id){
   monthlyObjs=monthlyObjs.filter(o=>o.id!==id);save();renderAll();toast("🗑️ Objetivo eliminado");
 }
 
-
+function deactivateProtector(){
+  if(!isProtectorActive()){toast("No hay protector activo");return;}
+  if(!confirm("¿Desactivar el protector? No se devolverá el XP ni la racha gastados."))return;
+  protector.active=false;protector.expiresAt=null;protector.reason="";
+  protector.mode="full";protector.targetNeedId=null;protector.targetLabel="";
+  save();renderAll();
+  toast("🛡️ Protector desactivado");
+}
 
 // SPORT PAGE
 function renderSportPage(){
+  const sdEl0=document.getElementById("sportDate");
+if(sdEl0 && !sdEl0.value) sdEl0.value=getTodayKey();
   const weekSessions=getWeekSessions();
   const statusEl=document.getElementById("sportWeeklyStatus");
   if(statusEl){
     const done=weekSessions.length>0;
     const requiredCats=sportCats.filter(c=>c.required);
     let html=`<div style="margin-bottom:0.7rem">`;
-    html+=`<span class="week-req-chip ${done?"done":"pending"}">${done?"✅":"⚠️"} Mínimo 1 sesión</span>`;
     requiredCats.forEach(rc=>{
       const catDone=weekSessions.some(s=>s.catId===rc.id);
       html+=`<span class="week-req-chip ${catDone?"done":"pending"}">${catDone?"✅":"⚠️"} ${rc.emoji} ${rc.name}</span>`;
@@ -6023,7 +6228,7 @@ function renderSportPage(){
     if(weekSessions.length){
       const catDoneIds=[...new Set(weekSessions.map(s=>s.catId))];
       html+=`<div style="font-size:0.78rem;color:var(--text3)">${weekSessions.length} sesión${weekSessions.length!==1?"es":""} · ${catDoneIds.map(id=>{const c=sportCats.find(x=>x.id===id);return c?c.emoji+c.name:id;}).join(", ")}</div>`;
-    } else html+=`<div style="font-size:0.78rem;color:var(--red)">Sin sesiones esta semana.</div>`;
+    } else html+=`<div style="font-size:0.78rem;color:var(--text3)">Sin sesiones esta semana.</div>`;
     statusEl.innerHTML=html;
   }
   const dn=Math.round(needValue("strength"));
@@ -6130,17 +6335,15 @@ function renderHabitsPages(){
 const as = document.getElementById("aguaSubtitle");
 if(as) as.innerHTML = `Beber agua mantiene tu planta hidratada · Objetivo: <strong>${coreParams.agua.target}L</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('agua')">⚙️ Ajustar</button>`;
 const ps2 = document.getElementById("pasosSubtitle");
-if(ps2) ps2.innerHTML = `Caminar mantiene sana a tu planta · Objetivo: <strong>${coreParams.pasos.objetivo.toLocaleString()} pasos</strong>, mín: <strong>${coreParams.pasos.minimo.toLocaleString()}</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('pasos')">⚙️ Ajustar</button>`;
+if(ps2) ps2.innerHTML = `Caminar mantiene sana a tu planta · Objetivo: <strong>${coreParams.pasos.objetivo.toLocaleString()} pasos</strong> · Mín: <strong>${coreParams.pasos.minimo.toLocaleString()} pasos</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('pasos')">⚙️ Ajustar</button>`;
 const ss2 = document.getElementById("suenoSubtitle");
-if(ss2) ss2.innerHTML = `El descanso mantiene a tu planta con energía · Fatal <strong>&lt;${decimalHoursToHM(coreParams.sueno.minFatal)}</strong>, óptimo <strong>≥${decimalHoursToHM(coreParams.sueno.minOptimo)}</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('sueno')">⚙️ Ajustar</button>`;
+if(ss2) ss2.innerHTML = `El descanso mantiene a tu planta con energía · Muere si duermes menos de <strong>${decimalHoursToHM(coreParams.sueno.minFatal)}</strong>  · Horas óptimas <strong>${decimalHoursToHM(coreParams.sueno.minOptimo)}</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('sueno')">⚙️ Ajustar</button>`;
 const ds2 = document.getElementById("deporteSubtitle");
-if(ds2) ds2.innerHTML = `Realiza <strong>una sesión</strong> para mantener tu planta fuerte · Muerte si no hace en <strong>${coreParams.deporte.diasMaxSinHacer}d</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openSportCatModal()">🏅 Categorías</button> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('deporte')">⚙️ Ajustar</button>`;
+if(ds2) ds2.innerHTML = `Realiza deporte para mantener tu planta fuerte · La planta muere si no haces deporte en <strong>${coreParams.deporte.diasMaxSinHacer} días</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openSportCatModal()">🏅 Categorías</button> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('deporte')">⚙️ Ajustar</button>`;
 const als = document.getElementById("alemanSubtitle");
-if(als) als.innerHTML = `Estudiar alemán mantiene la inteligencia de tu planta · Muerte si no estudias <strong>${coreParams.aleman.diasMaxSinHacer}d</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('aleman')">⚙️ Ajustar</button>`;
+if(als) als.innerHTML = `Estudiar alemán mantiene la inteligencia de tu planta · La planta muere si no estudias en <strong>${coreParams.aleman.diasMaxSinHacer} días</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('aleman')">⚙️ Ajustar</button>`;
 const ms2 = document.getElementById("movilSubtitle");
-if(ms2) ms2.innerHTML = `El exceso de pantalla daña tu planta · Fatal: <strong>${decimalHoursToHM(coreParams.movil.minFatal)}</strong>, penaliza desde <strong>${decimalHoursToHM(coreParams.movil.penaltyThreshold)}</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('movil')">⚙️ Ajustar</button>`;
-const mfw = document.getElementById("movilFatalWarning");
-if(mfw) mfw.innerHTML = `🚨 <strong>Obligatorio.</strong> Más de ${decimalHoursToHM(coreParams.movil.minFatal)} con el móvil mata a tu planta.`;
+if(ms2) ms2.innerHTML = `El exceso de pantalla daña tu planta · Tu planta morirá si superas <strong>${decimalHoursToHM(coreParams.movil.minFatal)}</strong> · Recibirás una penalización si superas <strong>${decimalHoursToHM(coreParams.movil.penaltyThreshold)}</strong> · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('movil')">⚙️ Ajustar</button>`;
 
 const sub2=document.getElementById("suenoUndoBtn");if(sub2)sub2.style.display=dailyActions.suenoDone?"":"none";
 const pub=document.getElementById("pasosUndoBtn");if(pub)pub.style.display=energy.doneToday?"":"none";
@@ -6154,7 +6357,6 @@ const mub=document.getElementById("movilUndoBtn");if(mub)mub.style.display=daily
   const ao=document.getElementById("aguaObj");if(ao)ao.textContent=hydration.target.toFixed(2);
   const ap=document.getElementById("aguaPct");if(ap)ap.textContent=Math.round((hydration.loggedToday/hydration.target)*100)+"%";
   const am=document.getElementById("aguaAlertMsg");
-  if(am){if(wl<25){am.className="alert alert-danger";am.textContent="⚠️ Nivel crítico.";}else if(wl<50){am.className="alert alert-warn";am.textContent="⚠️ Hidratación baja.";}else{am.className="alert alert-info";am.textContent="✅ Bien hidratada.";}}
   const gEl=document.getElementById("waterGlasses");
   if(gEl){const total=8,filled=Math.round((hydration.loggedToday/hydration.target)*total);gEl.innerHTML=Array.from({length:total},(_,i)=>`<div class="glass${i<filled?" filled":""}" onclick="addWater(0.25)">💧</div>`).join("");}
 
@@ -6168,7 +6370,7 @@ const mub=document.getElementById("movilUndoBtn");if(mub)mub.style.display=daily
   const pt=document.getElementById("pasosProgressText");
   if(pt)pt.textContent=`${energy.stepsToday.toLocaleString()} / ${coreParams.pasos.objetivo.toLocaleString()} pasos`;
   const sc2=document.getElementById("pasosShortcuts");
-  if(sc2){const min=coreParams.pasos.minimo,obj=coreParams.pasos.objetivo;sc2.innerHTML=`<button class="btn btn-secondary btn-sm" onclick="doPasosVal(${min})">${(min/1000).toFixed(1)}k mín</button><button class="btn btn-secondary btn-sm" onclick="doPasosVal(${obj})">✅ ${(obj/1000).toFixed(0)}k</button>`;}
+  if(sc2){sc2.innerHTML="";}
 renderPasosHist();
 
   // ORDEN
@@ -6204,7 +6406,7 @@ renderPasosHist();
   const ls=document.getElementById("lecturaSesiones");if(ls)ls.textContent=goals.reading.entries.length;
   const lb=document.getElementById("lecturaLibros");if(lb)lb.textContent=books.length;
   const ls2=document.getElementById("lecturaSubtitle");
-if(ls2)ls2.innerHTML=`Leer mantiene a tu planta entretenida · Sin leer <strong>${coreParams.lectura?.diasMaxSinHacer||2}d</strong> → muerte · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('lectura')">⚙️ Ajustar</button> · <button class="btn btn-blue btn-xs" style="vertical-align:middle" onclick="openBookModal()">📚 Añadir libro</button>`;
+if(ls2)ls2.innerHTML=`Leer mantiene a tu planta entretenida · Si no lees durante <strong>${coreParams.lectura?.diasMaxSinHacer||2} días</strong> la planta muere · <button class="btn btn-secondary btn-xs" style="vertical-align:middle" onclick="openEditCore('lectura')">⚙️ Ajustar</button> · <button class="btn btn-blue btn-xs" style="vertical-align:middle" onclick="openBookModal()">📚 Añadir libro</button>`;
   renderReadingHist();renderBooksSection();
 
   // SUEÑO
@@ -6215,7 +6417,7 @@ if(ls2)ls2.innerHTML=`Leer mantiene a tu planta entretenida · Sin leer <strong>
   if(sm){const hist=sleep.history.slice(-7);sm.textContent=hist.length?decimalHoursToHM(hist.reduce((a,b)=>a+b.hours,0)/hist.length):"—";}
   const shd=document.getElementById("suenoHorasDisplay");if(shd)shd.textContent=sleep.hoursToday!=null?`Última noche: ${decimalHoursToHM(sleep.hoursToday)}`:"Última noche: —";
   const sda=document.getElementById("suenoDoneAlert");
- if(sda)sda.innerHTML=dailyActions.suenoDone?`<div class="alert alert-info">✅ Registrado (${decimalHoursToHM(sleep.hoursToday)})${sleep.lowSleepStreak>0?` · ⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3} poco`:""}${sleep.highSleepStreak>0?` · ⚠️ ${sleep.highSleepStreak}/${coreParams.sueno.maxHighSleepStreak||3} exceso`:""}</div>`:`<div class="alert alert-danger">🚨 Pendiente: registra antes de medianoche.</div>`;
+ if(sda)sda.innerHTML="";
  renderSleepStats();
 
   // MÓVIL
@@ -6246,7 +6448,7 @@ function renderOrderPage(){
     qc.innerHTML=orderQuestions.map((q,i)=>`<div class="order-question"><button class="order-toggle" id="oq${i}" onclick="this.classList.toggle('on')"></button><span class="order-q-text">${q}</span></div>`).join("");
   }
   const da=document.getElementById("ordenDoneAlert");
-  if(da)da.innerHTML=dailyActions.orderDone?`<div class="alert alert-info">✅ Test completado · ${goals.order.scores.slice(-1)[0]?.score?.toFixed(1)||"?"}/10</div>`:`<div class="alert alert-danger">🚨 Pendiente: completa el test hoy.</div>`;
+  if(da)da.innerHTML="";
   const hist=document.getElementById("ordenHistContent");
   if(hist)hist.innerHTML=goals.order.scores.length?goals.order.scores.slice().reverse().map(s=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem"><span style="color:var(--text3)">${s.date}</span><span style="font-weight:500;color:${s.score>=7?"var(--green-md)":s.score>=5?"var(--amber)":"var(--red)"}">${s.score.toFixed(1)}/10</span></div>`).join(""):`<p style="font-size:0.8rem;color:var(--text3)">Sin tests aún.</p>`;
 const orb=document.getElementById("orderRedoBtn");if(orb)orb.style.display=dailyActions.orderDone?"":"none";
@@ -6266,18 +6468,39 @@ function deleteReadingEntry(id){
   const idx=goals.reading.entries.findIndex(e=>e.id===id);
   if(idx<0)return;
   const e=goals.reading.entries[idx];
-  if(!confirm(`¿Eliminar esta sesión de ${e.minutes} min? Se restará el XP ganado.`))return;
+  const xpToRemove=e.xp!==undefined?e.xp:Math.floor(e.minutes/15);
+  if(!confirm(`¿Eliminar esta sesión de ${e.minutes} min? Se restarán ${xpToRemove} XP.`))return;
   goals.reading.entries.splice(idx,1);
-  plant.xp=Math.max(0,plant.xp-Math.floor(e.minutes/15));
+  plant.xp=Math.max(0,plant.xp-xpToRemove);
   save();renderAll();
   toast("🗑️ Sesión de lectura eliminada");
 }
 
 function renderBooksSection(){
   const bl=document.getElementById("booksListContent");if(!bl)return;
-  const filtered=booksFilter==="all"?books:books.filter(b=>b.genre===booksFilter);
-  if(!filtered.length){bl.innerHTML=`<p style="font-size:0.8rem;color:var(--text3)">${books.length?"Sin libros de este género.":"Añade tu primer libro."}</p>`;return;}
-  bl.innerHTML=filtered.slice().reverse().map(b=>`<div class="book-item"><div class="book-cover">📕</div><div class="book-info"><div class="book-title">${b.title}</div><div class="book-author">${b.author||"Autor desconocido"}</div><span class="book-genre">${b.genre}</span><div class="book-rating" style="margin-top:3px">${stars(b.rating)}${b.date?`<span style="font-size:0.65rem;color:var(--text3);margin-left:6px">${formatDate(b.date)}</span>`:""}</div>${b.review?`<div style="font-size:0.72rem;color:var(--text2);margin-top:4px;font-style:italic">"${b.review}"</div>`:""}</div><div style="display:flex;flex-direction:column;gap:4px"><button class="btn-icon" onclick="openBookModal('${b.id}')">✏️</button><button class="btn-icon" onclick="deleteBook('${b.id}')">🗑️</button></div></div>`).join("");
+  let filtered=books.slice();
+  if(booksFilter!=="all") filtered=filtered.filter(b=>b.genre===booksFilter);
+  if(booksSearchTerm.trim()){
+    const q=booksSearchTerm.trim().toLowerCase();
+    filtered=filtered.filter(b=>(b.title||"").toLowerCase().includes(q)||(b.author||"").toLowerCase().includes(q));
+  }
+  filtered=filtered.slice().reverse();
+  const totalMatches=filtered.length;
+  if(!booksShowAll) filtered=filtered.slice(0,5);
+
+  if(!filtered.length){
+    bl.innerHTML=`<p style="font-size:0.8rem;color:var(--text3)">${books.length?"Sin resultados para este filtro.":"Añade tu primer libro."}</p>`;
+  } else {
+    bl.innerHTML=filtered.map(b=>`<div class="book-item"><div class="book-cover">📕</div><div class="book-info"><div class="book-title">${b.title}</div><div class="book-author">${b.author||"Autor desconocido"}</div><span class="book-genre">${b.genre}</span><div class="book-rating" style="margin-top:3px">${stars(b.rating)}${b.date?`<span style="font-size:0.65rem;color:var(--text3);margin-left:6px">${formatDate(b.date)}</span>`:""}</div>${b.review?`<div style="font-size:0.72rem;color:var(--text2);margin-top:4px;font-style:italic">"${b.review}"</div>`:""}</div><div style="display:flex;flex-direction:column;gap:4px"><button class="btn-icon" onclick="openBookModal('${b.id}')">✏️</button><button class="btn-icon" onclick="deleteBook('${b.id}')">🗑️</button></div></div>`).join("");
+  }
+
+  const moreBtn=document.getElementById("booksShowMoreBtn");
+  if(moreBtn){
+    if(totalMatches>5){
+      moreBtn.style.display="";
+      moreBtn.textContent=booksShowAll?"Mostrar solo los últimos 5":`Ver todos (${totalMatches})`;
+    } else moreBtn.style.display="none";
+  }
 }
 
 function renderMovilStats(){
@@ -6291,9 +6514,9 @@ function renderMovilStats(){
   const mm=document.getElementById("movilMedia");if(mm)mm.textContent=decimalHoursToHM(avg);
   const mx=document.getElementById("movilMax");if(mx)mx.textContent=decimalHoursToHM(max);
   const ma=document.getElementById("movilAlert");
-  if(ma){if(today>5){ma.style.display="";ma.className="alert alert-danger";ma.textContent="⚠️ Uso muy elevado (>5h).";}else if(today>3){ma.style.display="";ma.className="alert alert-warn";ma.textContent="📱 Uso alto (>3h).";}else ma.style.display="none";}
+  if(ma){ma.style.display="none";}
   const da=document.getElementById("movilDoneAlert");
-  if(da)da.innerHTML=dailyActions.phoneDone?`<div class="alert alert-info">✅ Registrado (${decimalHoursToHM(today)}).</div>`:`<div class="alert alert-danger">🚨 Pendiente: registra antes de medianoche.</div>`;
+  if(da)da.innerHTML="";
 }
 
 function renderSleepStats(){
@@ -6311,8 +6534,6 @@ function renderSleepStats(){
       <div class="stat-card"><div class="stat-val">${decimalHoursToHM(worst)}</div><div class="stat-lbl">Peor noche</div></div>
       <div class="stat-card"><div class="stat-val">${goodNights}</div><div class="stat-lbl">≥${decimalHoursToHM(coreParams.sueno.minOptimo)}</div></div>
     </div>
-    ${sleep.lowSleepStreak>0?`<div class="alert alert-warn">⚠️ ${sleep.lowSleepStreak}/${coreParams.sueno.maxLowSleepStreak||3} noches con poco sueño.</div>`:""}
-    ${sleep.highSleepStreak>0?`<div class="alert alert-warn">⚠️ ${sleep.highSleepStreak}/${coreParams.sueno.maxHighSleepStreak||3} noches con exceso de sueño.</div>`:""}
   `;
 }
 
@@ -6523,6 +6744,19 @@ if(logs.length>0){
     },100);
   }
 }
+
+function goalWizardNext(){
+  const cur=GOAL_WIZARD_STEPS[goalWizardStep];
+  if(cur==="identity"&&!document.getElementById("gmName").value.trim()){toast("Escribe el nombre de la meta");return;}
+  if(cur==="deadline"){
+    const countdown=document.getElementById("gmCountdown").value==="yes";
+    const deadline=document.getElementById("gmDeadline").value;
+    if(countdown&&!deadline){toast("La cuenta atrás necesita una fecha límite");return;}
+  }
+  goalWizardStep=Math.min(goalWizardStep+1,GOAL_WIZARD_STEPS.length-1);
+  renderGoalWizard();
+}
+
 function setHabitChartType(habitId,type){
   const h=customHabits.find(x=>x.id===habitId);if(!h)return;
   h.chartType=type;
@@ -6672,6 +6906,12 @@ function habitWizardNext(){
   }
   habitWizardStep=Math.min(habitWizardStep+1, steps.length-1);
   renderHabitWizard();
+
+    if(cur==="goal"){
+    const countdown=document.getElementById("hGoalCountdown").value==="yes";
+    const deadline=document.getElementById("hGoalDeadline").value;
+    if(countdown&&!deadline){toast("La cuenta atrás necesita una fecha límite");return;}
+  }
 }
 
 function habitWizardBack(){
@@ -6882,6 +7122,9 @@ function renderSleepChart(){
   suenoChartInst=new Chart(canvas.getContext("2d"),{type:"bar",data:{labels,datasets:[{label:"Horas",data,backgroundColor:data.map(v=>v===null?"rgba(0,0,0,0.05)":v<p.minFatal?"rgba(139,46,26,0.7)":v<p.minOptimo?"rgba(184,115,51,0.7)":"rgba(74,124,47,0.7)"),borderColor:data.map(v=>v===null?"transparent":v<p.minFatal?"#8b2e1a":v<p.minOptimo?"#b87333":"#4a7c2f"),borderWidth:1.5,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw===null?"Sin registrar":ctx.raw.toFixed(2)+"h"}}},scales:{y:{beginAtZero:true,max:yMax,grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{size:10},callback:v=>v+"h"}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
 }
 
+function searchBooksInput(val){booksSearchTerm=val;renderBooksSection();}
+function filterBooksByGenreSelect(val){booksFilter=val;renderBooksSection();}
+function toggleBooksShowAll(){booksShowAll=!booksShowAll;renderBooksSection();}
 
 
 // NAVEGADOR
@@ -7542,7 +7785,7 @@ const hq=document.getElementById("motivHeroQuote");
     if(motivData.ideal&&motivData.ideal.trim()){
       it.innerHTML=`<span style="font-family:'Lora',serif;font-size:0.95rem;color:var(--text);line-height:1.8;white-space:pre-wrap">${motivData.ideal.replace(/</g,"&lt;")}</span>`;
     } else {
-      it.innerHTML=`<span class="motiv-ideal-placeholder">Describe a tu yo ideal. ¿Cómo vive? ¿Cómo se cuida? ¿Qué hace cada día? ¿Qué opinas de esa persona?.</span>`;
+      it.innerHTML=`<span class="motiv-ideal-placeholder">Describe a tu yo ideal. ¿Cómo es? ¿Qué hace cada día? ¿Por qué hace lo que hace?.</span>`;
     }
   }
 
