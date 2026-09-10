@@ -856,23 +856,31 @@ textarea {
 #toastBox {
   position:fixed;
   bottom:22px;
-  left:50%;
-  transform:translateX(-50%);
+  left:0;
+  right:0;
   z-index:999;
   display:flex;
   flex-direction:column;
   gap:7px;
   align-items:center;
+  padding:0 12px;
+  pointer-events:none;
 }
 
 .toast {
   background:var(--green-dk);
   color:#d6f0b8;
-  padding:8px 20px;
-  border-radius:30px;
+  padding:9px 18px;
+  border-radius:22px;
   font-size:0.76rem;
+  line-height:1.4;
   animation:toastIn 0.3s ease,toastOut 0.3s ease 2.7s forwards;
-  white-space:nowrap;
+  max-width:100%;
+  width:max-content;
+  text-align:center;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  box-shadow:0 4px 14px rgba(0,0,0,0.25);
 }
 
 @keyframes toastIn {
