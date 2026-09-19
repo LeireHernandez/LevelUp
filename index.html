@@ -308,6 +308,41 @@ main::-webkit-scrollbar {
   color:var(--green-dk);
 }
 
+/* ===== TUTORIAL ===== */
+body.tutorial-locked main,
+body.tutorial-locked nav{ overflow:hidden !important; }
+
+#tutorialSpotlight{
+  position:fixed; z-index:9000; border-radius:14px; pointer-events:none; display:none;
+  box-shadow:0 0 0 9999px rgba(20,28,14,0.62), 0 0 0 3px var(--green-lt), 0 0 22px 5px rgba(122,173,82,0.45);
+  transition:top .28s cubic-bezier(.4,0,.2,1), left .28s cubic-bezier(.4,0,.2,1), width .28s, height .28s;
+}
+#tutorialSpotlight.on{ display:block; }
+
+#tutorialBlocker{ position:fixed; inset:0; z-index:8999; display:none; background:transparent; }
+#tutorialBlocker.on{ display:block; }
+
+#tutorialTooltip{
+  position:fixed; z-index:9001; display:none;
+  width:300px; max-width:calc(100vw - 24px);
+  background:var(--card); border:1px solid var(--green-lt);
+  border-radius:var(--radius); box-shadow:0 18px 44px rgba(20,28,14,0.32);
+  overflow:hidden; animation:tutIn .22s ease;
+}
+@keyframes tutIn{ from{opacity:0;transform:translateY(6px) scale(.97);} to{opacity:1;transform:none;} }
+#tutorialTooltip .tut-head{ background:var(--green-dk); padding:.75rem 1rem .7rem; }
+#tutorialStepInfo{ font-size:.62rem; letter-spacing:.09em; text-transform:uppercase; color:var(--green-lt); }
+#tutorialTarget{ font-family:'Lora',serif; font-size:.97rem; color:#fff; margin-top:3px; line-height:1.3; }
+#tutorialTooltip .tut-body{ padding:.85rem 1rem .2rem; }
+#tutorialDesc{ font-size:.79rem; line-height:1.65; color:var(--text2); }
+#tutorialTooltip .tut-foot{ display:flex; align-items:center; gap:9px; padding:.85rem 1rem 1rem; }
+#tutorialProgress{ flex:1; height:4px; background:var(--green-pale); border-radius:4px; overflow:hidden; }
+#tutorialProgressFill{ height:100%; width:0; background:var(--green-md); border-radius:4px; transition:width .3s; }
+.tut-btn{ border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.72rem; padding:7px 14px; border-radius:20px; white-space:nowrap; }
+.tut-btn-next{ background:var(--green-md); color:#fff; }
+.tut-btn-prev{ background:var(--green-pale); color:var(--green-dk); }
+.tut-skip{ display:block; margin:0 0 .85rem 1rem; background:none; border:none; color:var(--text3); font-size:.68rem; cursor:pointer; text-decoration:underline; }
+
 /* Needs Grid */
 .needs-grid {
   display:grid;
@@ -1155,6 +1190,8 @@ textarea {
   margin-top:0.8rem;
 }
 
+
+
 .feature-toggle {
   display:flex;
   align-items:center;
@@ -1870,6 +1907,7 @@ textarea {
   background:rgba(15,10,5,0.8);
   backdrop-filter:blur(2px);
 }
+
 #deathOverlay .death-card{
   margin:0;
   max-width:380px;
@@ -1885,6 +1923,21 @@ textarea {
 </style>
 </head>
 <body>
+<div id="tutorialBlocker"></div>
+  <div id="tutorialSpotlight"></div>
+<div id="tutorialTooltip">
+  <div class="tut-head">
+    <div id="tutorialStepInfo">Paso 1</div>
+    <div id="tutorialTarget">Título</div>
+  </div>
+  <div class="tut-body"><p id="tutorialDesc"></p></div>
+  <div class="tut-foot">
+    <button class="tut-btn tut-btn-prev" id="tutorialPrevBtn" onclick="tutorialPrev()">←</button>
+    <div id="tutorialProgress"><div id="tutorialProgressFill"></div></div>
+    <button class="tut-btn tut-btn-next" id="tutorialNextBtn" onclick="tutorialNext()">Siguiente →</button>
+  </div>
+  <button class="tut-skip" onclick="skipTutorial()">Saltar tutorial</button>
+</div>
 
 <!-- OVERLAY GLOBAL: PLANTA MUERTA (se muestra sobre cualquier pantalla) -->
 <div class="modal-overlay" id="deathOverlay">
@@ -1893,6 +1946,25 @@ textarea {
     <p id="deathReasonTextGlobal"></p>
     <button class="btn" style="background:rgba(139,46,26,0.12);color:var(--red);font-size:0.73rem" onclick="resetFromDeathOverlay()">Reiniciar planta</button>
   </div>
+</div>
+
+<!-- OVERLAY BIENVENIDA + TUTORIAL -->
+<!-- TUTORIAL: TOOLTIP FLOTANTE -->
+<div id="tutorialTooltip" style="display:none;position:fixed;z-index:6000;max-width:290px;background:var(--card);border:2px solid var(--green-lt);border-radius:var(--radius-sm);box-shadow:0 12px 40px rgba(0,0,0,0.28);padding:1rem 1.1rem">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:0.5rem">
+    <div id="tutorialStepInfo" style="font-size:0.68rem;color:var(--text3);font-weight:500;letter-spacing:0.05em;text-transform:uppercase"></div>
+    <button onclick="skipTutorial()" style="background:none;border:none;font-size:1rem;color:var(--text3);cursor:pointer;line-height:1;padding:0" title="Cerrar tutorial">✕</button>
+  </div>
+  <div id="tutorialTarget" style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);font-weight:500;margin-bottom:0.4rem"></div>
+  <div id="tutorialDesc" style="font-size:0.8rem;color:var(--text2);line-height:1.55;margin-bottom:0.9rem"></div>
+  <div style="display:flex;gap:6px;justify-content:space-between;align-items:center">
+    <button class="btn btn-secondary btn-xs" onclick="skipTutorial()">Omitir</button>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-secondary btn-xs" id="tutorialPrevBtn" onclick="tutorialPrev()">← Atrás</button>
+      <button class="btn btn-xs" id="tutorialNextBtn" onclick="tutorialNext()">Siguiente →</button>
+    </div>
+  </div>
+  <div id="tutorialArrow" style="position:absolute;width:14px;height:14px;background:var(--card);border-left:2px solid var(--green-lt);border-top:2px solid var(--green-lt);transform:rotate(45deg)"></div>
 </div>
 
 <button class="burger" id="burgerBtn" aria-label="Menú"><span></span><span></span><span></span></button>
@@ -3059,7 +3131,7 @@ textarea {
 
 
 
-    <div class="edit-section">
+    <div class="edit-section" id="editNeedsSection">
       <div class="edit-section-title">🌿 Necesidades de la planta</div>
       <p style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem">Edita los nombres e iconos de las necesidades o crea nuevas necesidades personalizadas vinculadas a los hábitos.</p>
       <div id="editNeedsList"></div>
@@ -3075,7 +3147,18 @@ textarea {
  
 <!-- INFO -->
 <div class="page" id="page-info">
-  <div class="page-header"><h2>¿Cómo funciona LevelUp?</h2></div>
+  <div class="page-header">
+    <h2>¿Cómo funciona LevelUp?</h2>
+    <p>Consulta cualquier duda sobre las mecánicas de la app</p>
+  </div>
+
+  <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div>
+      <div style="font-family:'Lora',serif;font-size:1.05rem;color:var(--green-dk);font-weight:500">🎓 Tutorial guiado</div>
+      <p style="font-size:0.78rem;color:var(--text3);margin-top:3px">Vuelve a ver el tutorial de bienvenida cuando quieras</p>
+    </div>
+    <button class="btn" onclick="replayTutorial()">▶️ Ver tutorial</button>
+  </div>
 
   <div class="card">
     <h3 style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);margin-bottom:0.6rem;font-weight:500">🌱 La idea general</h3>
@@ -4524,7 +4607,12 @@ if(isPlantNewToday()){
   checkDeath();save();renderAll();renderPhoneChart();
 }
 
+function replayTutorial(){
+  tutorialIndex=0;
+  document.getElementById("welcomeText").textContent="Este es el tutorial que viste al empezar. Puedes salir cuando quieras.";
 
+  renderTutorialStep();
+}
 
 // CUSTOM HABITS — LOG
 function openLogModal(habitId){
@@ -8560,6 +8648,157 @@ window.addEventListener("popstate",(e)=>{
 // Estado inicial para que el botón atrás siempre tenga algo que "popear"
 history.pushState({page:"home"},"");
 
+// ============ TUTORIAL DE BIENVENIDA (tooltip) ============
+const TUTORIAL_STEPS=[
+  {page:"home",selector:null,title:"🏠 Inicio",desc:"Aquí ves tu planta, su nivel y sus necesidades. Las necesidades bajan con el tiempo: si llegan a 0%, la planta muere. También aparecen los pendientes obligatorios del día, tus metas y objetivos."},
+  {page:"home",selector:'#pendientesCard',title:"⚠️ Pendientes obligatorios",desc:"Todo lo que debe completarse hoy antes de medianoche. Si algo se queda sin marcar, la planta muere al día siguiente."},
+  {page:"home",selector:'#homeNeedsGrid .need-item',title:"📊 Necesidades",desc:"Cada tarjeta es una necesidad vinculada a un hábito. Toca cualquiera para ir directamente a registrar ese hábito."},
+  {page:"agenda",selector:'button[onclick="openTaskModal()"]',title:"📅 Nueva tarea",desc:"Pulsa aquí para crear una tarea única. Se abre un asistente por pasos: nombre, hora, prioridad, cuántas veces al día, categoría y notas. Puedes programarla para hoy o cualquier día futuro."},
+  {page:"agenda",selector:'button[onclick="openRecurringModal()"]',title:"🔁 Tarea recurrente",desc:"A diferencia de las tareas normales, una recurrente se repite sola: eliges qué días de la semana y a qué hora. La app crea automáticamente cada aparición los días que toca."},
+  {page:"agenda",selector:'button[onclick="openAgendaCatModal()"]',title:"🏷️ Categorías",desc:"Crea, renombra o elimina las categorías con las que clasificas tus tareas (Personal, Trabajo, Salud...). Después puedes filtrar la vista con los botones de colores."},
+  {page:"agenda",selector:'#agendaNextDayBtn',title:"➡️ Navegar días",desc:"Pulsa Siguiente → para ver las tareas de días futuros. Cuando estés en un día futuro, aparecerá '← Hoy' para volver."},
+  {page:"agenda",selector:'#agendaUpcomingList',title:"📌 Próximos días",desc:"Aquí aparecen todas las tareas programadas para los días siguientes, agrupadas por fecha."},
+
+  {page:"agua",selector:'#waterGlasses',title:"💧 Hidratación",desc:"Registra el agua que bebes. Cumplir el objetivo diario es uno de los obligatorios. Puedes añadir o quitar con los botones rápidos."},
+  {page:"deporte",selector:'button[onclick="openSportSessionModal()"]',title:"💪 Registrar deporte",desc:"Selecciona la categoría, duración, intensidad y opcionalmente km. Puedes crear tus propias categorías desde '🏅 Categorías'."},
+  {page:"sueno",selector:null,title:"😴 Sueño",desc:"Registra tus horas dormidas cada día. Dormir menos del mínimo fatal mata a la planta al instante."},
+  {page:"aleman",selector:null,title:"🧠 Alemán",desc:"Registra horas de estudio. Tienes una hoja de ruta A1→C2 y puedes ajustar tu nivel de partida."},
+  {page:"pasos",selector:null,title:"⚡ Pasos diarios",desc:"Registra tus pasos. Superar el objetivo sube Salud al 100%; quedarte por debajo del mínimo mata a la planta."},
+  {page:"orden",selector:null,title:"🍃 Test del Orden",desc:"Responde el cuestionario diario sobre el orden de tu entorno. Es obligatorio: sin test, la planta muere al día siguiente."},
+  {page:"estiramientos",selector:null,title:"🧘 Estiramientos",desc:"Registra tus sesiones con o sin medida. Sirve para progresar hacia el spagatt (0 cm al suelo)."},
+  {page:"lectura",selector:'button[onclick="openBookModal()"]',title:"📚 Añadir libro",desc:"Registra los libros que terminas con título, autor, género, valoración, fecha y reseña. Se guardan en tu biblioteca."},
+  {page:"movil",selector:null,title:"📱 Tiempo de móvil",desc:"Registra tus horas de pantalla del día anterior. Superar el mínimo fatal mata a la planta; pasar del umbral de aviso penaliza Tranquilidad."},
+
+  {page:"habitos-custom",selector:'button[onclick="openHabitModal()"]',title:"✨ Nuevo hábito",desc:"Pulsa aquí para crear un hábito desde cero. Un asistente te guía paso a paso: nombre y emoji, si es de idioma, unidad de medida, necesidad que alimenta, frecuencia, efecto al completar y opciones extra."},
+  {page:"habitos-custom",selector:'#customHabitsList',title:"📋 Mis hábitos",desc:"Aquí aparecen todos tus hábitos personalizados. Puedes registrarlos con ✅, ver su detalle o editarlos con ✏️."},
+
+  {page:"editar",selector:null,title:"✏️ Editar — panel de control",desc:"Desde aquí ajustas toda la app. Vamos a ver las zonas más importantes."},
+  {page:"editar",selector:'#editCoreHabitsList',title:"⚙️ Hábitos del sistema",desc:"Cada hábito core (agua, deporte, sueño...) tiene 3 botones: ⚙️ Parámetros (para ajustar sus límites), un botón para añadirlo o quitarlo de Pendientes obligatorios, y otro para desactivarlo por completo."},
+  {page:"editar",selector:'#editCustomHabitsList',title:"✨ Hábitos personalizados",desc:"Crea, edita o elimina tus hábitos propios. Cada uno puede tener su propia necesidad, unidad de registro, meta y funciones extra."},
+  {page:"editar",selector:'#editNeedsSection',title:"🌿 Necesidades",desc:"Las necesidades son lo que alimenta tu planta. Puedes editar el nombre e icono de cualquiera, o crear nuevas vinculándolas a un hábito."},
+ {page:"editar",selector:'#editAppPagesList',title:"👁️ Pantallas visibles",desc:"Oculta las pantallas que no uses (bosque, motivación, corcho...). Podrás volver a activarlas cuando quieras."},
+  {page:"editar",selector:'#editBuiltinGoalsList',title:"🏆 Metas predefinidas",desc:"Las 3 metas de fábrica (Alemán B2, Spagatt, Biblioteca). Puedes ocultarlas del inicio o restaurarlas si las habías quitado."},
+  {page:"editar",selector:'#editSportCatPreview',title:"🏅 Categorías de deporte",desc:"Gestiona las categorías deportivas, actívales km y ritmo, o márcalas como obligatorias semanales."},
+  {page:"editar",selector:'#editAgendaCatPreview',title:"🏷️ Categorías de agenda",desc:"Las categorías con las que clasificas tus tareas. Se usan también en las tareas recurrentes."},
+
+  {page:"bosque",selector:null,title:"🌳 Mi bosque",desc:"Cada planta que llega a nivel 8 se convierte en árbol. Aquí guardas sus recuerdos. Mantén pulsado un árbol para verlos."},
+  {page:"motivacion",selector:null,title:"🌟 Mi motivación",desc:"Tu espacio personal para recordar quién quieres ser, tus porqués y los pasos para conseguirlo."},
+  {page:"notas",selector:null,title:"📌 Mi corcho",desc:"Notas rápidas tipo post-it, con colores. Pulsa una nota para expandirla."},
+
+  {page:"info",selector:'button[onclick="replayTutorial()"]',title:"❓ Cómo funciona",desc:"Consulta cualquier duda. Y si quieres volver a ver el tutorial cuando quieras, pulsa este botón '▶️ Ver tutorial'."},
+  {page:"info",selector:null,title:"🎓 Fin del tutorial",desc:"Ya has visto lo básico. Puedes volver a ver este tutorial cuando quieras desde 'Cómo funciona' → botón '▶️ Ver tutorial'. ¡A cuidar tu planta!"}
+];
+let tutorialIndex=0;
+
+function startWelcomeTutorial(){
+  if(localStorage.getItem("levelup_v7_tutorial_done"))return;
+  replayTutorial();
+}
+function replayTutorial(){
+  tutorialIndex=0;
+    document.getElementById("tutorialBlocker").classList.add("on");
+  document.body.classList.add("tutorial-locked");
+  document.getElementById("tutorialTooltip").style.display="block";
+  document.getElementById("tutorialSpotlight").classList.add("on");
+  renderTutorialStep();
+}
+function tutorialFindTarget(s){
+  if(!s.selector)return null;
+  let t=null;
+  const page=document.getElementById("page-"+s.page);
+  if(page)t=page.querySelector(s.selector);
+  if(!t)t=document.querySelector(s.selector);
+  // Si está oculto o sin tamaño, tratarlo como si no existiera
+  if(t&&(t.offsetParent===null||t.getBoundingClientRect().width===0))t=null;
+  return t;
+}
+function renderTutorialStep(){
+  const s=TUTORIAL_STEPS[tutorialIndex];
+  if(s.page){
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    const pe=document.getElementById("page-"+s.page);
+    if(pe)pe.classList.add("active");
+  }
+  document.getElementById("tutorialStepInfo").textContent=`Paso ${tutorialIndex+1} de ${TUTORIAL_STEPS.length}`;
+  document.getElementById("tutorialTarget").textContent=s.title;
+  document.getElementById("tutorialDesc").textContent=s.desc;
+  document.getElementById("tutorialProgressFill").style.width=`${((tutorialIndex+1)/TUTORIAL_STEPS.length)*100}%`;
+  const prevBtn=document.getElementById("tutorialPrevBtn");
+  const nextBtn=document.getElementById("tutorialNextBtn");
+  if(prevBtn)prevBtn.style.visibility=tutorialIndex===0?"hidden":"visible";
+  if(nextBtn)nextBtn.textContent=(tutorialIndex===TUTORIAL_STEPS.length-1)?"✅ Terminar":"Siguiente →";
+
+  const target=tutorialFindTarget(s);
+  document.body.classList.remove("tutorial-locked");
+  if(target)target.scrollIntoView({behavior:"auto",block:"center"});
+  else{window.scrollTo(0,0);const m=document.querySelector("main");if(m)m.scrollTop=0;}
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    document.body.classList.add("tutorial-locked");
+    placeTutorial(target);
+  }));
+}
+function placeTutorial(target){
+  const tip=document.getElementById("tutorialTooltip");
+  const spot=document.getElementById("tutorialSpotlight");
+  const vw=window.innerWidth,vh=window.innerHeight,m=14;
+  const tipW=tip.offsetWidth||300,tipH=tip.offsetHeight||190;
+  if(!target){
+    spot.style.width="0px";spot.style.height="0px";
+    spot.style.left=(vw/2)+"px";spot.style.top=(vh/2)+"px";
+    tip.style.left=Math.max(m,(vw-tipW)/2)+"px";
+    tip.style.top=Math.max(m,(vh-tipH)/2)+"px";
+    return;
+  }
+  const r=target.getBoundingClientRect(),pad=8;
+  spot.style.left=(r.left-pad)+"px";spot.style.top=(r.top-pad)+"px";
+  spot.style.width=(r.width+pad*2)+"px";spot.style.height=(r.height+pad*2)+"px";
+  let left,top,lateral=true;
+  if(r.right+18+tipW<=vw-m)left=r.right+18;
+  else if(r.left-18-tipW>=m)left=r.left-18-tipW;
+  else{left=Math.max(m,Math.min(r.left,vw-tipW-m));lateral=false;}
+  if(lateral)top=r.top+r.height/2-tipH/2;
+  else if(r.bottom+18+tipH<=vh-m)top=r.bottom+18;
+  else if(r.top-18-tipH>=m)top=r.top-18-tipH;
+  else top=((vh-r.bottom)>=r.top)?vh-tipH-m:m;
+  top=Math.max(m,Math.min(top,vh-tipH-m));
+  left=Math.max(m,Math.min(left,vw-tipW-m));
+  tip.style.left=left+"px";tip.style.top=top+"px";
+}
+function tutorialNext(){ if(tutorialIndex<TUTORIAL_STEPS.length-1){tutorialIndex++;renderTutorialStep();}else finishTutorial(); }
+function tutorialPrev(){ if(tutorialIndex>0){tutorialIndex--;renderTutorialStep();} }
+function skipTutorial(){ finishTutorial(); }
+function finishTutorial(){
+    document.getElementById("tutorialBlocker").classList.remove("on");
+  document.getElementById("tutorialTooltip").style.display="none";
+  document.getElementById("tutorialSpotlight").classList.remove("on");
+  document.body.classList.remove("tutorial-locked");
+  localStorage.setItem("levelup_v7_tutorial_done","1");
+  navigateTo("home");
+}
+
+function tutorialActive(){ return document.body.classList.contains("tutorial-locked"); }
+function tutorialKeyGuard(e){
+  if(!tutorialActive())return;
+  e.preventDefault(); e.stopPropagation();
+  if(e.key==="ArrowRight"||e.key==="Enter"||e.key===" ")tutorialNext();
+  else if(e.key==="ArrowLeft")tutorialPrev();
+  else if(e.key==="Escape")skipTutorial();
+}
+function tutorialScrollGuard(e){ if(tutorialActive())e.preventDefault(); }
+window.addEventListener("keydown",tutorialKeyGuard,true);
+window.addEventListener("wheel",tutorialScrollGuard,{passive:false,capture:true});
+window.addEventListener("touchmove",tutorialScrollGuard,{passive:false,capture:true});
+window.addEventListener("resize",()=>{ if(document.body.classList.contains("tutorial-locked"))renderTutorialStep(); });
+
+// Reposicionar al redimensionar/scroll
+window.addEventListener("resize",()=>{
+  const t=document.getElementById("tutorialTooltip");
+  if(t&&t.style.display==="block")positionTutorialTooltip(TUTORIAL_STEPS[tutorialIndex].selector);
+});
+window.addEventListener("scroll",()=>{
+  const t=document.getElementById("tutorialTooltip");
+  if(t&&t.style.display==="block")positionTutorialTooltip(TUTORIAL_STEPS[tutorialIndex].selector);
+},true);
 
 // INIT
 load();
@@ -8569,6 +8808,8 @@ renderAll();
 renderPhoneChart();
 renderSleepChart();
 startDecay();
+// Arrancar tutorial la primera vez
+setTimeout(startWelcomeTutorial, 400);
 
 // Add active-filter style
 const style=document.createElement("style");
