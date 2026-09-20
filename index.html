@@ -3483,6 +3483,12 @@ const FEATURES_DEF = [
 
 
 // STATE
+let forest = [];
+let lastAppTouch = Date.now();
+let treeOverlayDismissed = false;
+let corkNotes = [];
+let expandedCorkNoteId = null;
+let motivData={ideal:"",whys:[],steps:[]};
 let plant={}, needsState={}, hydration={}, flexibility={}, energy={}, sleep={};
 let goals={}, phoneUsage=[], dailyActions={}, streak={};
 let customHabits=[], customNeedStates={}, habitLogs={}, habitStreaks={};
@@ -7901,15 +7907,6 @@ function updateTaskTimesInputs(){
   }
   container.innerHTML=html;
 }
-
-
-// BOSQUE
-
-let forest = [];
-let lastAppTouch = Date.now();
-let treeOverlayDismissed = false;
-let corkNotes = [];
-let expandedCorkNoteId = null;
 
 
 function triggerMonthlyObjUpdate(key){
