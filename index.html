@@ -310,7 +310,10 @@ main::-webkit-scrollbar {
 
 /* ===== TUTORIAL ===== */
 body.tutorial-locked main,
-body.tutorial-locked nav{ overflow:hidden !important; }
+body.tutorial-locked nav{
+  overflow:hidden !important;
+  touch-action:none;
+}
 
 #tutorialSpotlight{
   position:fixed; z-index:9000; border-radius:14px; pointer-events:none; display:none;
@@ -1949,23 +1952,7 @@ textarea {
 </div>
 
 <!-- OVERLAY BIENVENIDA + TUTORIAL -->
-<!-- TUTORIAL: TOOLTIP FLOTANTE -->
-<div id="tutorialTooltip" style="display:none;position:fixed;z-index:6000;max-width:290px;background:var(--card);border:2px solid var(--green-lt);border-radius:var(--radius-sm);box-shadow:0 12px 40px rgba(0,0,0,0.28);padding:1rem 1.1rem">
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:0.5rem">
-    <div id="tutorialStepInfo" style="font-size:0.68rem;color:var(--text3);font-weight:500;letter-spacing:0.05em;text-transform:uppercase"></div>
-    <button onclick="skipTutorial()" style="background:none;border:none;font-size:1rem;color:var(--text3);cursor:pointer;line-height:1;padding:0" title="Cerrar tutorial">✕</button>
-  </div>
-  <div id="tutorialTarget" style="font-family:'Lora',serif;font-size:1rem;color:var(--green-dk);font-weight:500;margin-bottom:0.4rem"></div>
-  <div id="tutorialDesc" style="font-size:0.8rem;color:var(--text2);line-height:1.55;margin-bottom:0.9rem"></div>
-  <div style="display:flex;gap:6px;justify-content:space-between;align-items:center">
-    <button class="btn btn-secondary btn-xs" onclick="skipTutorial()">Omitir</button>
-    <div style="display:flex;gap:6px">
-      <button class="btn btn-secondary btn-xs" id="tutorialPrevBtn" onclick="tutorialPrev()">← Atrás</button>
-      <button class="btn btn-xs" id="tutorialNextBtn" onclick="tutorialNext()">Siguiente →</button>
-    </div>
-  </div>
-  <div id="tutorialArrow" style="position:absolute;width:14px;height:14px;background:var(--card);border-left:2px solid var(--green-lt);border-top:2px solid var(--green-lt);transform:rotate(45deg)"></div>
-</div>
+
 
 <button class="burger" id="burgerBtn" aria-label="Menú"><span></span><span></span><span></span></button>
 <div class="nav-overlay" id="navOverlay"></div>
@@ -4607,12 +4594,7 @@ if(isPlantNewToday()){
   checkDeath();save();renderAll();renderPhoneChart();
 }
 
-function replayTutorial(){
-  tutorialIndex=0;
-  document.getElementById("welcomeText").textContent="Este es el tutorial que viste al empezar. Puedes salir cuando quieras.";
 
-  renderTutorialStep();
-}
 
 // CUSTOM HABITS — LOG
 function openLogModal(habitId){
@@ -8729,13 +8711,20 @@ function renderTutorialStep(){
   if(nextBtn)nextBtn.textContent=(tutorialIndex===TUTORIAL_STEPS.length-1)?"✅ Terminar":"Siguiente →";
 
   const target=tutorialFindTarget(s);
-  document.body.classList.remove("tutorial-locked");
-  if(target)target.scrollIntoView({behavior:"auto",block:"center"});
-  else{window.scrollTo(0,0);const m=document.querySelector("main");if(m)m.scrollTop=0;}
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    document.body.classList.add("tutorial-locked");
-    placeTutorial(target);
-  }));
+const mainEl=document.querySelector("main");
+if(target){
+  // Scroll dentro del contenedor main, no del window
+  const mainRect=mainEl.getBoundingClientRect();
+  const tRect=target.getBoundingClientRect();
+  const desiredTop=mainEl.scrollTop+(tRect.top-mainRect.top)-(mainRect.height/2)+(tRect.height/2);
+  mainEl.scrollTop=Math.max(0,desiredTop);
+} else {
+  if(mainEl)mainEl.scrollTop=0;
+}
+setTimeout(()=>{
+  document.body.classList.add("tutorial-locked");
+  placeTutorial(target);
+},50);
 }
 function placeTutorial(target){
   const tip=document.getElementById("tutorialTooltip");
