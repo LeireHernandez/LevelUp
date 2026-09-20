@@ -8779,15 +8779,7 @@ window.addEventListener("wheel",tutorialScrollGuard,{passive:false,capture:true}
 window.addEventListener("touchmove",tutorialScrollGuard,{passive:false,capture:true});
 window.addEventListener("resize",()=>{ if(document.body.classList.contains("tutorial-locked"))renderTutorialStep(); });
 
-// Reposicionar al redimensionar/scroll
-window.addEventListener("resize",()=>{
-  const t=document.getElementById("tutorialTooltip");
-  if(t&&t.style.display==="block")positionTutorialTooltip(TUTORIAL_STEPS[tutorialIndex].selector);
-});
-window.addEventListener("scroll",()=>{
-  const t=document.getElementById("tutorialTooltip");
-  if(t&&t.style.display==="block")positionTutorialTooltip(TUTORIAL_STEPS[tutorialIndex].selector);
-},true);
+
 
 // INIT
 load();
